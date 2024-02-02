@@ -1,0 +1,493 @@
+
+<!DOCTYPE html>
+
+<html data-default-color-scheme="auto" lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<link href="/blog/img/favicon.jpg" rel="apple-touch-icon" sizes="76x76"/>
+<link href="/blog/img/favicon.jpg" rel="icon"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no" name="viewport"/>
+<meta content="ie=edge" http-equiv="x-ua-compatible"/>
+<meta content="#2f4154" name="theme-color"/>
+<meta content="星期十" name="author"/>
+<meta content="" name="keywords"/>
+<meta content="AIR001-Clion/VScode优雅环境配置合宙是真会和工程师打关系啊，没事看看合宙公众号看有没有新活动已经是日常了，， 合宙这AIR001没套stm32的模板，我也不知道该说是好事还是坏事了属于，，（不过也是HAL库） 这篇文章几乎是踩坑，以供参考。 本文尝试配置了    环境 基于 推荐度 本文章    Arduino support-Clion环境 老版Arduino 1%" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="AIR001-Clion/VScode优雅环境配置" property="og:title"/>
+<meta content="https://decaday.github.io/blog/air001introduction/index.html" property="og:url"/>
+<meta content="Decaday" property="og:site_name"/>
+<meta content="AIR001-Clion/VScode优雅环境配置合宙是真会和工程师打关系啊，没事看看合宙公众号看有没有新活动已经是日常了，， 合宙这AIR001没套stm32的模板，我也不知道该说是好事还是坏事了属于，，（不过也是HAL库） 这篇文章几乎是踩坑，以供参考。 本文尝试配置了    环境 基于 推荐度 本文章    Arduino support-Clion环境 老版Arduino 1%" property="og:description"/>
+<meta content="zh_CN" property="og:locale"/>
+<meta content="https://decaday.github.io/blog/images/air001.jpg" property="og:image"/>
+<meta content="2023-07-14T16:00:00.000Z" property="article:published_time"/>
+<meta content="2024-02-02T11:24:30.411Z" property="article:modified_time"/>
+<meta content="星期十" property="article:author"/>
+<meta content="嵌入式" property="article:tag"/>
+<meta content="开发环境" property="article:tag"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="https://decaday.github.io/blog/images/air001.jpg" name="twitter:image"/>
+<meta content="no-referrer-when-downgrade" name="referrer"/>
+<title>AIR001-Clion/VScode优雅环境配置 - Decaday</title>
+<link href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" rel="stylesheet">
+<link href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" rel="stylesheet"/>
+<link href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet"/>
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+<link href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css" rel="stylesheet"/>
+<link href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css" rel="stylesheet"/>
+<link href="/blog/css/main.css" rel="stylesheet">
+<link href="/blog/css/highlight.css" id="highlight-css" rel="stylesheet">
+<link href="/blog/css/highlight-dark.css" id="highlight-css-dark" rel="stylesheet"/>
+<script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"decaday.github.io","root":"/blog/","version":"1.9.7","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/blog/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+<script src="/blog/js/utils.js"></script>
+<script src="/blog/js/color-schema.js"></script>
+<meta content="Hexo 7.1.1" name="generator"/></link></link></link></link></head>
+<body>
+<header>
+<div class="header-inner" style="height: 70vh;">
+<nav class="navbar fixed-top navbar-expand-lg navbar-dark scrolling-navbar" id="navbar">
+<div class="container">
+<a class="navbar-brand" href="/blog/">
+<strong>Decaday 星期十的博客</strong>
+</a>
+<button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbarSupportedContent" data-toggle="collapse" id="navbar-toggler-btn" type="button">
+<div class="animated-icon"><span></span><span></span><span></span></div>
+</button>
+<!-- Collapsible content -->
+<div class="collapse navbar-collapse" id="navbarSupportedContent">
+<ul class="navbar-nav ml-auto text-center">
+<li class="nav-item">
+<a class="nav-link" href="/blog/" target="_self">
+<i class="iconfont icon-home-fill"></i>
+<span>首页</span>
+</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="/blog/tags/" target="_self">
+<i class="iconfont icon-tags-fill"></i>
+<span>标签</span>
+</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="/blog/about/" target="_self">
+<i class="iconfont icon-user-fill"></i>
+<span>关于</span>
+</a>
+</li>
+<li class="nav-item" id="search-btn">
+<a aria-label="Search" class="nav-link" data-target="#modalSearch" data-toggle="modal" href="javascript:;" target="_self">
+<i class="iconfont icon-search"></i>
+</a>
+</li>
+<li class="nav-item" id="color-toggle-btn">
+<a aria-label="Color Toggle" class="nav-link" href="javascript:;" target="_self">
+<i class="iconfont icon-dark" id="color-toggle-icon"></i>
+</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<div class="banner" id="banner" parallax="true" style="background: url('/blog/img/default.png') no-repeat center center; background-size: cover;">
+<div class="full-bg-img">
+<div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+<div class="banner-text text-center fade-in-up">
+<div class="h2">
+<span id="subtitle">AIR001-Clion/VScode优雅环境配置</span>
+</div>
+<div class="mt-3">
+<span class="post-meta">
+<i aria-hidden="true" class="iconfont icon-date-fill"></i>
+<time datetime="2023-07-15 00:00" pubdate="">
+          2023年7月15日 凌晨
+        </time>
+</span>
+</div>
+<div class="mt-1">
+<span class="post-meta mr-2">
+<i class="iconfont icon-chart"></i>
+        
+          1.6k 字
+        
+      </span>
+<span class="post-meta mr-2">
+<i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          13 分钟
+        
+      </span>
+<span id="busuanzi_container_page_pv" style="display: none">
+<i aria-hidden="true" class="iconfont icon-eye"></i>
+<span id="busuanzi_value_page_pv"></span> 次
+        </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<main>
+<div class="container-fluid nopadding-x">
+<div class="row nomargin-x">
+<div class="side-col d-none d-lg-block col-lg-2">
+</div>
+<div class="col-lg-8 nopadding-x-md">
+<div class="container nopadding-x-md" id="board-ctn">
+<div id="board">
+<article class="post-content mx-auto">
+<h1 id="seo-header">AIR001-Clion/VScode优雅环境配置</h1>
+<p class="note note-info" id="updated-time" style="">
+                
+                  
+                    本文最后更新于 2024年2月2日 晚上
+                  
+                
+              </p>
+<div class="markdown-body">
+<h1 id="AIR001-Clion-VScode优雅环境配置"><a class="headerlink" href="#AIR001-Clion-VScode优雅环境配置" title="AIR001-Clion/VScode优雅环境配置"></a>AIR001-Clion/VScode优雅环境配置</h1><p>合宙是真会和工程师打关系啊，没事看看合宙公众号看有没有新活动已经是日常了，，</p>
+<p>合宙这AIR001没套stm32的模板，我也不知道该说是好事还是坏事了属于，，（不过也是HAL库）</p>
+<p>这篇文章几乎是踩坑，以供参考。</p>
+<p>本文尝试配置了</p>
+<table>
+<thead>
+<tr>
+<th>环境</th>
+<th>基于</th>
+<th>推荐度</th>
+<th>本文章</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Arduino support-Clion环境</td>
+<td>老版Arduino</td>
+<td>1%</td>
+<td>尝试失败</td>
+</tr>
+<tr>
+<td>VScode-Arduino环境</td>
+<td>Arduino CLI</td>
+<td>30%</td>
+<td>基本成功</td>
+</tr>
+<tr>
+<td>HAL-CMake-Clion-PyOCD环境</td>
+<td>armgcc-Cmake</td>
+<td>90%</td>
+<td>成功</td>
+</tr>
+<tr>
+<td>借用py32的makefile</td>
+<td>armgcc-makefile</td>
+<td>-</td>
+<td>-</td>
+</tr>
+</tbody></table>
+<p>截止至2023年9月30日，PlatformIO不支持Air001.详情：<a href="https://github.com/Air-duino/Arduino-AirMCU/issues/4" rel="noopener" target="_blank">需要有人适配platfromIO · Issue #4 · Air-duino/Arduino-AirMCU</a></p>
+<img alt="image-20230930133008958" lazyload="" src="image-20230930133008958.png" srcset="/blog/img/loading.gif" style="zoom:50%;"/>
+<h2 id="AIR001"><a class="headerlink" href="#AIR001" title="AIR001"></a>AIR001</h2><p>合宙Air001是一款TSSOP20封装的MCU，采用高性能的32位ARM®Cortex®-M0+内核，最大48Mhz，内置32Kbytes的Flash和4Kbytes的RAM。芯片集 成多路USART、IIC、SPI等通讯外设，5个16bit定时器以及1路12bit ADC和2路比较器。</p>
+<p>我也好奇合宙的命名，以后不打算做同系列产品了嘛，直接叫Air001，我还是挺期待LQFP32、QFN32产品，因为tssop20的引脚总是不够用。</p>
+<p>其实，AIR001是py32f002A/py32f003/py32f030的<del>贴牌</del>同源产品。py（普冉）是最近几年卷m0核市场的，它自己的三个系列（002A/003/030）就是同一块晶圆，通过HAL库和封装来实现区分。所以，网上才有002A开PLL，开USART2,开内存等操作。py32的<del>贴牌</del>同源产品不只有air001，还有XL32f002（芯岭，普冉一级代理）等。</p>
+<p>虽然py32f002A比air001便宜，前者tssop20才六毛钱不到，但是论标注保证性能，air001是py32f030级别的。py32f030大概一块钱，air001 0.76元。要是用py32f002A datasheet里面没有的功能和性能，出了问题也没法不是？</p>
+<h2 id="Arduino"><a class="headerlink" href="#Arduino" title="Arduino"></a>Arduino</h2><p>我个人是不太喜欢Arduino风格，不过，用Arduino可以少学一套API，又有一大堆库可用。</p>
+<p>Arduino AIR001适配（社区项目<a href="https://github.com/Air-duino" rel="noopener" target="_blank">Air-duino</a>），看commit，基本是<a href="https://github.com/HalfSweet" rel="noopener" target="_blank">半糖</a>做的，我一直以为半糖是合宙的人，后来才知道是大学生，我以为合宙会开点赞助，在群里问了问，只赞助了点开发板和技术支持，，感觉有点，，AIR001可是用Arduino支持做了宣传的啊</p>
+<p>另一个贡献者是<a href="https://github.com/chenxuuu" rel="noopener" target="_blank">晨旭</a>，应该是合宙的人。</p>
+<p>半糖这大佬是真牛。</p>
+<p>因为PlatformIO不支持Air001，就只能配置Arduino插件。</p>
+<h2 id="调试器"><a class="headerlink" href="#调试器" title="调试器"></a>调试器</h2><p>Air001目前并不支持openDCD，支持pyOCD。</p>
+<p>pyOCD的易用性也不错，而且支持CMSIS PACK，直接挂上CMSIS PACK就能跑。</p>
+<p>不过，air001也进了pyOCD的<code>develop</code>分支：<a href="https://github.com/pyocd/pyOCD/pull/1612" rel="noopener" target="_blank">Pull Request #1612 by kaidegit</a></p>
+<p>Arduino似乎是不支持pyOCD，这是半糖提的Issue：</p>
+<p><a href="https://github.com/arduino/arduino-ide/issues/2193" rel="noopener" target="_blank">Using <code>PyOCD</code> as a debugger · Issue #2193 · arduino/arduino-ide (github.com)</a></p>
+<p>所以这东西似乎是假的，，，</p>
+<img alt="image-20230930133229413" lazyload="" src="air001introduction/image-20230930133229413.png" srcset="/blog/img/loading.gif"/>
+<h2 id="Arduino-support-Clion环境"><a class="headerlink" href="#Arduino-support-Clion环境" title="Arduino support-Clion环境"></a>Arduino support-Clion环境</h2><p>写了一半的教程删了，踩坑如下：</p>
+<p>1.需要手动在CMake文件设置set(ARDUINO_SDK_PATH D:/Develop/arduino-1.8.19)</p>
+<p>2.必须在这个cmake（\cmake\ArduinoToolchain.cmake）前面设置ARDUINO_SDK_PATH，在CMakeLists.txt文件里设置会发生奇怪的报错</p>
+<p>3.Arduino support插件只支持老版本aurduino，不支持新出的ArduinoIDE（Arduino CLI），他会提示你版本不支持</p>
+<p>4.Arduino support并不能自动加载你安装的库，需要手动导入boards.txt，查了半天才查出来</p>
+<p>5.arduino support 设置在这种鬼地方：</p>
+<img alt="image-20230716104914282" lazyload="" src="image-20230716104914282.png" srcset="/blog/img/loading.gif" style="zoom:50%;"/>
+<p>6.Arduino自动将芯片包和库装在C:\Users\xxx\AppData\Local\Arduino15\下，找了半天，，而且不能通过设置修改位置（虽然能修改）</p>
+<p>7.arduino support插件只支持一个boards.txt，切换不同的厂商还需要自己改boards.txt，逆天</p>
+<img alt="image-20230716105157297" lazyload="" src="image-20230716105157297.png" srcset="/blog/img/loading.gif" style="zoom:50%;"/>
+<p>8.board.txt在这种这么深的路径，还要你手动设置，还只能一次设置一个：C:\Users\xxx\AppData\Local\Arduino15\packages\AirM2M\hardware\AirMCU\0.2.3</p>
+<p>9.编译又出问题了：</p>
+<p><img alt="image-20230716105334950" lazyload="" src="/blog/air001introduction/image-20230716105334950.png" srcset="/blog/img/loading.gif"/></p>
+<p>这还玩**，我宝贵的三个小时。。</p>
+<p><img alt="image-20230716105434024" lazyload="" src="/blog/air001introduction/image-20230716105434024.png" srcset="/blog/img/loading.gif"/></p>
+<p>Uninstall…</p>
+<h2 id="VScode-Arduino环境"><a class="headerlink" href="#VScode-Arduino环境" title="VScode-Arduino环境"></a>VScode-Arduino环境</h2><h3 id="1-Arduino配置"><a class="headerlink" href="#1-Arduino配置" title="1.Arduino配置"></a>1.Arduino配置</h3><p>先看这个做到能烧录。比较简单</p>
+<p><a href="https://wiki.luatos.com/chips/air001/Air001-Arduino.html" rel="noopener" target="_blank">Air001基于Arduino的用户手册 - LuatOS 文档</a></p>
+<h3 id="2-插件配置"><a class="headerlink" href="#2-插件配置" title="2.插件配置"></a>2.插件配置</h3><p>vscode中安装这个插件。</p>
+<p><img alt="image-20230716133814843" lazyload="" src="/blog/air001introduction/image-20230716133814843.png" srcset="/blog/img/loading.gif"/></p>
+<p>打开<code>vscode</code>设置（快捷键<code>ctrl+,</code>），找到<code>arduino configuration</code></p>
+<p>别的啥都不用管，把这个Use Arduino CLI给开开就行，不用填路径！</p>
+<p>不然你需要安装旧版Arduino才行。</p>
+<p><img alt="image-20230716125810472" lazyload="" src="/blog/air001introduction/image-20230716125810472.png" srcset="/blog/img/loading.gif"/></p>
+<p>然后打开一个用Arduino创建的项目（文件名和路径不能有中文、空格）。在右下角设置板子型号之类的信息。</p>
+<p><img alt="image-20230716125710319" lazyload="" src="/blog/air001introduction/image-20230716125710319.png" srcset="/blog/img/loading.gif"/></p>
+<p>在这里尝试编译烧录：</p>
+<p><img alt="image-20230716130053261" lazyload="" src="/blog/air001introduction/image-20230716130053261.png" srcset="/blog/img/loading.gif"/></p>
+<p>不出意外的话会出现这样一个warn：</p>
+<p><img alt="image-20230716130018049" lazyload="" src="/blog/air001introduction/image-20230716130018049.png" srcset="/blog/img/loading.gif"/></p>
+<p>添加<code>"output": "./Arduino/build",</code></p>
+<p><img alt="image-20230716130136480" lazyload="" src="/blog/air001introduction/image-20230716130136480.png" srcset="/blog/img/loading.gif"/></p>
+<p>注意：若你的编译或者上传出现这样的错误：</p>
+<p><img alt="image-20230716133023505" lazyload="" src="/blog/air001introduction/image-20230716133023505.png" srcset="/blog/img/loading.gif"/></p>
+<p>请将刚才改的路径修改下：</p>
+<p><img alt="image-20230716133037539" lazyload="" src="/blog/air001introduction/image-20230716133037539.png" srcset="/blog/img/loading.gif"/></p>
+<p>这个bulid路径不知道为什么特别严格，好像连纯ANSCII都不行，必须全英语小写（或者有长度限制）真是坑人。</p>
+<p>更坑人的是，无论烧录是否成功，都告诉你Done.</p>
+<p><img alt="image-20230716133258208" lazyload="" src="/blog/air001introduction/image-20230716133258208.png" srcset="/blog/img/loading.gif"/></p>
+<p>不知道怎么解决了。。。我只连一个烧录器，单片机都不连，都能Done…只能说佩服这插件了。</p>
+<p>波浪线问题解决：</p>
+<p><a href="https://blog.csdn.net/qq_45488242/article/details/108917794" rel="noopener" target="_blank">(60条消息) 使用Visual Studio Code开发Arduino踩坑日记(持续更新)_鸿神的博客-CSDN博客</a></p>
+<h2 id="HAL-CMake-Clion-PyOCD环境"><a class="headerlink" href="#HAL-CMake-Clion-PyOCD环境" title="HAL-CMake-Clion-PyOCD环境"></a>HAL-CMake-Clion-PyOCD环境</h2><p>有人造过轮子了：</p>
+<p><a href="https://github.com/kaidegit/air001-cmake" rel="noopener" target="_blank">kaidegit/air001-cmake (github.com)</a></p>
+<p>直接用就成。</p>
+<p><strong>该仓库新的commit已经集成pyOCD命令，安装好直接用就成。</strong>下面的不一定要整。</p>
+<p>Clion支持pyOCD，参考：<a href="https://www.jetbrains.com/help/clion/embedded-gdb-server.html" rel="noopener" target="_blank">https://www.jetbrains.com/help/clion/embedded-gdb-server.html</a><br/>python安装pyocd后<br/>在此处即可添加配置。pyocd.exe在python安装目录/scripts下。<br/><a href="https://user-images.githubusercontent.com/93421418/263986541-472afc79-8ee6-415d-8b2c-a0b783a70493.png" rel="noopener" target="_blank"><img alt="image" lazyload="" src="/blog/air001introduction/263986541-472afc79-8ee6-415d-8b2c-a0b783a70493.png" srcset="/blog/img/loading.gif"/></a><br/>可以选通用的cortex-m，即可调试。<br/>但是若下载+调试，需要使用Keil Pack文件。<br/>一个可用的配置是这样的：<br/><a href="https://user-images.githubusercontent.com/93421418/263988457-9030fb46-e287-4a66-9cf6-0395b9c1c304.png" rel="noopener" target="_blank"><img alt="image" lazyload="" src="/blog/air001introduction/263988457-9030fb46-e287-4a66-9cf6-0395b9c1c304.png" srcset="/blog/img/loading.gif"/></a></p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br/></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">gdbserver</span> -p <span class="hljs-number">29581</span> --pack=pack/Keil.AIR001_DFP.<span class="hljs-number">1</span>.<span class="hljs-number">1</span>.<span class="hljs-number">0</span>.pack -t Air001Dev -f <span class="hljs-number">100</span>K<br/></code></pre></td></tr></table></figure>
+<p>此外：</p>
+<p>可以将target改为m0plus，我不知道改了有什么好处，但是Air001是m0+内核，用m0plus应该好些（也可能也是个摆设</p>
+<p>然后armgcc，目前（2023年9月30日）的版本最高可以支持到C++standard 26，可海星、</p>
+<h2 id="借用py32的makefile"><a class="headerlink" href="#借用py32的makefile" title="借用py32的makefile"></a>借用py32的makefile</h2><p>上面已经说过，AIR001是py32f002A/py32f003/py32f030的<del>贴牌</del>同源产品，所以可以借用它的HAL库。有人已经做了makefile，gccarm的template：</p>
+<p><a href="https://github.com/IOsetting/py32f0-template" rel="noopener" target="_blank">IOsetting/py32f0-template: Puya PY32F002A PY32F003 PY32F030 GNU GCC SDK, template and examples (github.com)</a></p>
+<p>选择py32f002A/003/030就行。</p>
+<p>打算以后学学Rust，主要是，c语言实在太古老，的语言层级抽象度实在太低。Rust还有统一的包管理，以及比较统一的嵌入式trait。</p>
+<p>C++不是很想学，特性山嘛。</p>
+</div>
+<hr/>
+<div>
+<div class="post-metas my-3">
+<div class="post-meta">
+<i class="iconfont icon-tags"></i>
+<a class="print-no-link" href="/blog/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/">#嵌入式</a>
+<a class="print-no-link" href="/blog/tags/%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/">#开发环境</a>
+</div>
+</div>
+<div class="license-box my-3">
+<div class="license-title">
+<div>AIR001-Clion/VScode优雅环境配置</div>
+<div>https://decaday.github.io/blog/air001introduction/</div>
+</div>
+<div class="license-meta">
+<div class="license-meta-item">
+<div>作者</div>
+<div>星期十</div>
+</div>
+<div class="license-meta-item license-meta-date">
+<div>发布于</div>
+<div>2023年7月15日</div>
+</div>
+<div class="license-meta-item license-meta-date">
+<div>更新于</div>
+<div>2024年2月2日</div>
+</div>
+<div class="license-meta-item">
+<div>许可协议</div>
+<div>
+<a class="print-no-link" href="https://creativecommons.org/licenses/by/4.0/" target="_blank">
+<span aria-label="BY - 署名" class="hint--top hint--rounded">
+<i class="iconfont icon-by"></i>
+</span>
+</a>
+</div>
+</div>
+</div>
+<div class="license-icon iconfont"></div>
+</div>
+<div class="post-prevnext my-3">
+<article class="post-prev col-6">
+<a href="/blog/PowerBankErrors/" title="老天不想让我做充电宝">
+<i class="iconfont icon-arrowleft"></i>
+<span class="hidden-mobile">老天不想让我做充电宝</span>
+<span class="visible-mobile">上一篇</span>
+</a>
+</article>
+<article class="post-next col-6">
+<a href="/blog/DVsolution/" title="小型摄像机解决方案调研">
+<span class="hidden-mobile">小型摄像机解决方案调研</span>
+<span class="visible-mobile">下一篇</span>
+<i class="iconfont icon-arrowright"></i>
+</a>
+</article>
+</div>
+</div>
+</article>
+</div>
+</div>
+</div>
+<div class="side-col d-none d-lg-block col-lg-2">
+<aside class="sidebar" style="margin-left: -1rem">
+<div id="toc">
+<p class="toc-header">
+<i class="iconfont icon-list"></i>
+<span>目录</span>
+</p>
+<div class="toc-body" id="toc-body"></div>
+</div>
+</aside>
+</div>
+</div>
+</div>
+<a aria-label="TOP" href="#" id="scroll-top-button" role="button">
+<i aria-hidden="true" class="iconfont icon-arrowup"></i>
+</a>
+<div aria-hidden="true" aria-labelledby="ModalLabel" class="modal fade" id="modalSearch" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+<div class="modal-content">
+<div class="modal-header text-center">
+<h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+<button aria-label="Close" class="close" data-dismiss="modal" id="local-search-close" type="button">
+<span aria-hidden="true">×</span>
+</button>
+</div>
+<div class="modal-body mx-3">
+<div class="md-form mb-5">
+<input class="form-control validate" id="local-search-input" type="text"/>
+<label data-error="x" data-success="v" for="local-search-input">关键词</label>
+</div>
+<div class="list-group" id="local-search-result"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer>
+<div class="footer-inner">
+<div class="footer-content">
+<a href="https://hexo.io" rel="nofollow noopener" target="_blank"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" rel="nofollow noopener" target="_blank"><span>Fluid</span></a>
+</div>
+<div class="statistics">
+<span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+<span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+</div>
+</div>
+</footer>
+<!-- Scripts -->
+<script src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js"></script>
+<link href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet"/>
+<script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+<script src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js"></script>
+<script src="/blog/js/events.js"></script>
+<script src="/blog/js/plugins.js"></script>
+<script src="/blog/js/img-lazyload.js"></script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+<script src="https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js"></script>
+<script>Fluid.plugins.codeWidget();</script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+<script>Fluid.plugins.imageCaption();</script>
+<script src="/blog/js/local-search.js"></script>
+<script defer="" src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script src="/blog/js/boot.js"></script>
+<noscript>
+<div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+</noscript>
+</body>
+</html>

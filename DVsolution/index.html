@@ -1,0 +1,819 @@
+
+<!DOCTYPE html>
+
+<html data-default-color-scheme="auto" lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<link href="/blog/img/favicon.jpg" rel="apple-touch-icon" sizes="76x76"/>
+<link href="/blog/img/favicon.jpg" rel="icon"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no" name="viewport"/>
+<meta content="ie=edge" http-equiv="x-ua-compatible"/>
+<meta content="#2f4154" name="theme-color"/>
+<meta content="星期十" name="author"/>
+<meta content="" name="keywords"/>
+<meta content="小型摄像机解决方案调研一直想自己做一台相机记录生活，这也是我四年前学电子的初衷。 现在回想起来，年轻真好，有什么想做的就去做，一切do it yourself，纯洁真好。 我这人太恋旧了啊，照片不舍得删，东西不舍得扔，想要记录生活的一切。 好了，说正事 这几年来我这一个都不算是电子行业从业者的人一直在调研小型摄像机各种芯片解决方案。 爱好者级摄像头模组先抄一段来自camera-module.com" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="小型摄像机解决方案调研" property="og:title"/>
+<meta content="https://decaday.github.io/blog/DVsolution/index.html" property="og:url"/>
+<meta content="Decaday" property="og:site_name"/>
+<meta content="小型摄像机解决方案调研一直想自己做一台相机记录生活，这也是我四年前学电子的初衷。 现在回想起来，年轻真好，有什么想做的就去做，一切do it yourself，纯洁真好。 我这人太恋旧了啊，照片不舍得删，东西不舍得扔，想要记录生活的一切。 好了，说正事 这几年来我这一个都不算是电子行业从业者的人一直在调研小型摄像机各种芯片解决方案。 爱好者级摄像头模组先抄一段来自camera-module.com" property="og:description"/>
+<meta content="zh_CN" property="og:locale"/>
+<meta content="https://decaday.github.io/blog/images/DVsolution.jpg" property="og:image"/>
+<meta content="2023-06-13T16:00:00.000Z" property="article:published_time"/>
+<meta content="2024-02-02T11:24:47.733Z" property="article:modified_time"/>
+<meta content="星期十" property="article:author"/>
+<meta content="硬件" property="article:tag"/>
+<meta content="摄像" property="article:tag"/>
+<meta content="方案调研" property="article:tag"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="https://decaday.github.io/blog/images/DVsolution.jpg" name="twitter:image"/>
+<meta content="no-referrer-when-downgrade" name="referrer"/>
+<title>小型摄像机解决方案调研 - Decaday</title>
+<link href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" rel="stylesheet">
+<link href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" rel="stylesheet"/>
+<link href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet"/>
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+<link href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css" rel="stylesheet"/>
+<link href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css" rel="stylesheet"/>
+<link href="/blog/css/main.css" rel="stylesheet">
+<link href="/blog/css/highlight.css" id="highlight-css" rel="stylesheet">
+<link href="/blog/css/highlight-dark.css" id="highlight-css-dark" rel="stylesheet"/>
+<script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"decaday.github.io","root":"/blog/","version":"1.9.7","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/blog/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+<script src="/blog/js/utils.js"></script>
+<script src="/blog/js/color-schema.js"></script>
+<meta content="Hexo 7.1.1" name="generator"/></link></link></link></link></head>
+<body>
+<header>
+<div class="header-inner" style="height: 70vh;">
+<nav class="navbar fixed-top navbar-expand-lg navbar-dark scrolling-navbar" id="navbar">
+<div class="container">
+<a class="navbar-brand" href="/blog/">
+<strong>Decaday 星期十的博客</strong>
+</a>
+<button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbarSupportedContent" data-toggle="collapse" id="navbar-toggler-btn" type="button">
+<div class="animated-icon"><span></span><span></span><span></span></div>
+</button>
+<!-- Collapsible content -->
+<div class="collapse navbar-collapse" id="navbarSupportedContent">
+<ul class="navbar-nav ml-auto text-center">
+<li class="nav-item">
+<a class="nav-link" href="/blog/" target="_self">
+<i class="iconfont icon-home-fill"></i>
+<span>首页</span>
+</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="/blog/tags/" target="_self">
+<i class="iconfont icon-tags-fill"></i>
+<span>标签</span>
+</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="/blog/about/" target="_self">
+<i class="iconfont icon-user-fill"></i>
+<span>关于</span>
+</a>
+</li>
+<li class="nav-item" id="search-btn">
+<a aria-label="Search" class="nav-link" data-target="#modalSearch" data-toggle="modal" href="javascript:;" target="_self">
+<i class="iconfont icon-search"></i>
+</a>
+</li>
+<li class="nav-item" id="color-toggle-btn">
+<a aria-label="Color Toggle" class="nav-link" href="javascript:;" target="_self">
+<i class="iconfont icon-dark" id="color-toggle-icon"></i>
+</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<div class="banner" id="banner" parallax="true" style="background: url('/blog/img/default.png') no-repeat center center; background-size: cover;">
+<div class="full-bg-img">
+<div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+<div class="banner-text text-center fade-in-up">
+<div class="h2">
+<span id="subtitle">小型摄像机解决方案调研</span>
+</div>
+<div class="mt-3">
+<span class="post-meta">
+<i aria-hidden="true" class="iconfont icon-date-fill"></i>
+<time datetime="2023-06-14 00:00" pubdate="">
+          2023年6月14日 凌晨
+        </time>
+</span>
+</div>
+<div class="mt-1">
+<span class="post-meta mr-2">
+<i class="iconfont icon-chart"></i>
+        
+          4.6k 字
+        
+      </span>
+<span class="post-meta mr-2">
+<i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          39 分钟
+        
+      </span>
+<span id="busuanzi_container_page_pv" style="display: none">
+<i aria-hidden="true" class="iconfont icon-eye"></i>
+<span id="busuanzi_value_page_pv"></span> 次
+        </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<main>
+<div class="container-fluid nopadding-x">
+<div class="row nomargin-x">
+<div class="side-col d-none d-lg-block col-lg-2">
+</div>
+<div class="col-lg-8 nopadding-x-md">
+<div class="container nopadding-x-md" id="board-ctn">
+<div id="board">
+<article class="post-content mx-auto">
+<h1 id="seo-header">小型摄像机解决方案调研</h1>
+<p class="note note-info" id="updated-time" style="">
+                
+                  
+                    本文最后更新于 2024年2月2日 晚上
+                  
+                
+              </p>
+<div class="markdown-body">
+<h1 id="小型摄像机解决方案调研"><a class="headerlink" href="#小型摄像机解决方案调研" title="小型摄像机解决方案调研"></a>小型摄像机解决方案调研</h1><p>一直想自己做一台相机记录生活，这也是我四年前学电子的初衷。</p>
+<p>现在回想起来，年轻真好，有什么想做的就去做，一切do it yourself，纯洁真好。</p>
+<p>我这人太恋旧了啊，照片不舍得删，东西不舍得扔，想要记录生活的一切。</p>
+<p>好了，说正事</p>
+<p>这几年来我这一个都不算是电子行业从业者的人一直在调研小型摄像机各种芯片解决方案。</p>
+<h2 id="爱好者级摄像头模组"><a class="headerlink" href="#爱好者级摄像头模组" title="爱好者级摄像头模组"></a>爱好者级摄像头模组</h2><p>先抄一段来自<a href="http://www.camera-module.com/blog/what-is-the-difference-between-VGA-SVGA-UXGA-XGA.html" rel="noopener" target="_blank">camera-module.com</a>的显示分辨率格式，厂商们总是喜欢用这个描述，还要查表，直接贴到这里好了</p>
+<blockquote>
+<table>
+<thead>
+<tr>
+<th><strong>Description</strong></th>
+<th><strong>Code</strong></th>
+<th><strong>Resolution</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>*(Color Graphics Adapter)</td>
+<td>CGA</td>
+<td>320 x 200</td>
+</tr>
+<tr>
+<td>*(Enhanced Graphics Adapter)</td>
+<td>EGA</td>
+<td>640 x 350</td>
+</tr>
+<tr>
+<td>(Video Graphics Array)</td>
+<td>VGA</td>
+<td>640 x 480</td>
+</tr>
+<tr>
+<td>(Super Video Graphics Array)</td>
+<td>SVGA</td>
+<td>800 x 600</td>
+</tr>
+<tr>
+<td>(High Definition Television 720i/p)</td>
+<td>HDTV</td>
+<td>1280 x 720</td>
+</tr>
+<tr>
+<td>(Extended Graphics Array)</td>
+<td>XGA</td>
+<td>1024 x 768</td>
+</tr>
+<tr>
+<td>(Wide Extended Graphics Array)</td>
+<td>WXGA</td>
+<td>1366 x 768</td>
+</tr>
+<tr>
+<td>(Super Extended Graphics Array)</td>
+<td>SXGA</td>
+<td>1280 x 1024</td>
+</tr>
+<tr>
+<td>(Super Extended Graphics Array+)</td>
+<td>SXGA+</td>
+<td>1400 x 1050</td>
+</tr>
+<tr>
+<td>(Wide Super Extended Graphics Array)</td>
+<td>WSXGA</td>
+<td>1600 x 1024</td>
+</tr>
+<tr>
+<td>(Wide Super Extended Graphics Array+)</td>
+<td>WSXGA+</td>
+<td>1680 x 1050</td>
+</tr>
+<tr>
+<td>(High Definition Television 1080i/p)</td>
+<td>HDTV</td>
+<td>1920 x 1080</td>
+</tr>
+<tr>
+<td>(Ultra Extended Graphics Array)</td>
+<td>UXGA</td>
+<td>1600 x 1200</td>
+</tr>
+<tr>
+<td>(Wide Ultra Extended Graphics Array)</td>
+<td>WUXGA</td>
+<td>1920 x 1200</td>
+</tr>
+<tr>
+<td>(Quad Extended Graphics Array)</td>
+<td>QXGA</td>
+<td>2048 x 1536</td>
+</tr>
+<tr>
+<td>(Quad Super Extended Graphics Array)</td>
+<td>QSXGA</td>
+<td>2560 x 2048</td>
+</tr>
+<tr>
+<td>(Wide Quad Super Extended Graphics Array)</td>
+<td>WQSXGA</td>
+<td>3200 x 2048</td>
+</tr>
+<tr>
+<td>(Quad Ultra Extended Graphics Array)</td>
+<td>QUXGA</td>
+<td>3200 x 2400</td>
+</tr>
+<tr>
+<td>(Wide Quad Ultra Extended Graphics Array)</td>
+<td>WQUXGA</td>
+<td>3840 x 2400</td>
+</tr>
+<tr>
+<td>(Hex Super Extended Graphics Array)</td>
+<td>HSXGA</td>
+<td>5120 x 4096</td>
+</tr>
+<tr>
+<td>(Wide Hex Super Extended Graphics Array)</td>
+<td>WHSXGA</td>
+<td>6400 x 4096</td>
+</tr>
+<tr>
+<td>(Hex Ultra Extended Graphics Array)</td>
+<td>HUXGA</td>
+<td>6400 x 4800</td>
+</tr>
+<tr>
+<td>(Wide Hex Ultra Extended Graphics Array)</td>
+<td>WHUXGA</td>
+<td>7680 x 4800</td>
+</tr>
+</tbody></table>
+</blockquote>
+<p>先科普下，索尼，OMNIVISION这些公司出货的视频传感器一般是这样的芯片：</p>
+<p><img alt="image-20230614192836783" lazyload="" src="/blog/DVsolution/image-20230614192836783.png" srcset="/blog/img/loading.gif"/></p>
+<p>像是OV2640就是四分之一英寸的传感器。</p>
+<p>然后，再由摄像头模组厂做外壳排线接口镜片，包装成不同长度，不同角度的摄像头：</p>
+<img alt="image-20231231214118866" lazyload="" src="image-20231231214118866.png" srcset="/blog/img/loading.gif" style="zoom:80%;">
+<p>也许是DIY摄像头之类的人太少，除了玩单片机时最最最常用的OV7670，OV2640这种很热的型号，其它的型号的摄像头模组都很贵，广角的也比68度视角的贵很多，很多摄像头模组也买不到零售，连传感器都很难买到。</p>
+<p>还有一些清晰度比较高的视频传感器的电路板直接贴视频传感器芯片，然后直接将镜片镜筒固定在主板或者外壳上，这种也是蛮不立于DIY的，不然又得采购镜片，研究光学成像，画镜筒模型……但是遗憾的是高分辨率很多都是这种。</p>
+<p><img alt="image-20230614193311135" lazyload="" src="/blog/DVsolution/image-20230614193311135.png" srcset="/blog/img/loading.gif"/></p>
+<p>民用级（准确来说是电子爱好者级）的DVP摄像头模组，可以选的不多，比较常用的有：</p>
+<table>
+<thead>
+<tr>
+<th>模组</th>
+<th>性能</th>
+<th>参考价格</th>
+<th>备注</th>
+<th>发布时间</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>OV7670</td>
+<td>640 x 480@30fps</td>
+<td>7元</td>
+<td></td>
+<td>2005</td>
+</tr>
+<tr>
+<td>GC0308</td>
+<td>640(H) x 480(V)</td>
+<td>8元</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>OV9655</td>
+<td>1280 x 1024 15fps VGA 30fps 说明：有卖家说能替代老旧的OV2640，疑似瞎说</td>
+<td>6元</td>
+<td></td>
+<td>2005</td>
+</tr>
+<tr>
+<td>OV2640</td>
+<td>1600×1200@15fps SVGA@30fps   CIF@60fps</td>
+<td>7元</td>
+<td>支持JPEG</td>
+<td>2006</td>
+</tr>
+<tr>
+<td>OV3640</td>
+<td>2048×1536@15fps 1024×768@30fps</td>
+<td>18元</td>
+<td>支持JPEG</td>
+<td>2008</td>
+</tr>
+<tr>
+<td>OV3660</td>
+<td>2048×1536@15fps 1080p@20fps 720p@45fps VGA@60fps QVGA@120fps</td>
+<td>16元</td>
+<td>支持JPEG</td>
+<td>2011</td>
+</tr>
+<tr>
+<td>OV5640</td>
+<td>5MP@15fps 1080p@30fps 720p@60fps VGA@90fps QVGA@120fps</td>
+<td>23元</td>
+<td>支持JPEG</td>
+<td>2012</td>
+</tr>
+<tr>
+<td>OV5642</td>
+<td>5MP@15fps 1080p@30fps 720p@60fps VGA@90fps QVGA@120fps</td>
+<td>34元</td>
+<td>支持JPEG</td>
+<td>2008</td>
+</tr>
+</tbody></table>
+<p>注1：价格来自淘宝，2023年6月</p>
+<p>注2：以上均为窄角度镜头，若广角镜头价格要增加不少</p>
+<p>注3：参考：<a href="https://www.arducam.com/ov2640/" rel="noopener" target="_blank">OV2640: Specs, Camera, Datasheet &amp; Alternative (2022 Report) (arducam.com)</a></p>
+<p><a href="http://www.ovt.com/" rel="noopener" target="_blank">www.ovt.com</a></p>
+<p>注4：以上CMOS模组都是比较老（上述网站说end-of-life）的，咱们作为电子爱好者，没办法了属于是</p>
+<p>果然摄像头和单片机性能很挂钩啊，查OV7670一堆STM32模组，查OV2640的淘宝广告都是说支持ESP32，查3660说支持ESP32，K210，查5640都变成了荔枝派树莓派……</p>
+<h2 id="主控芯片"><a class="headerlink" href="#主控芯片" title="主控芯片"></a>主控芯片</h2><p>摄像头芯片一般若想低功耗价格便宜还能编码视频，一般通用MCU做不到的，基本要选用高性能MCU或者带视频编码硬件的才行。主控芯片其实有好几个很明显的分水岭，我按照清晰度对主控芯片分个类。是按照xP@15fps进行分类，其实这些都支持更高像素的拍照。</p>
+<p>其实有好几个分区，720P是个门槛，1080P是个门槛，2K是个门槛。</p>
+<p>720P以下的就是通用单片机，720P，1080P的是一些老产品或者低端产品，但基本上都是LQFP、QFN封装的小芯片，也是我的目标范围，2K4K8K的基本都是BGA封装，DDR3内存，甚至linux、安卓，不是穷逼能玩得起的了。表格按照低端到高端。</p>
+<p>说明：因为大部分厂商都不开源，啥都查不到，有些话是自己的猜想，欢迎各位指正。</p>
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>芯片</th>
+<th>资料情况</th>
+<th>产品情况</th>
+<th>个人购买</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>480P不及</td>
+<td>STM32(之类通用单片机)低端产品</td>
+<td>很多</td>
+<td>只能应用于拍照了</td>
+<td>很多</td>
+</tr>
+<tr>
+<td>720P</td>
+<td>STM32(之类通用单片机)中高端产品</td>
+<td>很多</td>
+<td>性价比太低</td>
+<td>很多</td>
+</tr>
+<tr>
+<td>480P</td>
+<td>ESP32</td>
+<td>很多</td>
+<td>只能应用于拍照了，视频不大行但听说能720P拍几帧</td>
+<td>很多</td>
+</tr>
+<tr>
+<td>720P</td>
+<td>杰理开源产品AC79</td>
+<td>海星（海星）</td>
+<td>720P有点拉15FPS勉强，但支持WIFI</td>
+<td>能买到</td>
+</tr>
+<tr>
+<td>720P，1080P，2K</td>
+<td>杰理闭源产品老DV系列</td>
+<td>完全查不到一点资料</td>
+<td>市场上应用很多销量很好，我所知道的产品不支持WIFI，需要模块</td>
+<td>买不到</td>
+</tr>
+<tr>
+<td>1080P，2K，4K</td>
+<td>杰理新闭源产品</td>
+<td>完全没有，SDK收费几个W，找人开发也要几个W</td>
+<td>听说是市场新秀，行车记录仪市场占比很高</td>
+<td>买不到</td>
+</tr>
+<tr>
+<td>720P，1080P</td>
+<td>凌通老产品</td>
+<td>网上可以下载SDK(少数型号)，可以搜到三篇使用博客。找不到详细的产品选型资料，具有产品GPCV1248，GPCV6624等，销量很大</td>
+<td>15年左右行车记录仪应用、销量很大，见过实物卡录</td>
+<td>淘宝少数店铺可购买</td>
+</tr>
+<tr>
+<td>2K，4K</td>
+<td>凌通新产品</td>
+<td>无</td>
+<td>未知</td>
+<td>买不到</td>
+</tr>
+<tr>
+<td>720P</td>
+<td>建荣/卓荣</td>
+<td>可以买到SDK，无了</td>
+<td>见过实物卡录</td>
+<td>买不到</td>
+</tr>
+<tr>
+<td>1080P，2K，4K</td>
+<td>联咏</td>
+<td>资料比较少</td>
+<td>行车记录仪听说挺多</td>
+<td>能买到</td>
+</tr>
+<tr>
+<td>1080P，2K，4K，8K(linux)</td>
+<td>海思</td>
+<td>少</td>
+<td>执法记录仪之类的应用比较多</td>
+<td>比较好买</td>
+</tr>
+<tr>
+<td>1080P，2K，4K(linux)</td>
+<td>国科微</td>
+<td>海思兼容替代</td>
+<td>听说还行</td>
+<td>好买</td>
+</tr>
+<tr>
+<td>1080P，2K，4K，8K(linux)</td>
+<td>瑞芯微</td>
+<td>资料还行</td>
+<td>玩的人不少想必应用也多，搞机器视觉的不少</td>
+<td>比较好买</td>
+</tr>
+<tr>
+<td>1080P，2K，4K，8K(linux)</td>
+<td>全志</td>
+<td>资料还行</td>
+<td>应用比较多</td>
+<td>好买</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="STM32等通用MCU"><a class="headerlink" href="#STM32等通用MCU" title="STM32等通用MCU"></a>STM32等通用MCU</h3><p>能查到资料很多，但是毕竟没有硬件编码模块，视频性能一般。</p>
+<p>STM32F4听他们说新产品很少用了。其它高性能MCU同样的视频性能（无硬件支持）基本上价格也比专门的DV芯片贵。</p>
+<h3 id="ESP32-Espressif"><a class="headerlink" href="#ESP32-Espressif" title="ESP32(Espressif)"></a>ESP32(Espressif)</h3><p>ESP32是一款物联网芯片，近几年以其规范的文档代码，开放的社区，便宜的芯片，丰富的外设，和WIFI蓝牙支持，成了开源界的大哥。ESP_CAM模块卖的超级好，资料也很全。更是以支持Arduino吸引了不少小白。但我个人非常不推荐Arduino，太难用了，自由度太低，很多接口的参数写死。</p>
+<p><a href="https://github.com/espressif/esp32-camera" rel="noopener" target="_blank">espressif/esp32-camera (github.com)</a></p>
+<p>但是毕竟是240Mhz物联网MCU嘛，视频性能就有点差了，听说720P只能跑几帧的，还不带录音。</p>
+<p>明年（2023）出的ESP32-P4可以期待一下，双核400Mhz，具有MIPI接口，H.264 编码支持，如果明年出了的话，将是对我来说最合适的芯片。</p>
+<h3 id="杰理-jieli-开源产品AC79"><a class="headerlink" href="#杰理-jieli-开源产品AC79" title="杰理(jieli)开源产品AC79"></a>杰理(jieli)开源产品AC79</h3><p><img alt="image-20230614204444831" lazyload="" src="/blog/DVsolution/image-20230614204444831.png" srcset="/blog/img/loading.gif"/></p>
+<p>杰理不知道怎么了突然大发慈悲开源了几款芯片。杰理的开源芯片都用于视频录像的目前只有AC79，资料较为完备，有官方文档官方群，视频性能比较差劲，主要是VGA(640*480)清晰度，标称720p30fps，据说效果不好。价格10r/pcs。群里有工程师说，今年会推出视频性能更好的芯片。截止到2023年6月尚未发布。</p>
+<p>杰理毕竟是长期的闭源厂，资料并不是很多，单片机经验少的话谨慎考虑。</p>
+<p>AC79 SoC：USB1.1、USB2.0（可以方便的当做读卡器）双核DSP，最高主频320Mhz。支持JPEG编码，最大支持720P@30fps@AVI封装，支持WiFi蓝牙，支持视频传输，支持DVP-1/2/4/8bit、 BT656图像传感器接口的YUV sensor，最大支持720P分辨率，可以说应用层的例程还蛮多，这个产品官方给的示例有无人机图传啊，儿童相机之类，视频性能一般。</p>
+<p><a href="https://doc.zh-jieli.com/AC79/zh-cn/master/index.html" rel="noopener" target="_blank">杰理 JieLi_AC79 开源项目文档 — JL Project Documentation (zh-jieli.com)</a></p>
+<h3 id="杰理-jieli-闭源产品"><a class="headerlink" href="#杰理-jieli-闭源产品" title="杰理(jieli)闭源产品"></a>杰理(jieli)闭源产品</h3><p>杰理是最近几年在蓝牙视频方面实力很强的公司，产品较为先进，进年来市场占有率增长极快。但是多数适用于行车记录仪的产品并不开源如杰理dv系列，dv15，dv16等，据悉有更新的产品，性能依旧不错，价格也比较好，但是全方位闭源，我见过的应用有卡录等，我也买到过杰理IC的卡录。</p>
+<h3 id="凌通-Generalplus"><a class="headerlink" href="#凌通-Generalplus" title="凌通(Generalplus)"></a>凌通(Generalplus)</h3><p><img alt="image-20230614204434772" lazyload="" src="/blog/DVsolution/image-20230614204434772.png" srcset="/blog/img/loading.gif"/></p>
+<p>网上可以下载SDK(少数型号)，可以搜到三篇使用博客。找不到详细的产品选型资料，具有产品GPCV1248，GPCV6624等<br/>GPVC1248等明星产品发布时间较早，像素较低，功耗较大。新产品资料过少。<br/>这是一个行车记录仪电路板。<a href="https://www.amobbs.com/thread-5694591-1-1.html" rel="noopener" target="_blank">https://www.amobbs.com/thread-5694591-1-1.html</a><br/>可以在淘宝(少数几个店铺)上买到几款芯片和开发版。<br/>官网只显示少数几个型号，总体看来频率较低，网上有资料的老产品大多数较为落后(但是并不算落后)，新产品信息较少。网上可查到的产品均为LQFP封装，比如1248为LQFP128封装。</p>
+<p><img alt="image-20230614203118124" lazyload="" src="/blog/DVsolution/image-20230614203118124.png" srcset="/blog/img/loading.gif"/></p>
+<p>凌通官网说他最小48pin，我也见过凌通的48pin产品GPCV4225（拆解获得），但是查不到。官网就两本Datasheet。</p>
+<p>他的开发板长这样：</p>
+<blockquote>
+<p>最近因为项目需要，购买了这块凌通开发板进行开发，凌通这个平台是台湾创建的，所以在深圳那边的市场会比较大，核心技术基本上都掌握在凌通原厂以及一些台湾芯片供应商那里，往大陆里面更进一些估计就很少接触凌通这款芯片的开发设计，但是平时用的行车记录仪却很有可能是凌通产的，毕竟价格摆在那里，实现的功能也和市面上的差不多，下面是这款开发板硬件平台的介绍.</p>
+<p><img alt="image-20230614203605990" lazyload="" src="/blog/DVsolution/image-20230614203605990.png" srcset="/blog/img/loading.gif"/></p>
+<p>————————————————<br/>版权声明：本文为CSDN博主「浮生若梦，学海无涯」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。<br/>原文链接：<a href="https://blog.csdn.net/weixin_41586634/article/details/88741670" rel="noopener" target="_blank">https://blog.csdn.net/weixin_41586634/article/details/88741670</a></p>
+</blockquote>
+<p>这是那三页博客，可谓弥足珍贵了，这位博主还贴心的给了SDK。</p>
+<p><a href="https://blog.csdn.net/weixin_41586634/article/details/88741670" rel="noopener" target="_blank">凌通DRV方案 ( 一、GPCV1248开发板主平台介绍 )_浮生若梦，学海无涯的博客-CSDN博客</a></p>
+<p><a href="https://blog.csdn.net/weixin_41586634/article/details/88793199" rel="noopener" target="_blank">凌通DRV方案 (二、GPCV1248芯片手册分析 )_凌通芯片_浮生若梦，学海无涯的博客-CSDN博客</a></p>
+<p><a href="https://blog.csdn.net/weixin_41586634/article/details/88795057" rel="noopener" target="_blank">凌通DRV方案 (三、固件的制作和烧录详解 )_浮生若梦，学海无涯的博客-CSDN博客</a></p>
+<p>为了防止资料丢失，我还准备了网页备份：</p>
+<p>[一、GPCV1248开发板主平台介绍](DVsolution/凌通DRV方案 ( 一、GPCV1248开发板主平台介绍 )_浮生若梦，学海无涯的博客-CSDN博客.mhtml)</p>
+<p>[二、GPCV1248芯片手册分析](DVsolution/凌通DRV方案 (二、GPCV1248芯片手册分析 )_浮生若梦，学海无涯的博客-CSDN博客.mhtml)</p>
+<p>[三、固件的制作和烧录详解](DVsolution/凌通DRV方案 (三、固件的制作和烧录详解 )_浮生若梦，学海无涯的博客-CSDN博客.mhtml)</p>
+<h3 id="建荣-卓荣-AppoTech"><a class="headerlink" href="#建荣-卓荣-AppoTech" title="建荣/卓荣(AppoTech)"></a>建荣/卓荣(AppoTech)</h3><p><img alt="image-20230614204421480" lazyload="" src="/blog/DVsolution/image-20230614204421480.png" srcset="/blog/img/loading.gif"/></p>
+<p>是同一家公司，后来改名叫卓荣了，这个logo我也拆卡录拆到过</p>
+<img alt="image-20230614204715289" lazyload="" src="image-20230614204715289.png" srcset="/blog/img/loading.gif" style="zoom:50%;">
+<p>这三款产品的页面似乎都是复制粘贴，规格都是：</p>
+<p><img alt="image-20230614205240331" lazyload="" src="/blog/DVsolution/image-20230614205240331.png" srcset="/blog/img/loading.gif"/></p>
+<p><img alt="image-20230614205303953" lazyload="" src="/blog/DVsolution/image-20230614205303953.png" srcset="/blog/img/loading.gif"/></p>
+<p>很久以前也查过他们家资料，这次居然发现网上（CSDN等）可以买到AX3233的SDK。去他妈CSDN。</p>
+<p>除此之外查不到什么资料。</p>
+<p>闲鱼上有一些废品卡录，大眼一看也是卓荣logo。</p>
+<h3 id="联咏-Novatek"><a class="headerlink" href="#联咏-Novatek" title="联咏(Novatek)"></a>联咏(Novatek)</h3><p>NT96650，NT96655，NT96663明星产品，也属于高端产品系列，配套索尼的传感器为主。</p>
+<p>也是行车记录仪用的很多的方案。</p>
+<p>资料比较少，可以查到SDK：<a href="https://github.com/nikitos1550/some_novatek_sdk" rel="noopener" target="_blank">nikitos1550/some_novatek_sdk (github.com)</a>，淘宝上也有一些开发板但也挺少</p>
+<h3 id="海思-Hisilicon"><a class="headerlink" href="#海思-Hisilicon" title="海思(Hisilicon)"></a>海思(Hisilicon)</h3><p>属于华为集团，中国大陆最大的无晶圆厂芯片设计公司，最近某些原因导致的缺货也影响到了摄像业务。海思毕竟是华为的，其产品也有执法记录仪应用，我猜国内海思芯片的比较多。（找了几个拆解视频，一个是安霸芯片，这个牌子也做行车记录仪，个人很难接触了，另一个直接上MTK了，打脸了）</p>
+<p>执法记录仪，监控等设备应用广泛，前几年见到一个芯片代理发朋友圈，七十多片Hi芯片余货卖。主要针对1080p，4k等高端领域，几乎都是BGA封装。芯片价格较贵，几十元不等，常见产品有Hi3516DV300(主频900mhz)等IPcamera芯片，大多数需要搭配DDR3内存，网上资料全，sensor较贵，量产大概要直接用传感器芯片，自己做镜片部分。海思的移动相机也有方案，但是比较睾端。</p>
+<img alt="image-20231231212835047" lazyload="" src="image-20231231212835047.png" srcset="/blog/img/loading.gif" style="zoom:50%;">
+<p>海思的SDK也是半开放状态，但是想从官方那弄，没门</p>
+<p><img alt="image-20230615002140720" lazyload="" src="/blog/DVsolution/image-20230615002140720.png" srcset="/blog/img/loading.gif"/></p>
+<h4 id="Hi3516DV300"><a class="headerlink" href="#Hi3516DV300" title="Hi3516DV300"></a>Hi3516DV300</h4><p>双核 ARM Cortex-A7@ 900MHz，集成POR、 RTC、Audio Codec以及待机唤醒电路，H.264/H.265 编解码最大宽度 3072，最大分辨率 3072x1728，2688x1536@30fps编码+720x480@30fps编码（多码流），支持h.264/265/jpeg编码，三四十块钱，还支持一堆视频处理功能。</p>
+<h4 id="Hi3516EV200"><a class="headerlink" href="#Hi3516EV200" title="Hi3516EV200"></a>Hi3516EV200</h4><p>后来在查国科微的时候查到海思一款Hi3516EV200</p>
+<p>ARM Cortex A7@ 900MHz，H.264/H.265 编码可支持最大分辨率为 2304x1296，宽度最大 2304</p>
+<p>H.264/H.265 多码流实时编码能力：<br/>− 2048x1536@20fps+720x576@20fps<br/>− 2304x1296@20fps+720x576@20fps<br/>− 1920x1080@30fps+720x576@30fps<br/>• 支持 JPEG 抓拍 3M（2304x1296）@5fps</p>
+<p>支持MIPI、LVDS/Sub-LVDS、HiSPi接口<br/>支持与SONY、ON、OmniVision、 Panasonic等主流高清CMOS sensor对接</p>
+<p><img alt="image-20230615001422822" lazyload="" src="/blog/DVsolution/image-20230615001422822.png" srcset="/blog/img/loading.gif"/></p>
+<p>这颗芯片有大佬做开发板，但是应该寄了，网站也挂了。</p>
+<p>主要在whycan上有些讨论。<a href="https://whycan.com/t_4466.html" rel="noopener" target="_blank">海思入门级开发板Hi3516EV200 正式预售/ DOPI开源摄像头(HI3516/HI3518) / WhyCan Forum(哇酷开发者社区)</a></p>
+<h3 id="国科微-gokemicro"><a class="headerlink" href="#国科微-gokemicro" title="国科微(gokemicro)"></a>国科微(gokemicro)</h3><p>有一些海思pin to pin兼容替代，如果GK7205RNCFV200，闲鱼淘宝价格在12元左右，有好几个海思的替换芯片</p>
+<p>GK7205V200 12元闲鱼  PtP  Hi3516EV200</p>
+<p>GK7205V300  20多元  PtP  Hi3516EV300</p>
+<h3 id="瑞芯微-Rockchip"><a class="headerlink" href="#瑞芯微-Rockchip" title="瑞芯微(Rockchip)"></a>瑞芯微(Rockchip)</h3><p>RV1109/1126/1108是瑞芯微比较经典的产品，新品有RK33XX，但是频率也上1GHz，也需要DDR3芯片，支持2K、4K，属于ARM高端产品了，网上查好像用作AI机器视觉的比较多，看来性能不错，DIY成本比较高，但是资料能查到不少，可以下载到SDK，<a href="https://github.com/rockchip-linux/rknpu2" rel="noopener" target="_blank">rockchip-linux/rknpu2 (github.com)</a>，能买到开发板，开发板也有好多专业的附带资料，该公司的新产品也能支持到8K。如果只做硬件开发的话还不错，而且芯片也是比较新的，和那些用ADS1.2的远古凌通没法比。</p>
+<p>范围和海思比较重合。资料数量也差不多，可能海思多点。</p>
+<p><a href="http://www.rock-chips.com/a/cn/product/RV11xilie/2017/0118/827.html" rel="noopener" target="_blank">RV1108</a> 30元左右</p>
+<p><a href="http://www.rock-chips.com/a/cn/product/RV11xilie/2020/0427/1075.html" rel="noopener" target="_blank">RV1126</a> 80元左右</p>
+<p>瑞芯微最近新出了RV1103,RV1106，<strong>最高达0.5TOPs算力</strong>，视频编解码能力一流。据说前者拿货价在25左右（淘宝30）。是为AI机器视觉做的芯片，前者有QFN88封装，后者是BGA。</p>
+<p><a href="https://wiki.luckfox.com/zh/Luckfox-Pico/Luckfox-Pico-quick-start/" rel="noopener" target="_blank">幸狐</a>出了好几款RV1103,RV1106的开发板，RV1103的最便宜才39，所以我猜，要么是有原厂推销的原因，要么是，实际拿货价要更低。</p>
+<h3 id="全志-Allwinner"><a class="headerlink" href="#全志-Allwinner" title="全志(Allwinner)"></a>全志(Allwinner)</h3><p>全志是国内比较有名的高端ARM芯片厂，也是最近在搞什么AI VR那种高端厂商，“和瑞芯微的产品应用领域高度相关。 形成直接竞争关系。”全志H系列很久以前都听说过。看拆解的行车记录仪有用的全志A10，听说全志的行车记录仪主要是安卓机，我也不清楚。总之是比较高端了。全志的V3s（这一片是LQFP，价格22左右）是全志为入门级行车记录仪（1080P双路）打造的芯片，但是被玩做高端ARM单片机的也不少，因此资料还挺多。</p>
+<p>全志的主要都是linux，安卓了。我对此了解也不多。国内有不少玩全志芯片的大佬。</p>
+<p><a href="https://bbs.elecfans.com/jishu_2322226_1_1.html" rel="noopener" target="_blank">【开源硬件大赛】基于全志V853的AI智能行驶记录仪 - 全志科技 - 电子技术论坛 - 广受欢迎的专业电子论坛! (elecfans.com)</a></p>
+<p>全志有两颗芯片比较受爱好者喜爱，分别是V3s，F1c100s/200s，都内置DDR。前者视频能力好点，TB22左右。F1c100s/200s十块钱出头，但是官方手册里只有MJPEG 720p@30fps的编码能力。</p>
+<p>这两颗芯片也是比较推荐的。</p>
+<p><a href="https://whycan.com/t_5073.html" rel="noopener" target="_blank">v3s/s3的H264编码 / 全志 SOC / WhyCan Forum(哇酷开发者社区)</a></p>
+<h2 id="开源项目"><a class="headerlink" href="#开源项目" title="开源项目"></a>开源项目</h2><p><a href="https://github.com/OpenIPC" rel="noopener" target="_blank">OpenIPC (github.com)</a></p>
+<p>OpenIPC是来自开放社区的开源操作系统，针对来自多家制造商的带有ARM和MIPS处理器的IP摄像机 为了取代封闭的、不透明的、不安全的、经常被遗弃和不支持的 供应商预安装的固件。</p>
+<p>佩服这些敢于给产品重写固件的开源项目，真的是太厉害了。</p>
+<p><a href="https://www.arducam.com/%E7%9C%8B%E5%88%B0%E4%B8%80%E4%B8%AAopenHD%E9%A1%B9%E7%9B%AE%EF%BC%8C" rel="noopener" target="_blank">https://www.arducam.com/看到一个openHD项目，</a></p>
+<p>用的Pi + IMX477<a href="https://github.com/OpenHD/OpenHD" rel="noopener" target="_blank">OpenHD/OpenHD: OpenHD (github.com)</a></p>
+<h2 id="我的窘境"><a class="headerlink" href="#我的窘境" title="我的窘境"></a>我的窘境</h2><p>我用不着动辄BGA，我也不会焊不是，现在就是找不到一款1080P的价格合适功耗合适芯片，有时有事没事就上网查，自己也拆了些无人机卡录，方案主要是凌通，杰理，卓荣，但是都不开源，，，只有凌通有一点远古资料。两年了没什么进展，唯一的就是杰理发布的AC79吧，但是视频性能也不行。杰理的老DV系列其实很合适，但是，不开源，一点资料都没有，啥都查不到，咱又是自己玩，不是做产品。</p>
+<img alt="image-20230614221444372" lazyload="" src="image-20230614221444372.png" srcset="/blog/img/loading.gif" style="zoom:50%;">
+<p>杰理未知型号卡录</p>
+<p>2023年12月31日更新：其实上linux也是个不错的选择，RV1103，F1C200S，都有QFN封装。不过，我打算等等ESP32-P4。</p>
+<h2 id="关于开源"><a class="headerlink" href="#关于开源" title="关于开源"></a>关于开源</h2><p>国内这些开源厂商，借用别人的话，恨不得你先定1kk的货再给你datasheet，都是藏着掖着，一个SDK授权费几万，真是缺德。</p>
+<p>另外今天也查到了点国外的资料，还是好多了的。比如哪个OpenIPC，让我想起了00年代大家给MP3刷固件（虽然没经历过）的时光。现在看到一些MP3固件网，再反观现在国内的一些IC公司，不禁感慨万千。</p>
+</img></img></img></img></div>
+<hr/>
+<div>
+<div class="post-metas my-3">
+<div class="post-meta">
+<i class="iconfont icon-tags"></i>
+<a class="print-no-link" href="/blog/tags/%E7%A1%AC%E4%BB%B6/">#硬件</a>
+<a class="print-no-link" href="/blog/tags/%E6%91%84%E5%83%8F/">#摄像</a>
+<a class="print-no-link" href="/blog/tags/%E6%96%B9%E6%A1%88%E8%B0%83%E7%A0%94/">#方案调研</a>
+</div>
+</div>
+<div class="license-box my-3">
+<div class="license-title">
+<div>小型摄像机解决方案调研</div>
+<div>https://decaday.github.io/blog/DVsolution/</div>
+</div>
+<div class="license-meta">
+<div class="license-meta-item">
+<div>作者</div>
+<div>星期十</div>
+</div>
+<div class="license-meta-item license-meta-date">
+<div>发布于</div>
+<div>2023年6月14日</div>
+</div>
+<div class="license-meta-item license-meta-date">
+<div>更新于</div>
+<div>2024年2月2日</div>
+</div>
+<div class="license-meta-item">
+<div>许可协议</div>
+<div>
+<a class="print-no-link" href="https://creativecommons.org/licenses/by/4.0/" target="_blank">
+<span aria-label="BY - 署名" class="hint--top hint--rounded">
+<i class="iconfont icon-by"></i>
+</span>
+</a>
+</div>
+</div>
+</div>
+<div class="license-icon iconfont"></div>
+</div>
+<div class="post-prevnext my-3">
+<article class="post-prev col-6">
+<a href="/blog/air001introduction/" title="AIR001-Clion/VScode优雅环境配置">
+<i class="iconfont icon-arrowleft"></i>
+<span class="hidden-mobile">AIR001-Clion/VScode优雅环境配置</span>
+<span class="visible-mobile">上一篇</span>
+</a>
+</article>
+<article class="post-next col-6">
+<a href="/blog/2022/" title="窝逝去的2022">
+<span class="hidden-mobile">窝逝去的2022</span>
+<span class="visible-mobile">下一篇</span>
+<i class="iconfont icon-arrowright"></i>
+</a>
+</article>
+</div>
+</div>
+</article>
+</div>
+</div>
+</div>
+<div class="side-col d-none d-lg-block col-lg-2">
+<aside class="sidebar" style="margin-left: -1rem">
+<div id="toc">
+<p class="toc-header">
+<i class="iconfont icon-list"></i>
+<span>目录</span>
+</p>
+<div class="toc-body" id="toc-body"></div>
+</div>
+</aside>
+</div>
+</div>
+</div>
+<a aria-label="TOP" href="#" id="scroll-top-button" role="button">
+<i aria-hidden="true" class="iconfont icon-arrowup"></i>
+</a>
+<div aria-hidden="true" aria-labelledby="ModalLabel" class="modal fade" id="modalSearch" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+<div class="modal-content">
+<div class="modal-header text-center">
+<h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+<button aria-label="Close" class="close" data-dismiss="modal" id="local-search-close" type="button">
+<span aria-hidden="true">×</span>
+</button>
+</div>
+<div class="modal-body mx-3">
+<div class="md-form mb-5">
+<input class="form-control validate" id="local-search-input" type="text"/>
+<label data-error="x" data-success="v" for="local-search-input">关键词</label>
+</div>
+<div class="list-group" id="local-search-result"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer>
+<div class="footer-inner">
+<div class="footer-content">
+<a href="https://hexo.io" rel="nofollow noopener" target="_blank"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" rel="nofollow noopener" target="_blank"><span>Fluid</span></a>
+</div>
+<div class="statistics">
+<span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+<span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+</div>
+</div>
+</footer>
+<!-- Scripts -->
+<script src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js"></script>
+<link href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet"/>
+<script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+<script src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js"></script>
+<script src="/blog/js/events.js"></script>
+<script src="/blog/js/plugins.js"></script>
+<script src="/blog/js/img-lazyload.js"></script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+<script src="https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js"></script>
+<script>Fluid.plugins.codeWidget();</script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+<script>Fluid.plugins.imageCaption();</script>
+<script src="/blog/js/local-search.js"></script>
+<script defer="" src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script src="/blog/js/boot.js"></script>
+<noscript>
+<div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+</noscript>
+</body>
+</html>
