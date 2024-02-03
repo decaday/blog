@@ -14,7 +14,7 @@
 <meta content="老天不想让我做充电宝做充电宝。 请务必看到幺蛾子大赏部分。 我之前的我之前的充电宝实在是，太像太像定时炸弹了（亚克力加螺柱结构，不久亚克力就烂掉了，之后就越来越破，这是遗照   之所以有一点纸屑，是因为怕亚克力外壳烂掉之后，螺丝或者针脚戳到电池把电池戳破（其实已经戳出来坑了，但是没破，亡羊补牢垫了点纸，后来纸掉出来一部分，就变成这个样子了 用的是淘宝去年或者前年买的IP5108电路板，没有上过机，" name="description"/>
 <meta content="article" property="og:type"/>
 <meta content="老天不想让我做充电宝" property="og:title"/>
-<meta content="https://decaday.github.io/blog/PowerBankErrors/index.html" property="og:url"/>
+<meta content="https://decaday.github.io/blog/power-Bank-errors/index.html" property="og:url"/>
 <meta content="Decaday" property="og:site_name"/>
 <meta content="老天不想让我做充电宝做充电宝。 请务必看到幺蛾子大赏部分。 我之前的我之前的充电宝实在是，太像太像定时炸弹了（亚克力加螺柱结构，不久亚克力就烂掉了，之后就越来越破，这是遗照   之所以有一点纸屑，是因为怕亚克力外壳烂掉之后，螺丝或者针脚戳到电池把电池戳破（其实已经戳出来坑了，但是没破，亡羊补牢垫了点纸，后来纸掉出来一部分，就变成这个样子了 用的是淘宝去年或者前年买的IP5108电路板，没有上过机，" property="og:description"/>
 <meta content="zh_CN" property="og:locale"/>
@@ -96,7 +96,7 @@
 </div>
 </div>
 </nav>
-<div class="banner" id="banner" parallax="true" style="background: url('/blog/img/default.png') no-repeat center center; background-size: cover;">
+<div class="banner" id="banner" parallax="true" style="background: url('/blog/images/PowerBank1.jpg') no-repeat center center; background-size: cover;">
 <div class="full-bg-img">
 <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
 <div class="banner-text text-center fade-in-up">
@@ -166,25 +166,25 @@
 <p>既然是自己做，就自己画板子，自己做！不再用成品板了，这种板子要么接口不达标（没有TypeC或者只有一个USB），要么是定位设计的比较奇葩，要么是功率太小，主要是都没有百分比电量显示。百分比电量显示这东西真的非常有用。于是决定自己做，而且自学SW。</p>
 <p>本来是打算用IP5306 I2C，用AIR001直驱/+TM1650做电量显示，后来发现IP5506-BZ-188支持直接驱动188数码管。那还何苦动用单片机！（其实支持数码管显示的型号不少）（之所以用AIR001，是因为嫖了10片，而且有开发板，不然用py32是更实惠的）</p>
 <p>其实我早就看到有一些型号标注着数码管，当我看到188数码管只有五根引脚的时候，我以为是这种，，</p>
-<p><img alt="image-20231126000640454" lazyload="" src="/blog/PowerBankErrors/image-20231126000640454.png" srcset="/blog/img/loading.gif"/></p>
+<p><img alt="image-20231126000640454" lazyload="" src="/blog/power-Bank-errors/image-20231126000640454.png" srcset="/blog/img/loading.gif"/></p>
 <p>后来在淘宝上看到了电子垃圾电路板的实物图，发现确实是货真价实的188数码管，后来看手册，发现这数码管结构如图：</p>
 <img alt="image-20231126000832642" lazyload="" src="image-20231126000832642.png" srcset="/blog/img/loading.gif" style="zoom: 80%;">
 <img alt="image-20231126000819064" lazyload="" src="image-20231126000819064.png" srcset="/blog/img/loading.gif" style="zoom:80%;"/>
 <p>这IO利用率可真高。。</p>
 <h2 id="硬件设计"><a class="headerlink" href="#硬件设计" title="硬件设计"></a>硬件设计</h2><p>使用IP5506充电宝SOC。注意，IP5506有三个细分型号，其中IP5506-BZ-188是支持数码管的，其余两种手册中的型号是否有出货，我持怀疑态度，我猜可能没。</p>
 <p>另外这些芯片里是有一个单片机的，同一个芯片有不同的版本，极有可能是不同的固件。似乎还支持订制数码管显示，可能是一颗8051 OTP？</p>
-<p><img alt="image-20231126001438243" lazyload="" src="/blog/PowerBankErrors/image-20231126001438243.png" srcset="/blog/img/loading.gif"/></p>
+<p><img alt="image-20231126001438243" lazyload="" src="/blog/power-Bank-errors/image-20231126001438243.png" srcset="/blog/img/loading.gif"/></p>
 <p>LED使用BP1808驱动，支持模拟调光和数字调光，设置输出功率，3-60V输入输出范围，看着符合要求。常用的PT4115最低输入是5V或者6V（因厂商而异），锂电池是3-4.2V，应该用不了，但是我看有人这么用。</p>
-<p><img alt="image-20231126001309070" lazyload="" src="/blog/PowerBankErrors/image-20231126001309070.png" srcset="/blog/img/loading.gif"/></p>
+<p><img alt="image-20231126001309070" lazyload="" src="/blog/power-Bank-errors/image-20231126001309070.png" srcset="/blog/img/loading.gif"/></p>
 <p>原理图</p>
-<p><img alt="Schematic_PowerBank1.1_2023-11-26" lazyload="" src="/blog/PowerBankErrors/Schematic_PowerBank1.1_2023-11-26.png" srcset="/blog/img/loading.gif"/></p>
+<p><img alt="Schematic_PowerBank1.1_2023-11-26" lazyload="" src="/blog/power-Bank-errors/Schematic_PowerBank1.1_2023-11-26.png" srcset="/blog/img/loading.gif"/></p>
 <h2 id="外壳设计"><a class="headerlink" href="#外壳设计" title="外壳设计"></a>外壳设计</h2><p>今年夏自学了几天SW，国庆把SW教程看完了，比较好上手，没有想象中那么难。第一次在3D打印机群（我三年前做写字机，卖主板进的群）找了个0.2/g的ABS代打。3D打印群里有不少自己组的机器接代打，pla0.15左右，abs0.2左右。这家精度不太行，侧面完全糊掉了，接口做的比较难看，但是没有东西的长侧面和有车床的地面相当不错。</p>
 <img alt="922c7257731291d2c4fb2cad9b05bc3" lazyload="" src="922c7257731291d2c4fb2cad9b05bc3.jpg" srcset="/blog/img/loading.gif" style="zoom:50%;">
 <p>侧面的层极易断裂，底面非常坚固（因为有个壳颜色错了，这台是给别人做的，我只好重打，所以把旧的掰了试了试），也不知道是ABS的特性，还是这位3D打印机的特性，还是用的ABS料比较差。</p>
 <p>两个大小不同，一共30，邮费12。</p>
 <p>第二次的效果就好多了。咸鱼找的大店，不是 个人，pteg 0.2/g接了我的单，河南老乡。pteg密度大不少，虽然这次减了点厚度，但是一共45，河南老乡给我包了邮。</p>
 <p>误差非常小，虽然竖直圆形还是偏椭圆，但是两个外壳拼合得比上回好太多了，堪称完美，不用修剪就拼上了（0.2-025mm配合间隙），第一批还修剪了一点，还是翘而且上螺丝有形变弹力。这次上螺丝完全没形变。而且坚固性也不错，加热也没有异味，修整后也不难看，这料子真轩。</p>
-<p><img alt="9cde15ea7d2262956051c210f0c8dfd" lazyload="" src="/blog/PowerBankErrors/9cde15ea7d2262956051c210f0c8dfd.jpg" srcset="/blog/img/loading.gif"/></p>
+<p><img alt="9cde15ea7d2262956051c210f0c8dfd" lazyload="" src="/blog/power-Bank-errors/9cde15ea7d2262956051c210f0c8dfd.jpg" srcset="/blog/img/loading.gif"/></p>
 <h2 id="第一批"><a class="headerlink" href="#第一批" title="第一批"></a>第一批</h2><h2 id="第二批（幺蛾子大赏）"><a class="headerlink" href="#第二批（幺蛾子大赏）" title="第二批（幺蛾子大赏）"></a>第二批（幺蛾子大赏）</h2><p>以下记录经过大量编辑修改，本来的聊天对象不懂电子就没有电子名词，已经加上。2023/11/25一整天，就是在这样的折腾中结束的。</p>
 <p>这一定是报应，我要反思我最近做错了什么。</p>
 <p>xxx 2023/11/25 22:51:51<br/>今天实在是太倒霉了</p>
@@ -217,7 +217,7 @@
 <p>xxx 2023/11/25 23:21:52<br/>18.3D模型设计依然是有一点点问题，两种不同规格的typec口，有一种可以正常放下，另一种放不下，然而我焊接的时候是随机拿的，焊上去之后就没法拆了，还好，这个外壳材料烫出来也并没有像之前那么难看</p>
 <p>xxx 2023/11/25 23:23:02<br/>19.折磨了我一整天的烙铁，虽然已经开暖气了，因为要焊接就开了窗户穿了袄，不知道是不是因为气温的原因，今天电烙铁温度开得很高，也很难化锡，烙铁在黑暗环境下可以看出来已经红了，就是死活不化锡。设置450度化一个小焊盘的无铅锡居然要十秒朝上，大焊盘要半分钟，有的时候快，有的时候奇慢，有的时候根本化不开。后来温度就开高，因此掉了不少焊盘，但化锡还是超级慢，清焊盘很麻烦，还老是掉焊盘。然后今天晚上比较绷不住的时候，就拿着烙铁往桌子上锤了两下（桌子上垫有一本书），然后烙铁头就弯了，，</p>
 <p>为了换烙铁头，需要把它掰直，我没找到尖嘴钳，就用剥线钳的尖的地方，在凉的时候也很容易掰过来了。</p>
-<p>xxx 2023/11/25 23:23:15<br/><img alt="image-20231126020838253" lazyload="" src="/blog/PowerBankErrors/image-20231126020838253.png" srcset="/blog/img/loading.gif"/></p>
+<p>xxx 2023/11/25 23:23:15<br/><img alt="image-20231126020838253" lazyload="" src="/blog/power-Bank-errors/image-20231126020838253.png" srcset="/blog/img/loading.gif"/></p>
 <p>xxx 2023/11/25 23:24:29<br/>20.我的万用表大概是没办法继续用了，现在好多档都有问题，什么都没接，居然告诉我电压超量程，量着一个稳定电源（4v），从10伏在20伏中间跳来跳去，现在故障时间大概是70%左右了，我只能量好些次找到一个正常值。量一次需要频繁开关万用表和换挡才能正确测量。</p>
 <p>xxx 2023/11/25 23:25:56<br/>21.我都不知道我运气是好还是差了，剪东西的时候，有一颗东西弹了起来（大概也就一mm大小），幸好当时眨了一下眼 那个东西从眼皮上弹走了，我听到了他落在20厘米外的声音，假如没眨眼，不堪设想，我赶紧去把护目镜带上，护目镜用的塑料是普通塑料，不耐磨，现在已经模糊的不行了，已经下单新的了</p>
 </img></img></img></div>
@@ -228,7 +228,7 @@
 <div class="license-box my-3">
 <div class="license-title">
 <div>老天不想让我做充电宝</div>
-<div>https://decaday.github.io/blog/PowerBankErrors/</div>
+<div>https://decaday.github.io/blog/power-Bank-errors/</div>
 </div>
 <div class="license-meta">
 <div class="license-meta-item">
@@ -254,6 +254,11 @@
 </div>
 <div class="post-prevnext my-3">
 <article class="post-prev col-6">
+<a href="/blog/my-sleep-issue/" title="我的生物钟与睡眠问题">
+<i class="iconfont icon-arrowleft"></i>
+<span class="hidden-mobile">我的生物钟与睡眠问题</span>
+<span class="visible-mobile">上一篇</span>
+</a>
 </article>
 <article class="post-next col-6">
 <a href="/blog/air001introduction/" title="AIR001-Clion/VScode优雅环境配置">
