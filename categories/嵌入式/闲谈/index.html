@@ -11,30 +11,25 @@
 <meta content="#2f4154" name="theme-color"/>
 <meta content="星期十" name="author"/>
 <meta content="" name="keywords"/>
-<meta content="星期十。 https://github.com/decaday myDecaday@outlook.com" name="description"/>
+<meta content="星期十在十号" name="description"/>
 <meta content="website" property="og:type"/>
-<meta content="关于" property="og:title"/>
-<meta content="https://decaday.github.io/blog/about/index.html" property="og:url"/>
+<meta content="分类 - 闲谈" property="og:title"/>
+<meta content="https://decaday.github.io/blog/categories/%E5%B5%8C%E5%85%A5%E5%BC%8F/%E9%97%B2%E8%B0%88/index.html" property="og:url"/>
 <meta content="Decaday" property="og:site_name"/>
-<meta content="星期十。 https://github.com/decaday myDecaday@outlook.com" property="og:description"/>
+<meta content="星期十在十号" property="og:description"/>
 <meta content="zh_CN" property="og:locale"/>
-<meta content="2024-02-03T04:01:05.720Z" property="article:published_time"/>
-<meta content="2024-02-03T04:01:05.720Z" property="article:modified_time"/>
 <meta content="星期十" property="article:author"/>
 <meta content="summary_large_image" name="twitter:card"/>
 <meta content="no-referrer-when-downgrade" name="referrer"/>
-<title>关于 - Decaday</title>
+<title>分类 - 闲谈 - Decaday</title>
 <link href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" rel="stylesheet">
-<link href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" rel="stylesheet"/>
-<link href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet"/>
 <!-- 主题依赖的图标库，不要自行修改 -->
 <!-- Do not modify the link that theme dependent icons -->
 <link href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css" rel="stylesheet"/>
 <link href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css" rel="stylesheet"/>
 <link href="/blog/css/main.css" rel="stylesheet">
 <link href="/blog/css/highlight.css" id="highlight-css" rel="stylesheet">
-<link href="/blog/css/highlight-dark.css" id="highlight-css-dark" rel="stylesheet"/>
+<link href="/blog/css/highlight-dark.css" id="highlight-css-dark" rel="stylesheet">
 <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
@@ -94,12 +89,12 @@
 </div>
 </div>
 </nav>
-<div class="banner" id="banner" parallax="true" style="background: url('/blog/evcg02d.jpg') no-repeat center center; background-size: cover;">
+<div class="banner" id="banner" parallax="true" style="background: url('/blog/img/default.png') no-repeat center center; background-size: cover;">
 <div class="full-bg-img">
 <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
 <div class="banner-text text-center fade-in-up">
 <div class="h2">
-<span id="subtitle">关于</span>
+<span id="subtitle">分类 - 闲谈</span>
 </div>
 </div>
 </div>
@@ -110,30 +105,18 @@
 <main>
 <div class="container nopadding-x-md">
 <div id="board">
-<div class="about-avatar">
-<img alt="avatar" class="img-fluid" lazyload="" src="/blog/img/myavatar.png" srcset="/blog/img/loading.gif"/>
-</div>
 <div class="container">
 <div class="row">
 <div class="col-12 col-md-10 m-auto">
-<div class="text-center">
-<div class="about-info">
-<div class="about-name">Decaday</div>
-<div class="about-intro">星期十...</div>
-<div class="about-icons">
-<a aria-label="GitHub" class="hint--bottom hint--rounded" href="https://github.com/decaday" target="_blank">
-<i aria-hidden="true" class="iconfont icon-github-fill"></i>
+<div class="list-group">
+<p class="h4">共计 1 篇文章</p>
+<hr/>
+<p class="h5">2024</p>
+<a class="list-group-item list-group-item-action" href="/blog/stc8051-talk/">
+<time>02-05</time>
+<div class="list-group-item-title">STC-51单片机闲谈</div>
 </a>
 </div>
-</div>
-</div>
-<article class="about-content page-content mt-5">
-<div class="markdown-body">
-<p>星期十。</p>
-<p><a href="https://github.com/decaday" rel="noopener" target="_blank">https://github.com/decaday</a></p>
-<p><a href="mailto:myDecaday@outlook.com">myDecaday@outlook.com</a></p>
-</div>
-</article>
 </div>
 </div>
 </div>
@@ -196,49 +179,6 @@
 <script src="/blog/js/events.js"></script>
 <script src="/blog/js/plugins.js"></script>
 <script src="/blog/js/img-lazyload.js"></script>
-<script src="https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js"></script>
-<script>Fluid.plugins.codeWidget();</script>
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
-    window.anchors.options = {
-      placement: CONFIG.anchorjs.placement,
-      visible  : CONFIG.anchorjs.visible
-    };
-    if (CONFIG.anchorjs.icon) {
-      window.anchors.options.icon = CONFIG.anchorjs.icon;
-    }
-    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
-    var res = [];
-    for (var item of el) {
-      res.push('.markdown-body > ' + item.trim());
-    }
-    if (CONFIG.anchorjs.placement === 'left') {
-      window.anchors.options.class = 'anchorjs-link-left';
-    }
-    window.anchors.add(res.join(', '));
-
-    Fluid.events.registerRefreshCallback(function() {
-      if ('anchors' in window) {
-        anchors.removeAll();
-        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
-        var res = [];
-        for (var item of el) {
-          res.push('.markdown-body > ' + item.trim());
-        }
-        if (CONFIG.anchorjs.placement === 'left') {
-          anchors.options.class = 'anchorjs-link-left';
-        }
-        anchors.add(res.join(', '));
-      }
-    });
-  });
-</script>
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
-    Fluid.plugins.fancyBox();
-  });
-</script>
-<script>Fluid.plugins.imageCaption();</script>
 <script src="/blog/js/local-search.js"></script>
 <script defer="" src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <!-- 主题的启动项，将它保持在最底部 -->

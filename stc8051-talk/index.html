@@ -1,0 +1,439 @@
+
+<!DOCTYPE html>
+
+<html data-default-color-scheme="auto" lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<link href="/blog/img/favicon.jpg" rel="apple-touch-icon" sizes="76x76"/>
+<link href="/blog/img/favicon.jpg" rel="icon"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no" name="viewport"/>
+<meta content="ie=edge" http-equiv="x-ua-compatible"/>
+<meta content="#2f4154" name="theme-color"/>
+<meta content="星期十" name="author"/>
+<meta content="" name="keywords"/>
+<meta content="STC-51单片机闲谈STC单片机，这个网站肯定不能不提。（想截个图结果网站访问不了了emm，这网站再我想用的时候崩了不止一次了）  现在网站恢复了，可惜它不存在了，已经会自动跳转到论坛。找个网图吧，，我记得最后上面这个大绿块已经开始宣传STC32了。 我记得之前还是合肥宏晶微电子，现在手册和官网（甚至域名）都变成了深圳国芯人工智能有限公司，，，8051想破脑袋也想不出来和AI有啥关系。 STC是" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="STC-51单片机闲谈" property="og:title"/>
+<meta content="https://decaday.github.io/blog/stc8051-talk/index.html" property="og:url"/>
+<meta content="Decaday" property="og:site_name"/>
+<meta content="STC-51单片机闲谈STC单片机，这个网站肯定不能不提。（想截个图结果网站访问不了了emm，这网站再我想用的时候崩了不止一次了）  现在网站恢复了，可惜它不存在了，已经会自动跳转到论坛。找个网图吧，，我记得最后上面这个大绿块已经开始宣传STC32了。 我记得之前还是合肥宏晶微电子，现在手册和官网（甚至域名）都变成了深圳国芯人工智能有限公司，，，8051想破脑袋也想不出来和AI有啥关系。 STC是" property="og:description"/>
+<meta content="zh_CN" property="og:locale"/>
+<meta content="https://decaday.github.io/blog/images/stc-mcu.jpg" property="og:image"/>
+<meta content="2024-02-05T13:39:20.000Z" property="article:published_time"/>
+<meta content="2024-02-06T03:13:26.542Z" property="article:modified_time"/>
+<meta content="星期十" property="article:author"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="https://decaday.github.io/blog/images/stc-mcu.jpg" name="twitter:image"/>
+<meta content="no-referrer-when-downgrade" name="referrer"/>
+<title>STC-51单片机闲谈 - Decaday</title>
+<link href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" rel="stylesheet">
+<link href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" rel="stylesheet"/>
+<link href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet"/>
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+<link href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css" rel="stylesheet"/>
+<link href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css" rel="stylesheet"/>
+<link href="/blog/css/main.css" rel="stylesheet">
+<link href="/blog/css/highlight.css" id="highlight-css" rel="stylesheet">
+<link href="/blog/css/highlight-dark.css" id="highlight-css-dark" rel="stylesheet"/>
+<script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"decaday.github.io","root":"/blog/","version":"1.9.7","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/blog/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+<script src="/blog/js/utils.js"></script>
+<script src="/blog/js/color-schema.js"></script>
+<meta content="Hexo 7.1.1" name="generator"/></link></link></link></link></head>
+<body>
+<header>
+<div class="header-inner" style="height: 70vh;">
+<nav class="navbar fixed-top navbar-expand-lg navbar-dark scrolling-navbar" id="navbar">
+<div class="container">
+<a class="navbar-brand" href="/blog/">
+<strong>Decaday 星期十的博客</strong>
+</a>
+<button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbarSupportedContent" data-toggle="collapse" id="navbar-toggler-btn" type="button">
+<div class="animated-icon"><span></span><span></span><span></span></div>
+</button>
+<!-- Collapsible content -->
+<div class="collapse navbar-collapse" id="navbarSupportedContent">
+<ul class="navbar-nav ml-auto text-center">
+<li class="nav-item">
+<a class="nav-link" href="/blog/" target="_self">
+<i class="iconfont icon-home-fill"></i>
+<span>首页</span>
+</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="/blog/tags/" target="_self">
+<i class="iconfont icon-tags-fill"></i>
+<span>标签</span>
+</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="/blog/about/" target="_self">
+<i class="iconfont icon-user-fill"></i>
+<span>关于</span>
+</a>
+</li>
+<li class="nav-item" id="search-btn">
+<a aria-label="Search" class="nav-link" data-target="#modalSearch" data-toggle="modal" href="javascript:;" target="_self">
+<i class="iconfont icon-search"></i>
+</a>
+</li>
+<li class="nav-item" id="color-toggle-btn">
+<a aria-label="Color Toggle" class="nav-link" href="javascript:;" target="_self">
+<i class="iconfont icon-dark" id="color-toggle-icon"></i>
+</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<div class="banner" id="banner" parallax="true" style="background: url('/blog/images/stc-mcu.jpg') no-repeat center center; background-size: cover;">
+<div class="full-bg-img">
+<div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+<div class="banner-text text-center fade-in-up">
+<div class="h2">
+<span id="subtitle">STC-51单片机闲谈</span>
+</div>
+<div class="mt-3">
+<span class="post-meta">
+<i aria-hidden="true" class="iconfont icon-date-fill"></i>
+<time datetime="2024-02-05 21:39" pubdate="">
+          2024年2月5日 晚上
+        </time>
+</span>
+</div>
+<div class="mt-1">
+<span class="post-meta mr-2">
+<i class="iconfont icon-chart"></i>
+        
+          1.6k 字
+        
+      </span>
+<span class="post-meta mr-2">
+<i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          14 分钟
+        
+      </span>
+<span id="busuanzi_container_page_pv" style="display: none">
+<i aria-hidden="true" class="iconfont icon-eye"></i>
+<span id="busuanzi_value_page_pv"></span> 次
+        </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<main>
+<div class="container-fluid nopadding-x">
+<div class="row nomargin-x">
+<div class="side-col d-none d-lg-block col-lg-2">
+</div>
+<div class="col-lg-8 nopadding-x-md">
+<div class="container nopadding-x-md" id="board-ctn">
+<div id="board">
+<article class="post-content mx-auto">
+<h1 id="seo-header">STC-51单片机闲谈</h1>
+<p class="note note-info" id="updated-time" style="">
+                
+                  
+                    本文最后更新于 2024年2月6日 上午
+                  
+                
+              </p>
+<div class="markdown-body">
+<h1 id="STC-51单片机闲谈"><a class="headerlink" href="#STC-51单片机闲谈" title="STC-51单片机闲谈"></a>STC-51单片机闲谈</h1><p>STC单片机，这个网站肯定不能不提。（想截个图结果网站访问不了了emm，这网站再我想用的时候崩了不止一次了）</p>
+<p><img alt="STC单片机的网站让我笑喷了" lazyload="" src="/blog/stc8051-talk/v2-ca34692eec39b7513465406a2dde1807_1440w.png" srcset="/blog/img/loading.gif"/></p>
+<p>现在网站恢复了，可惜它不存在了，已经会自动跳转到论坛。找个网图吧，，我记得最后上面这个大绿块已经开始宣传STC32了。</p>
+<p>我记得之前还是合肥宏晶微电子，现在手册和官网（甚至域名）都变成了<strong>深圳国芯人工智能有限公司</strong>，，，8051想破脑袋也想不出来和AI有啥关系。</p>
+<p>STC是做89C52起家的嘛，单片机人谁还没用过STC89C52。后来做了好多1T内核的产品<del>现代</del>8051单片机。</p>
+<h2 id="C51"><a class="headerlink" href="#C51" title="C51"></a>C51</h2><p>我觉得，现在不选择8051单片机的一大理由是，8051无法使用标准C，而只能使用C51或汇编。这一致命缺陷直接决定了移植其它平台单片机C库的困难性，而且有很多语法都用不了。如果不是为了学8051内核只是为了应用层开发，那么去做8051开发，会很耗费精力和麻烦。</p>
+<p>笔者最初也是先接触的51单片机。之后接触esp32，stm32等支持标准C的单片机后，因为某些原因回来开发stc8，移植库用了三个小时，然后做应用层开发出现各种离奇的问题，一个6个项的枚举，仿真硬是给我仿真出来一个0x0A，，，</p>
+<p>刚接触时我的编程能力也欠佳，用Keil开发也没那么不舒服，近日回来，马上改为EIDE+SDCC+VScode、Keil assistant+VScode。</p>
+<p>SDCC虽然有更好的标准C支持，但有个致命缺陷：</p>
+<blockquote>
+<p>The linker sdld does not support function-level linking. The standard library, therefore, uses one source file per function.</p>
+</blockquote>
+<blockquote>
+<p>It is not possible to eliminate the unused function while linking. </p>
+</blockquote>
+<p><strong>无法删除没有链接的函数</strong>！全都塞最终的hex里！用寄存器还好，用库函数的话简直是，，</p>
+<p>KeilC51都有个LX51可以REMOVEUNUSED，，</p>
+<p>现在，我认为，不支持标准C的，gcc或者armclang(LLVM)不支持的单片机，要尽量避开。</p>
+<p>其一是，开发环境单一，必然很不舒服</p>
+<p>其二，开发中又有各种禁忌，出一堆问题发现是单片机不支持标准C导致的；</p>
+<p>其三，这种单片机要么是51，要么是OTP，要么是远古单片机，要么兼备。</p>
+<p>远古单片机的工具链和开发环境，可谓emm。或者技术比较古早的公司，只会用51，你去了不是折磨你。</p>
+<p>前两者，我想引用别人说的一句话：你做的单片机越便宜，你的工资就越低，只有追求极致成本的公司才会选择OTP，必然也压榨你的人力成本。嵌入式行业，不那么追求四五毛成本的产品多了去了。</p>
+<h2 id="STC8"><a class="headerlink" href="#STC8" title="STC8"></a>STC8</h2><p>STC8是一个比较成熟的产品系列了，而且是STC（目前）主推的8位机产品系列，外设也比较丰富。四年前，我用了我人生中第一块8051后就开始用stc8了，用过sop16，tssop20，lqfp32,dfn8，lqfp64，lqfp48等好多块产品。</p>
+<p>体验比较差的是我的STC8H8K64U了，居然是A版本，，A版本的外部中断，RTC等好多地方都有问题，，我怀疑STC的测试是不是义工，还是干脆找网友测试，还是姚老板催的太急了，还是TSMC不给你流片，产品这么大缺陷就直接量产，，（好像0.18um掩膜也没那么贵</p>
+<p>由此也可以体现出STC的实际实力，，</p>
+<h2 id="STC的库"><a class="headerlink" href="#STC的库" title="STC的库"></a>STC的库</h2><p>STC的应用团队没有人会git就算了，就是同一zip包里面，库还不一致，独立例程有一套大差不差但是版本不同的库，，，我用根目录的库，发现缺几个宏，一看，在独立例程里面是有的，，“独立”</p>
+<h2 id="STC-ARM"><a class="headerlink" href="#STC-ARM" title="STC ARM"></a>STC ARM</h2><p>STC ARM的饼，在我最痴迷STC的那段时间（2020左右）就有了，这句话我真的烂熟于心：</p>
+<p><img alt="image-20240205221822525" lazyload="" src="/blog/stc8051-talk/image-20240205221822525.png" srcset="/blog/img/loading.gif"/></p>
+<p>2021年的时候，STC官网还有这几句话：</p>
+<blockquote>
+<p>大量客户提前预付定金，支持 STC 提前抢2023年的产能，确保维持 近16年 现货稳定供应的水平，这是大众心态，都是合理正确思维模式。成本持续上升/要抢，大势所趋，仓中有米，芯不慌，屯够/才是您的/不一定让您屯/只有长期合作的老客户才可以…</p>
+</blockquote>
+<blockquote>
+<p>大批 STC 客户来电，请求 STC 价格适当调整，有底气去抢晶圆，抢封测产能，不要抢不到晶圆，抢不到封测产能，搞成欧美同行 订货 24 - 48 周 还交不了货，最后遭殃的还是用户。大批 STC 客户来电请求 STC MCU 价格合理上浮，积蓄战力，加速 STC 32-BIT M4 MCU 的推出，将 32-BIT MCU的价格拉回合理价位。</p>
+</blockquote>
+<p>后来变成M33，后来变成STAR-MC1</p>
+<p><img alt="image-20240205221935677" lazyload="" src="/blog/stc8051-talk/image-20240205221935677.png" srcset="/blog/img/loading.gif"/></p>
+<p>至于为什么到现在都不出，我问老姚，老姚这么说：</p>
+<p><img alt="image-20240205222240157" lazyload="" src="/blog/stc8051-talk/image-20240205222240157.png" srcset="/blog/img/loading.gif"/></p>
+<p>同一天（2024/1/14）：</p>
+<p><img alt="image-20240205222522791" lazyload="" src="/blog/stc8051-talk/image-20240205222522791.png" srcset="/blog/img/loading.gif"/></p>
+<p>《其实已经设计好了》</p>
+<p><img alt="image-20240205222551410" lazyload="" src="/blog/stc8051-talk/image-20240205222551410.png" srcset="/blog/img/loading.gif"/></p>
+<p>《STC33上面做好的东西都在，往51上移植》</p>
+<p>看来不光我对STC有意见？</p>
+<p><a href="https://www.eet-china.com/mp/a54764.html" rel="noopener" target="_blank">网友：“1年之内，都不要浪费时间在STC新出的ARM-M4”，你同意吗？-电子工程专辑 (eet-china.com)</a></p>
+<h2 id="STC32"><a class="headerlink" href="#STC32" title="STC32"></a>STC32</h2><p>STC32我认为是STC比较奇怪的产品线，因为用的是80251核，是英特尔在1996年推出的，不知道STC为什么沉迷于古老的8051系列内核。</p>
+<p>8051还好，Keil，IAR，SDCC有三个编译器可用，80251就只有Keil C251一个编译器了。STC近几年也忙着摸索80251。说来，我之前申请了STC16的样品，后来这产品线就砍了，，</p>
+<p><img alt="image-20240205222258939" lazyload="" src="/blog/stc8051-talk/image-20240205222258939.png" srcset="/blog/img/loading.gif"/></p>
+<p>另外，STC买了真不少域名啊</p>
+<p>STC新官网：<a href="http://www.stcai.com/" rel="noopener" target="_blank">www.STCAI.com</a></p>
+<p>STC官方论坛：<a href="http://www.stcaimcu.com/" rel="noopener" target="_blank">www.STCAImcu.com</a></p>
+<p>老官网: <a href="http://www.stcmcudata.com/" rel="noopener" target="_blank">www.STCMCUdata.com</a></p>
+<p><a href="WWW.GXWMCU.COM">WWW.GXWMCU.COM</a></p>
+<p><a href="https://www.stcisp.com/" rel="noopener" target="_blank">https://www.stcisp.com/</a> （这个的话不是官方的，但是这风格可谓一脉相传，而且宣传语都是这种风格）</p>
+<h2 id="我的二次入坑"><a class="headerlink" href="#我的二次入坑" title="我的二次入坑"></a>我的二次入坑</h2><p>其实根本原因是这个电路板的电路设计和程序设计差了一年多，那个时候我还没见识到标准C的魅力。有一个项目需要很小的封装，本来想上TSSOP20，后来发现DFN8也刚好够用，就用DFN8了。</p>
+<p><img alt="image-20240206110315181" lazyload="" src="/blog/stc8051-talk/image-20240206110315181.png" srcset="/blog/img/loading.gif"/></p>
+<p>然后，如<a href="C51">C51</a>章节所说的。。</p>
+<p>项目打算重开了，用py32的QFN16/20封装。另外py32的DFN8居然比stc8的还便宜，才7毛，，</p>
+</div>
+<hr/>
+<div>
+<div class="post-metas my-3">
+<div class="post-meta mr-3 d-flex align-items-center">
+<i class="iconfont icon-category"></i>
+<span class="category-chains">
+<span class="category-chain">
+<a class="category-chain-item" href="/blog/categories/%E5%B5%8C%E5%85%A5%E5%BC%8F/">嵌入式</a>
+<span>&gt;</span>
+<a class="category-chain-item" href="/blog/categories/%E5%B5%8C%E5%85%A5%E5%BC%8F/%E9%97%B2%E8%B0%88/">闲谈</a>
+</span>
+</span>
+</div>
+</div>
+<div class="license-box my-3">
+<div class="license-title">
+<div>STC-51单片机闲谈</div>
+<div>https://decaday.github.io/blog/stc8051-talk/</div>
+</div>
+<div class="license-meta">
+<div class="license-meta-item">
+<div>作者</div>
+<div>星期十</div>
+</div>
+<div class="license-meta-item license-meta-date">
+<div>发布于</div>
+<div>2024年2月5日</div>
+</div>
+<div class="license-meta-item license-meta-date">
+<div>更新于</div>
+<div>2024年2月6日</div>
+</div>
+<div class="license-meta-item">
+<div>许可协议</div>
+<div>
+<a class="print-no-link" href="https://creativecommons.org/licenses/by/4.0/" target="_blank">
+<span aria-label="BY - 署名" class="hint--top hint--rounded">
+<i class="iconfont icon-by"></i>
+</span>
+</a>
+</div>
+</div>
+</div>
+<div class="license-icon iconfont"></div>
+</div>
+<div class="post-prevnext my-3">
+<article class="post-prev col-6">
+</article>
+<article class="post-next col-6">
+<a href="/blog/my-2023/" title="my-2023">
+<span class="hidden-mobile">my-2023</span>
+<span class="visible-mobile">下一篇</span>
+<i class="iconfont icon-arrowright"></i>
+</a>
+</article>
+</div>
+</div>
+</article>
+</div>
+</div>
+</div>
+<div class="side-col d-none d-lg-block col-lg-2">
+<aside class="sidebar" style="margin-left: -1rem">
+<div id="toc">
+<p class="toc-header">
+<i class="iconfont icon-list"></i>
+<span>目录</span>
+</p>
+<div class="toc-body" id="toc-body"></div>
+</div>
+</aside>
+</div>
+</div>
+</div>
+<a aria-label="TOP" href="#" id="scroll-top-button" role="button">
+<i aria-hidden="true" class="iconfont icon-arrowup"></i>
+</a>
+<div aria-hidden="true" aria-labelledby="ModalLabel" class="modal fade" id="modalSearch" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+<div class="modal-content">
+<div class="modal-header text-center">
+<h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+<button aria-label="Close" class="close" data-dismiss="modal" id="local-search-close" type="button">
+<span aria-hidden="true">×</span>
+</button>
+</div>
+<div class="modal-body mx-3">
+<div class="md-form mb-5">
+<input class="form-control validate" id="local-search-input" type="text"/>
+<label data-error="x" data-success="v" for="local-search-input">关键词</label>
+</div>
+<div class="list-group" id="local-search-result"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer>
+<div class="footer-inner">
+<div class="footer-content">
+<a href="https://hexo.io" rel="nofollow noopener" target="_blank"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" rel="nofollow noopener" target="_blank"><span>Fluid</span></a>
+</div>
+<div class="statistics">
+<span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+<span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+</div>
+</div>
+</footer>
+<!-- Scripts -->
+<script src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js"></script>
+<link href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet"/>
+<script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+<script src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js"></script>
+<script src="/blog/js/events.js"></script>
+<script src="/blog/js/plugins.js"></script>
+<script src="/blog/js/img-lazyload.js"></script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+<script src="https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js"></script>
+<script>Fluid.plugins.codeWidget();</script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+<script>Fluid.plugins.imageCaption();</script>
+<script src="/blog/js/local-search.js"></script>
+<script defer="" src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script src="/blog/js/boot.js"></script>
+<noscript>
+<div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+</noscript>
+</body>
+</html>
