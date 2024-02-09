@@ -4,6 +4,25 @@
   
   
   <entry>
+    <title>窝逝去的2023</title>
+    <link href="/blog/my-2023/"/>
+    <url>/blog/my-2023/</url>
+    
+    <content type="html"><![CDATA[<p>今天是除夕了。是时候写一写年终总结了。</p><p>我觉得今年是自己称为一名合格的程序员的第一年，因为今年我学了git（，</p><p>既然是除夕才写，那么是应该按照农历来算作一年（</p><h1 id="学"><a href="#学" class="headerlink" title="学"></a>学</h1><p>有些东西本来写了博客，也做了项目，但是后来也没有放在网站上。</p><table><thead><tr><th>学了点系列</th><th>学习方式</th><th>时间</th><th>进度</th></tr></thead><tbody><tr><td>ESP-IDF&#x2F;ADF</td><td>实战练习、文档</td><td>2023年初</td><td>学得差不多</td></tr><tr><td>Git的使用</td><td>文档，练习</td><td>2023年初</td><td>差不多会用了</td></tr><tr><td>线性代数</td><td>同济《线性代数》，3b1b视频</td><td>2023.5-2.23.6</td><td>读完</td></tr><tr><td>Python进阶</td><td>《python100days》选读打印、维护项目</td><td>2023.8</td><td>部分文章读完</td></tr><tr><td>Soildworks</td><td>B站课程，充电宝外壳练习</td><td>2023.8-2023.10</td><td>看完课程</td></tr><tr><td>stm32 HAL开发</td><td>读《STM32库开发实战指南》(标准库，略读) <br/>选印《野火HAL库开发指南》<br/>工程练习</td><td>2023.9-2023.11</td><td>差不多</td></tr><tr><td>单片机C进阶</td><td>读MultiButton等项目源码，练习</td><td>2023.10-2023.11</td><td>提高水平</td></tr></tbody></table><table><thead><tr><th>正在学系列</th><th>学习方式</th><th>时间</th><th>进度</th></tr></thead><tbody><tr><td>Rust</td><td>读Rust语言圣经（打印）</td><td>2023.7，2023.11-至今</td><td>学完第一部分</td></tr><tr><td>Godot</td><td>看英文文档</td><td>2024.2-至今</td><td>学了几天</td></tr><tr><td>Rust嵌入式</td><td>读embedded rust book等，了解Rust嵌入式开源项目</td><td>2023.11-至今</td><td>看完了book，看了一些项目</td></tr></tbody></table><table><thead><tr><th>弃坑系列</th><th>学习方式</th><th>时间</th><th>进度</th></tr></thead><tbody><tr><td>PyTorch深度学习</td><td>《PyTorch深度学习实战》实体书</td><td>2023.4-2023.6</td><td>读了刚好一半</td></tr><tr><td>Scala</td><td>《Scala函数式编程》实体书，Scala中文文档打印</td><td>2023.9</td><td>读了不到一半</td></tr><tr><td>Arduino</td><td>UinIO.com博客打印</td><td>2023.9</td><td>读完未使用</td></tr></tbody></table><p>主要是学了STM32，能开发最主流的通用单片机了，之前我只会51和esp32（IDF）。</p><p>然后学了Soildworks，终于有了3D建模能力。</p><p>Rust学了一部分，里面的概念还真是抽象。我在今年之前连面对对象都接触的少，学rust起初很吃力。</p><p>我感觉我是比较喜欢rust这种比较严格的语言，因为很多地方不会为了怎么写而纠结太多。举例，c语言做嵌入式，有人用<code>uint8</code>，有人用<code>uint8_t</code>（这个是在c标准库里面的定义）,有人用<code>unsigned char</code>，就很难受。而且项目结构各家也不同，也没包管理，也没一套通用嵌入式库规范（Arduino除外），是真难受。</p><p>rust嵌入式的轮子还远远不够，现在还是基础功能还好，想用高级功能必须有很高的rust水平才行，因为轮子都处于建设阶段。</p><p>我发现一个现象，就是初看怎么也不理解的概念，隔几天再看就完全明白了，比如rust的特征对象，生命周期标注，线代里的很多概念等。</p><h1 id="读书"><a href="#读书" class="headerlink" title="读书"></a>读书</h1><p>今年读了四十多本书，确实达到目标了，其实有段时间我自己都忘了目标是多少，25？40？</p><p>明年不会再定目标了，因为一有目标，读一些没那么吸引人的书，就容易只关注页码，只想刷KPI了。</p><table><thead><tr><th>作者</th><th>书名</th><th>读完日期</th><th>备注</th></tr></thead><tbody><tr><td>蒋廷黻</td><td>《中国近代史》</td><td>23.2.13</td><td></td></tr><tr><td>张嘉佳</td><td>《天堂旅方行团》</td><td>23.2.16</td><td></td></tr><tr><td>博文视点</td><td>《21天学通C语言》</td><td>23.2.17</td><td>不推荐</td></tr><tr><td>迪莉娅·欧文斯</td><td>《蝲蛄吟唱的地方》</td><td>23.2.23</td><td>推荐</td></tr><tr><td>鲁迅</td><td>《呐喊》</td><td>23.3.2</td><td></td></tr><tr><td>鲁迅</td><td>《彷徨》</td><td>23.3.10</td><td></td></tr><tr><td>鲁迅</td><td>《热风》</td><td>23.3.16</td><td>推荐</td></tr><tr><td>费孝通</td><td>《乡土中国》</td><td>23.3.18</td><td></td></tr><tr><td>张宏杰</td><td>《坐天下很累》</td><td>23.3.25</td><td></td></tr><tr><td>加西亚·马尔克斯</td><td>《百年孤独》</td><td>23.4.19</td><td></td></tr><tr><td>丹·布朗</td><td>《达芬奇密码》</td><td>23.4.27</td><td></td></tr><tr><td>吴思</td><td>《潜规则一中国历史中的真实游戏》</td><td>23.5.16</td><td></td></tr><tr><td>哈珀·李</td><td>《杀死一只知更鸟》</td><td>23.5.27</td><td>推荐</td></tr><tr><td>同济大学数学系</td><td>《线性代数》第六版</td><td>23.6.24</td><td></td></tr><tr><td>宫泽贤治</td><td>《银河铁道之夜》</td><td>23.6.30</td><td></td></tr><tr><td>唐小兵</td><td>《北美学踪：从温哥华到波士顿》</td><td>23.7.3</td><td>比较推荐</td></tr><tr><td>村上春树</td><td>《且听风吟》</td><td>23.7.30</td><td></td></tr><tr><td>余华</td><td>《没有一条道路是重复的》</td><td>23.8.8</td><td>推荐</td></tr><tr><td>章小东</td><td>《吃饭》</td><td>23.8.14</td><td></td></tr><tr><td>钱锺书</td><td>《围城》</td><td>23.8.21</td><td></td></tr><tr><td>Enic R. Kandel</td><td>《追寻记忆的痕迹》</td><td>23.9.4</td><td>推荐</td></tr><tr><td>高建群</td><td>《最后一个匈奴》</td><td>23.9.14</td><td></td></tr><tr><td>章小东</td><td>《小狮子》</td><td>23.9.20</td><td></td></tr><tr><td>冯骥才</td><td>《俗世奇人》</td><td>23.9.26</td><td></td></tr><tr><td>马国川</td><td>《我与八十年代》</td><td>23.10.20</td><td>推荐</td></tr><tr><td>余华</td><td>《没有一条道路是重复的》重读</td><td>2023.10.25</td><td></td></tr><tr><td>刘火良 杨森</td><td>《STM32库开发实战指南》略读</td><td>2023.10.27</td><td>过时</td></tr><tr><td>彼得·海斯勒</td><td>《江城》</td><td>2023.10.27</td><td>不太推荐</td></tr><tr><td>杨绛</td><td>《我们仨》</td><td>2023.10.31</td><td>推荐</td></tr><tr><td>汪曾祺</td><td>《受戒》（包括《受戒》、《大淖记事》、《聊斋新义》三辑）</td><td>2023.11.9</td><td>推荐</td></tr><tr><td>东野圭吾</td><td>《白夜行》</td><td>2023.11.27</td><td></td></tr><tr><td>莫言</td><td>《生死疲劳》</td><td>2023.11.30</td><td>不推荐</td></tr><tr><td>冯骥才</td><td>《俗世奇人 贰》</td><td>2023.12.7</td><td></td></tr><tr><td>卡勒德·胡赛尼</td><td>《灿烂千阳》</td><td>2023.12.21</td><td></td></tr><tr><td>野火</td><td>《STM32 HAL库开发指南》开源书籍打印选读</td><td>2023.12.26</td><td>强烈不推荐</td></tr><tr><td>贾平凹</td><td>《自在独行》</td><td>2023.12.27</td><td></td></tr><tr><td>邓贤</td><td>《父亲的一九四二》</td><td>2024.1.4</td><td>推荐</td></tr><tr><td>加西亚·马尔克斯</td><td>《世上最美的溺水者》</td><td>2024.1.11</td><td></td></tr><tr><td>余华</td><td>《余华作品集 I》</td><td>2024.1.24</td><td></td></tr><tr><td>加西亚·马尔克斯</td><td>《星期二午睡时刻》两遍</td><td>2024.1.25</td><td></td></tr><tr><td>海伦·凯勒</td><td>《假如给我三天光明》</td><td>2024.1.31</td><td>译本有问题</td></tr></tbody></table><h1 id="明年"><a href="#明年" class="headerlink" title="明年"></a>明年</h1><p>希望明年能把乒乓球学会。</p><p>希望明年开开心心的，每天都很有精神。</p>]]></content>
+    
+    
+    
+    <tags>
+      
+      <tag>年终总结</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>PY32F0系列CMake开发环境配置(PY32F030,PY32F002...)</title>
     <link href="/blog/py32f0-cmake/"/>
     <url>/blog/py32f0-cmake/</url>
@@ -40,25 +59,6 @@
       
     </categories>
     
-    
-  </entry>
-  
-  
-  
-  <entry>
-    <title>my-2023</title>
-    <link href="/blog/my-2023/"/>
-    <url>/blog/my-2023/</url>
-    
-    <content type="html"><![CDATA[]]></content>
-    
-    
-    
-    <tags>
-      
-      <tag>年终总结</tag>
-      
-    </tags>
     
   </entry>
   
