@@ -1,0 +1,448 @@
+
+<!DOCTYPE html>
+
+<html data-default-color-scheme="auto" lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<link href="/blog/img/favicon.jpg" rel="apple-touch-icon" sizes="76x76"/>
+<link href="/blog/img/favicon.jpg" rel="icon"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no" name="viewport"/>
+<meta content="ie=edge" http-equiv="x-ua-compatible"/>
+<meta content="#2f4154" name="theme-color"/>
+<meta content="星期十" name="author"/>
+<meta content="" name="keywords"/>
+<meta content="这是一个使用lvgl/lv_binding_rust使用Rust开发lvgl的尝试。 相比于slint要求的300KB ram，Lvgl只要求最低16K，因此它在嵌入式的地位目前还是无法取代的。 那么，开始吧！ 编译构建Lvgl-RustStep1.准备工作1.Ubuntu或者任意linux桌面环境，WSL也可，我使用的是Ubuntu20.04 为什么非得Linux呢？如果你想节省一个下" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="编译构建Lvgl-Rust，用rust开发Lvgl" property="og:title"/>
+<meta content="https://decaday.github.io/blog/lvgl-rust-build/index.html" property="og:url"/>
+<meta content="Decaday" property="og:site_name"/>
+<meta content="这是一个使用lvgl/lv_binding_rust使用Rust开发lvgl的尝试。 相比于slint要求的300KB ram，Lvgl只要求最低16K，因此它在嵌入式的地位目前还是无法取代的。 那么，开始吧！ 编译构建Lvgl-RustStep1.准备工作1.Ubuntu或者任意linux桌面环境，WSL也可，我使用的是Ubuntu20.04 为什么非得Linux呢？如果你想节省一个下" property="og:description"/>
+<meta content="zh_CN" property="og:locale"/>
+<meta content="https://decaday.github.io/blog/images/lvgl-rust-demo.png" property="og:image"/>
+<meta content="2024-02-11T14:51:34.256Z" property="article:published_time"/>
+<meta content="2024-02-11T17:08:49.949Z" property="article:modified_time"/>
+<meta content="星期十" property="article:author"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="https://decaday.github.io/blog/images/lvgl-rust-demo.png" name="twitter:image"/>
+<meta content="no-referrer-when-downgrade" name="referrer"/>
+<title>编译构建Lvgl-Rust，用rust开发Lvgl - Decaday</title>
+<link href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" rel="stylesheet">
+<link href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" rel="stylesheet"/>
+<link href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet"/>
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+<link href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css" rel="stylesheet"/>
+<link href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css" rel="stylesheet"/>
+<link href="/blog/css/main.css" rel="stylesheet">
+<link href="/blog/css/highlight.css" id="highlight-css" rel="stylesheet">
+<link href="/blog/css/highlight-dark.css" id="highlight-css-dark" rel="stylesheet"/>
+<script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"decaday.github.io","root":"/blog/","version":"1.9.7","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/blog/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+<script src="/blog/js/utils.js"></script>
+<script src="/blog/js/color-schema.js"></script>
+<meta content="Hexo 7.1.1" name="generator"/></link></link></link></link></head>
+<body>
+<header>
+<div class="header-inner" style="height: 70vh;">
+<nav class="navbar fixed-top navbar-expand-lg navbar-dark scrolling-navbar" id="navbar">
+<div class="container">
+<a class="navbar-brand" href="/blog/">
+<strong>Decaday 星期十的博客</strong>
+</a>
+<button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbarSupportedContent" data-toggle="collapse" id="navbar-toggler-btn" type="button">
+<div class="animated-icon"><span></span><span></span><span></span></div>
+</button>
+<!-- Collapsible content -->
+<div class="collapse navbar-collapse" id="navbarSupportedContent">
+<ul class="navbar-nav ml-auto text-center">
+<li class="nav-item">
+<a class="nav-link" href="/blog/" target="_self">
+<i class="iconfont icon-home-fill"></i>
+<span>首页</span>
+</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="/blog/tags/" target="_self">
+<i class="iconfont icon-tags-fill"></i>
+<span>标签</span>
+</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="/blog/about/" target="_self">
+<i class="iconfont icon-user-fill"></i>
+<span>关于</span>
+</a>
+</li>
+<li class="nav-item" id="search-btn">
+<a aria-label="Search" class="nav-link" data-target="#modalSearch" data-toggle="modal" href="javascript:;" target="_self">
+<i class="iconfont icon-search"></i>
+</a>
+</li>
+<li class="nav-item" id="color-toggle-btn">
+<a aria-label="Color Toggle" class="nav-link" href="javascript:;" target="_self">
+<i class="iconfont icon-dark" id="color-toggle-icon"></i>
+</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<div class="banner" id="banner" parallax="true" style="background: url('/blog/images/lvgl-rust-demo.png') no-repeat center center; background-size: cover;">
+<div class="full-bg-img">
+<div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+<div class="banner-text text-center fade-in-up">
+<div class="h2">
+<span id="subtitle">编译构建Lvgl-Rust，用rust开发Lvgl</span>
+</div>
+<div class="mt-3">
+<span class="post-meta">
+<i aria-hidden="true" class="iconfont icon-date-fill"></i>
+<time datetime="2024-02-11 22:51" pubdate="">
+          2024年2月11日 晚上
+        </time>
+</span>
+</div>
+<div class="mt-1">
+<span class="post-meta mr-2">
+<i class="iconfont icon-chart"></i>
+        
+          1.5k 字
+        
+      </span>
+<span class="post-meta mr-2">
+<i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          13 分钟
+        
+      </span>
+<span id="busuanzi_container_page_pv" style="display: none">
+<i aria-hidden="true" class="iconfont icon-eye"></i>
+<span id="busuanzi_value_page_pv"></span> 次
+        </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<main>
+<div class="container-fluid nopadding-x">
+<div class="row nomargin-x">
+<div class="side-col d-none d-lg-block col-lg-2">
+</div>
+<div class="col-lg-8 nopadding-x-md">
+<div class="container nopadding-x-md" id="board-ctn">
+<div id="board">
+<article class="post-content mx-auto">
+<h1 id="seo-header">编译构建Lvgl-Rust，用rust开发Lvgl</h1>
+<p class="note note-info" id="updated-time" style="">
+                
+                  
+                    本文最后更新于 2024年2月12日 凌晨
+                  
+                
+              </p>
+<div class="markdown-body">
+<p>这是一个使用<a href="https://github.com/lvgl/lv_binding_rust" rel="noopener" target="_blank">lvgl/lv_binding_rust</a>使用Rust开发lvgl的尝试。</p>
+<p>相比于slint要求的300KB ram，Lvgl只要求最低16K，因此它在嵌入式的地位目前还是无法取代的。</p>
+<p>那么，开始吧！</p>
+<h1 id="编译构建Lvgl-Rust"><a class="headerlink" href="#编译构建Lvgl-Rust" title="编译构建Lvgl-Rust"></a>编译构建Lvgl-Rust</h1><h2 id="Step1-准备工作"><a class="headerlink" href="#Step1-准备工作" title="Step1.准备工作"></a>Step1.准备工作</h2><p>1.Ubuntu或者任意linux桌面环境，WSL也可，我使用的是Ubuntu20.04</p>
+<p>为什么非得Linux呢？如果你想节省一个下午，那就装一个Linux吧！<a href="https://github.com/lvgl/lv_binding_rust" rel="noopener" target="_blank">lvgl/lv_binding_rust</a>项目的setup根本没有为Windows考虑，在Windows上用SDL跑通模拟器也相当麻烦！除非你有足够的能力，否则不要使用Windows。Mac倒可以尝试，本文不涉及。</p>
+<p>2.VSCode，rust analyser插件等</p>
+<p>3.良好的网络环境，可以方便地使用github</p>
+<p>3.git和使用git的能力</p>
+<h2 id="Step2-跑通embedded-graphics"><a class="headerlink" href="#Step2-跑通embedded-graphics" title="Step2.跑通embedded-graphics"></a>Step2.跑通embedded-graphics</h2><p>Lvgl底层使用embedded-graphics，无论是模拟器还是屏幕。所以先跑通embedded-graphics能省去排查问题的时间。这里先跑通模拟器。</p>
+<p><a href="https://github.com/embedded-graphics/embedded-graphics" rel="noopener" target="_blank">embedded-graphics/embedded-graphics: A no_std graphics library for embedded applications</a></p>
+<p>模拟器：</p>
+<p><a href="https://github.com/embedded-graphics/simulator" rel="noopener" target="_blank">embedded-graphics/simulator</a></p>
+<h3 id="配置SDL"><a class="headerlink" href="#配置SDL" title="配置SDL"></a>配置SDL</h3><h4 id="Linux-apt"><a class="headerlink" href="#Linux-apt" title="Linux (apt)"></a>Linux (<code>apt</code>)</h4><figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br/></pre></td><td class="code"><pre><code class="hljs cmake">sudo apt <span class="hljs-keyword">install</span> libsdl2-dev<br/></code></pre></td></tr></table></figure>
+<h4 id="macOS-brew"><a class="headerlink" href="#macOS-brew" title="macOS (brew)"></a>macOS (<code>brew</code>)</h4><figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br/></pre></td><td class="code"><pre><code class="hljs mipsasm"><span class="hljs-keyword">brew </span><span class="hljs-keyword">install </span>sdl2<br/></code></pre></td></tr></table></figure>
+<p>使用 Apple 芯片或自定义安装目录的用户需要设置 LIBRARY_PATH，以便链接器找到已安装的 SDL2 包：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br/></pre></td><td class="code"><pre><code class="hljs routeros"><span class="hljs-built_in">export</span> <span class="hljs-attribute">LIBRARY_PATH</span>=<span class="hljs-string">"<span class="hljs-variable">$LIBRARY_PATH</span>:<span class="hljs-variable">$(brew --prefix)</span>/lib"</span><br/></code></pre></td></tr></table></figure>
+<p> 更多信息: <a href="https://github.com/Rust-SDL2/rust-sdl2#homebrew" rel="noopener" target="_blank">SDL2 documentation</a>.</p>
+<h4 id="Windows"><a class="headerlink" href="#Windows" title="Windows"></a>Windows</h4><p>如果你只想跑embedded-graphics，可以尝试。Windows 的安装过程比较复杂，但是确实可以。请参阅  <a href="https://github.com/Rust-SDL2/rust-sdl2" rel="noopener" target="_blank">the Rust-SDL2 crate’s README</a>以获取说明。有多种方法可以使它工作，但可能最简单的方法是按照<a href="https://github.com/Rust-SDL2/rust-sdl2#windows-msvc" rel="noopener" target="_blank">这里</a>所示的复制二进制文件。</p>
+<h3 id="尝试运行"><a class="headerlink" href="#尝试运行" title="尝试运行"></a>尝试运行</h3><p>配置好后，我们克隆工程到本地：</p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br/></pre></td><td class="code"><pre><code class="hljs crmsh">git <span class="hljs-keyword">clone</span> <span class="hljs-title">https</span>://github.com/embedded-graphics/examples.git<br/></code></pre></td></tr></table></figure>
+<p>然后用Vscode打开这个目录下的<code>examples/eg-07</code></p>
+<p>![2024-02-11 23-45-56](lvgl-rust-build/2024-02-11 23-45-56.png)</p>
+<p>命令行运行cargo run –example demo-analog-clock，也可以直接在vscode里面运行这个main，查看是否能出来模拟界面。</p>
+<img alt="2024-02-11 23-47-54" lazyload="" src="2024-02-11 23-47-54.png" srcset="/blog/img/loading.gif" style="zoom:50%;"/>
+<p>如果不行，请按照log来排查再进行下一步。</p>
+<h2 id="Step3-跑通Lvgl-Rust"><a class="headerlink" href="#Step3-跑通Lvgl-Rust" title="Step3.跑通Lvgl-Rust"></a>Step3.跑通Lvgl-Rust</h2><p>此篇建议参考readme：<a href="https://github.com/lvgl/lv_binding_rust" rel="noopener" target="_blank">lvgl/lv_binding_rust</a></p>
+<h3 id="搭建工程"><a class="headerlink" href="#搭建工程" title="搭建工程"></a>搭建工程</h3><p>cargo new一个项目。Cargo.toml依赖如下</p>
+<figure class="highlight toml"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/></pre></td><td class="code"><pre><code class="hljs toml"><span class="hljs-section">[dependencies]</span><br/><span class="hljs-attr">lvgl</span> = { version = <span class="hljs-string">"0.6.2"</span>, features = [<span class="hljs-string">"alloc"</span>] }<br/><span class="hljs-attr">lvgl-sys</span> = <span class="hljs-string">"0.6.2"</span><br/><span class="hljs-attr">cty</span> = <span class="hljs-string">"0.2.2"</span><br/><span class="hljs-attr">embedded-graphics</span> = <span class="hljs-string">"0.7.1"</span><br/><span class="hljs-attr">cstr_core</span> = { version = <span class="hljs-string">"0.2.6"</span>, default-features = <span class="hljs-literal">false</span>, features = [<span class="hljs-string">"alloc"</span>] }<br/><span class="hljs-attr">bitflags</span> = <span class="hljs-string">"2.3.2"</span><br/><span class="hljs-attr">paste</span> = <span class="hljs-string">"1.0.12"</span><br/><span class="hljs-attr">ctor</span> = <span class="hljs-string">"0.2.2"</span><br/><span class="hljs-attr">embedded-graphics-simulator</span> = <span class="hljs-string">"0.3.0"</span><br/></code></pre></td></tr></table></figure>
+<p>（我这里使用的是0.6.2，请注意你的版本，截止至2024年2月，该项目已有10个月没有新release，3个月没有人维护。）</p>
+<p>在<a href="https://github.com/lvgl/lv_binding_rust/releases/tag/0.6.2" rel="noopener" target="_blank">Release Release 0.6.2</a>这里下载source code压缩包，将里面的<code>demo.rs</code>代码复制到<code>main.rs</code>。</p>
+<p>建立include文件夹，将压缩包里的examples/include文件夹的文件复制过来，这是lv_conf，和c语言配置LVGL是一样的，但是注意修改完后要<strong>重新编译这个crate</strong>或者全部重新编译，它并不会识别这文件的变更。否则修改无效。</p>
+<p>建立fonts文件夹，把压缩包里的fonts复制过来。</p>
+<p>lvgl建议开启<code>alloc</code> featue,这样才能使用<code>label.set_text(CString::new("Loading...")</code></p>
+<p>但是否使用lvgl_alloc看君习惯，这是lvgl内部实现的堆内存管理器。</p>
+<h3 id="编译"><a class="headerlink" href="#编译" title="编译"></a>编译</h3><p>安装Clang</p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br/></pre></td><td class="code"><pre><code class="hljs mipsasm">sudo apt <span class="hljs-keyword">install </span><span class="hljs-keyword">build-essential </span><span class="hljs-keyword">llvm </span>clang<br/></code></pre></td></tr></table></figure>
+<p>构建需要设置以下环境变量： </p>
+<p>DEP_LV_CONFIG_PATH：包含用于配置 LVGL 库的 lv_conf.h 头文件的目录路径。 </p>
+<p>（可选）LVGL_FONTS_DIR：生成用于 LVGL 的自定义字体的目录。 使用方法请参阅文档。 </p>
+<p>（可选）LVGL_INCLUDE：如果使用驱动程序功能，则在构建期间包含的 C 头文件，以逗号分隔。 默认为/usr/include、/usr/local/include。 </p>
+<p>（可选）LVGL_LINK：如果使用驱动程序功能，则在构建期间链接的 C 库，以逗号分隔。 默认为 SDL2。</p>
+<p>编译命令：</p>
+<figure class="highlight autohotkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br/></pre></td><td class="code"><pre><code class="hljs autohotkey">DEP_LV_CONFIG_PATH=`pwd`/xxx/xxx cargo build<br/></code></pre></td></tr></table></figure>
+<h3 id="rust-analyzer插件"><a class="headerlink" href="#rust-analyzer插件" title="rust-analyzer插件"></a>rust-analyzer插件</h3><p>按照上面的进行，rust语法提示是加载不出来的，下面的状态栏的rust-analyzer服务还是个错误，接下来我们解决插件的问题。</p>
+<p>进入settings，找到rust-analyzer插件。点击<code>Edit in settings.json</code></p>
+<img alt="2024-02-11 23-52-26" lazyload="" src="2024-02-11 23-52-26.png" srcset="/blog/img/loading.gif" style="zoom:80%;"/>
+<p><code>settings.json</code>中我们要设置环境变量，因为我没找到这些环境变量执行命令时是在哪个目录（似乎不是项目根目录），而且<code>settings.json</code>也是在插件下的而不是项目下的，我暂且使用绝对路径。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/><span class="line">12</span><br/><span class="line">13</span><br/><span class="line">14</span><br/><span class="line">15</span><br/><span class="line">16</span><br/><span class="line">17</span><br/><span class="line">18</span><br/><span class="line">19</span><br/><span class="line">20</span><br/><span class="line">21</span><br/></pre></td><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">{</span><br/>    <span class="hljs-attr">"editor.fontSize"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">20</span><span class="hljs-punctuation">,</span><br/>    <span class="hljs-attr">"rust-analyzer.cargo.extraEnv"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><br/>        <span class="hljs-attr">"DEP_LV_CONFIG_PATH"</span><span class="hljs-punctuation">:</span><span class="hljs-string">"/home/your_user_name/path/to/your/dir/include"</span><span class="hljs-punctuation">,</span><br/>        <span class="hljs-attr">"LVGL_FONTS_DIR"</span><span class="hljs-punctuation">:</span><span class="hljs-string">"/home/your_user_name/path/to/your/dir/fonts"</span><br/>    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span><br/>    <span class="hljs-attr">"rust-analyzer.runnables.extraEnv"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><br/>        <span class="hljs-attr">"DEP_LV_CONFIG_PATH"</span><span class="hljs-punctuation">:</span><span class="hljs-string">"/home/your_user_name/path/to/your/dir/include"</span><span class="hljs-punctuation">,</span><br/>        <span class="hljs-attr">"LVGL_FONTS_DIR"</span><span class="hljs-punctuation">:</span><span class="hljs-string">"/home/your_user_name/path/to/your/dir/fonts"</span><br/>    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span><br/>    <span class="hljs-attr">"rust-analyzer.check.extraEnv"</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><br/>        <span class="hljs-attr">"DEP_LV_CONFIG_PATH"</span><span class="hljs-punctuation">:</span><span class="hljs-string">"/home/your_user_name/path/to/your/dir/include"</span><span class="hljs-punctuation">,</span><br/>        <span class="hljs-attr">"LVGL_FONTS_DIR"</span><span class="hljs-punctuation">:</span><span class="hljs-string">"/home/your_user_name/path/to/your/dir/fonts</span><br/><span class="hljs-string">    },</span><br/><span class="hljs-string">    "</span>rust-analyzer.server.extraEnv<span class="hljs-string">": {</span><br/><span class="hljs-string">        "</span>DEP_LV_CONFIG_PATH<span class="hljs-string">":"</span>/home/your_user_name/path/to/your/dir/include<span class="hljs-string">",</span><br/><span class="hljs-string">        "</span>LVGL_FONTS_DIR<span class="hljs-string">":"</span>/home/your_user_name/path/to/your/dir/fonts<span class="hljs-string">"</span><br/><span class="hljs-string">    },</span><br/><span class="hljs-string">    "</span>diffEditor.hideUnchangedRegions.enabled<span class="hljs-string">": true,</span><br/><span class="hljs-string">    "</span>cmake.configureOnOpen<span class="hljs-string">": false</span><br/><span class="hljs-string">}</span><br/></code></pre></td></tr></table></figure>
+<p>然后稍等一会等插件加载好，就有代码提示和run啦！点击run，成功！</p>
+<p><img alt="2024-02-12 00-10-48" lazyload="" src="/blog/../images/lvgl-rust-demo.png" srcset="/blog/img/loading.gif"/></p>
+<p>再跑个example <code>bar</code> ：</p>
+<p>![2024-02-12 00-21-11](lvgl-rust-build/2024-02-12 00-21-11.png)</p>
+<p>另外，用lvgl内置字体需开启nightly feature。</p>
+<h2 id="Step4-嵌入式环境"><a class="headerlink" href="#Step4-嵌入式环境" title="Step4.嵌入式环境"></a>Step4.嵌入式环境</h2><p><a href="https://github.com/lvgl/lv_binding_rust" rel="noopener" target="_blank">lvgl/lv_binding_rust</a>有这么个内容：</p>
+<blockquote>
+<p>我们在构建时使用 <code>bindgen</code> 来生成 LittleVGL 的绑定。在为 no_std 构建时，cargo 有一个问题，所以我们需要使用一个变通方法来构建 <code>lvgl-rs</code>。该问题正在<a href="https://github.com/rust-lang/cargo/issues/7915" rel="noopener" target="_blank">rust-lang/cargo#7915</a>跟踪。</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br/></pre></td><td class="code"><pre><code class="hljs routeros"><span class="hljs-attribute">DEP_LV_CONFIG_PATH</span>=`pwd` cargo build <span class="hljs-attribute">-Zfeatures</span>=build_dep<br/></code></pre></td></tr></table></figure>
+<p><code>unsafe_no_autoinit</code> 特性也必须在为裸机目标构建时启用。请参阅 Cargo.toml 中的文档以了解使用说明。</p>
+</blockquote>
+<p>原文：</p>
+<blockquote>
+<p>We make use of <code>bindgen</code> for generating the bindings to LittlevGL at build time. There is a problem in cargo when building for <code>no_std</code>, so we need to use a workaround to build “lvgl-rs”. The mainstrem issue in cargo is being tracked at <a href="https://github.com/rust-lang/cargo/issues/7915" rel="noopener" target="_blank">rust-lang/cargo#7915</a>.</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br/></pre></td><td class="code"><pre><code class="hljs routeros">$ <span class="hljs-attribute">DEP_LV_CONFIG_PATH</span>=`pwd` cargo build <span class="hljs-attribute">-Zfeatures</span>=build_dep<br/></code></pre></td></tr></table></figure>
+<p>The <code>unsafe_no_autoinit</code> feature must also be enabled when building for baremetal targets. See its documentation in <code>Cargo.toml</code> for notes on usage.</p>
+</blockquote>
+<h1 id="其它"><a class="headerlink" href="#其它" title="其它"></a>其它</h1><p>截止至2024年2月，该项目已有10个月没有新release（最新release版本为0.6.2），3个月没有人维护了。</p>
+<p>master分支可能因为正在施工，我这边尝试编译失败了，看起来像是一些东西还正在修改。</p>
+<p><img alt="image-20240212010615191" lazyload="" src="/blog/lvgl-rust-build/image-20240212010615191.png" srcset="/blog/img/loading.gif"/></p>
+<p>但是现在实现的Features也差不多了，主要是lv_fs没有实现，没法显示图片。目前似乎只能让lvgl和embedded-graphics分管不同的界面，来达到更好的效果。</p>
+</div>
+<hr/>
+<div>
+<div class="post-metas my-3">
+<div class="post-meta mr-3 d-flex align-items-center">
+<i class="iconfont icon-category"></i>
+<span class="category-chains">
+<span class="category-chain">
+<a class="category-chain-item" href="/blog/categories/rust/">rust</a>
+<span>&gt;</span>
+<a class="category-chain-item" href="/blog/categories/rust/%E5%B5%8C%E5%85%A5%E5%BC%8F/">嵌入式</a>
+</span>
+</span>
+</div>
+</div>
+<div class="license-box my-3">
+<div class="license-title">
+<div>编译构建Lvgl-Rust，用rust开发Lvgl</div>
+<div>https://decaday.github.io/blog/lvgl-rust-build/</div>
+</div>
+<div class="license-meta">
+<div class="license-meta-item">
+<div>作者</div>
+<div>星期十</div>
+</div>
+<div class="license-meta-item license-meta-date">
+<div>发布于</div>
+<div>2024年2月11日</div>
+</div>
+<div class="license-meta-item license-meta-date">
+<div>更新于</div>
+<div>2024年2月12日</div>
+</div>
+<div class="license-meta-item">
+<div>许可协议</div>
+<div>
+<a class="print-no-link" href="https://creativecommons.org/licenses/by/4.0/" target="_blank">
+<span aria-label="BY - 署名" class="hint--top hint--rounded">
+<i class="iconfont icon-by"></i>
+</span>
+</a>
+</div>
+</div>
+</div>
+<div class="license-icon iconfont"></div>
+</div>
+<div class="post-prevnext my-3">
+<article class="post-prev col-6">
+</article>
+<article class="post-next col-6">
+<a href="/blog/my-2023/" title="窝逝去的2023">
+<span class="hidden-mobile">窝逝去的2023</span>
+<span class="visible-mobile">下一篇</span>
+<i class="iconfont icon-arrowright"></i>
+</a>
+</article>
+</div>
+</div>
+</article>
+</div>
+</div>
+</div>
+<div class="side-col d-none d-lg-block col-lg-2">
+<aside class="sidebar" style="margin-left: -1rem">
+<div id="toc">
+<p class="toc-header">
+<i class="iconfont icon-list"></i>
+<span>目录</span>
+</p>
+<div class="toc-body" id="toc-body"></div>
+</div>
+</aside>
+</div>
+</div>
+</div>
+<a aria-label="TOP" href="#" id="scroll-top-button" role="button">
+<i aria-hidden="true" class="iconfont icon-arrowup"></i>
+</a>
+<div aria-hidden="true" aria-labelledby="ModalLabel" class="modal fade" id="modalSearch" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+<div class="modal-content">
+<div class="modal-header text-center">
+<h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+<button aria-label="Close" class="close" data-dismiss="modal" id="local-search-close" type="button">
+<span aria-hidden="true">×</span>
+</button>
+</div>
+<div class="modal-body mx-3">
+<div class="md-form mb-5">
+<input class="form-control validate" id="local-search-input" type="text"/>
+<label data-error="x" data-success="v" for="local-search-input">关键词</label>
+</div>
+<div class="list-group" id="local-search-result"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer>
+<div class="footer-inner">
+<div class="footer-content">
+<a href="https://hexo.io" rel="nofollow noopener" target="_blank"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" rel="nofollow noopener" target="_blank"><span>Fluid</span></a>
+</div>
+<div class="statistics">
+<span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+<span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+</div>
+</div>
+</footer>
+<!-- Scripts -->
+<script src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js"></script>
+<link href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet"/>
+<script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+<script src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js"></script>
+<script src="/blog/js/events.js"></script>
+<script src="/blog/js/plugins.js"></script>
+<script src="/blog/js/img-lazyload.js"></script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+<script src="https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js"></script>
+<script>Fluid.plugins.codeWidget();</script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+<script>Fluid.plugins.imageCaption();</script>
+<script src="/blog/js/local-search.js"></script>
+<script defer="" src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script src="/blog/js/boot.js"></script>
+<noscript>
+<div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+</noscript>
+</body>
+</html>
