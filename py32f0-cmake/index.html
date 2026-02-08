@@ -1,0 +1,467 @@
+
+<!DOCTYPE html>
+
+<html data-default-color-scheme="auto" lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<link href="/blog/img/favicon.jpg" rel="apple-touch-icon" sizes="76x76"/>
+<link href="/blog/img/favicon.jpg" rel="icon"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no" name="viewport"/>
+<meta content="ie=edge" http-equiv="x-ua-compatible"/>
+<meta content="#2f4154" name="theme-color"/>
+<meta content="星期十" name="author"/>
+<meta content="" name="keywords"/>
+<meta content="模板工程链接：https://github.com/decaday/py32f0-cmake   文档链接：https://github.com/decaday/PY32_Docs    PY32F0系列CMake开发环境配置支持的MCU—PY32F002B Series—Puya PY32F002B Xinlinggo XL32F001*, XL32F002B* —PY32F0xx S" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="PY32F0系列CMake开发环境配置(PY32F030,PY32F002...)" property="og:title"/>
+<meta content="https://decaday.github.io/blog/py32f0-cmake/index.html" property="og:url"/>
+<meta content="Decaday's Blogs" property="og:site_name"/>
+<meta content="模板工程链接：https://github.com/decaday/py32f0-cmake   文档链接：https://github.com/decaday/PY32_Docs    PY32F0系列CMake开发环境配置支持的MCU—PY32F002B Series—Puya PY32F002B Xinlinggo XL32F001*, XL32F002B* —PY32F0xx S" property="og:description"/>
+<meta content="zh_CN" property="og:locale"/>
+<meta content="https://decaday.github.io/blog/images/py32f0-git.jpg" property="og:image"/>
+<meta content="2024-02-07T16:00:00.000Z" property="article:published_time"/>
+<meta content="2025-06-30T08:27:28.721Z" property="article:modified_time"/>
+<meta content="星期十" property="article:author"/>
+<meta content="嵌入式" property="article:tag"/>
+<meta content="PY32" property="article:tag"/>
+<meta content="环境搭建" property="article:tag"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="https://decaday.github.io/blog/images/py32f0-git.jpg" name="twitter:image"/>
+<meta content="no-referrer-when-downgrade" name="referrer"/>
+<title>PY32F0系列CMake开发环境配置(PY32F030,PY32F002...) - Decaday's Blogs</title>
+<link href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" rel="stylesheet">
+<link href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" rel="stylesheet"/>
+<link href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet"/>
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+<link href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css" rel="stylesheet"/>
+<link href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css" rel="stylesheet"/>
+<link href="/blog/css/main.css" rel="stylesheet">
+<link href="/blog/css/highlight.css" id="highlight-css" rel="stylesheet">
+<link href="/blog/css/highlight-dark.css" id="highlight-css-dark" rel="stylesheet"/>
+<script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"decaday.github.io","root":"/blog/","version":"1.9.8","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/blog/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+<script src="/blog/js/utils.js"></script>
+<script src="/blog/js/color-schema.js"></script>
+<meta content="Hexo 7.1.1" name="generator"/></link></link></link></link></head>
+<body>
+<header>
+<div class="header-inner" style="height: 70vh;">
+<nav class="navbar fixed-top navbar-expand-lg navbar-dark scrolling-navbar" id="navbar">
+<div class="container">
+<a class="navbar-brand" href="/blog/">
+<strong>Decaday 星期十的博客</strong>
+</a>
+<button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbarSupportedContent" data-toggle="collapse" id="navbar-toggler-btn" type="button">
+<div class="animated-icon"><span></span><span></span><span></span></div>
+</button>
+<!-- Collapsible content -->
+<div class="collapse navbar-collapse" id="navbarSupportedContent">
+<ul class="navbar-nav ml-auto text-center">
+<li class="nav-item">
+<a class="nav-link" href="/blog/" target="_self">
+<i class="iconfont icon-home-fill"></i>
+<span>首页</span>
+</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="/blog/tags/" target="_self">
+<i class="iconfont icon-tags-fill"></i>
+<span>标签</span>
+</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="/blog/about/" target="_self">
+<i class="iconfont icon-user-fill"></i>
+<span>关于</span>
+</a>
+</li>
+<li class="nav-item" id="search-btn">
+<a aria-label="Search" class="nav-link" data-target="#modalSearch" data-toggle="modal" href="javascript:;" target="_self">
+<i class="iconfont icon-search"></i>
+</a>
+</li>
+<li class="nav-item" id="color-toggle-btn">
+<a aria-label="Color Toggle" class="nav-link" href="javascript:;" target="_self">
+<i class="iconfont icon-dark" id="color-toggle-icon"></i>
+</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<div class="banner" id="banner" parallax="true" style="background: url('/blog/images/py32f0-git.jpg') no-repeat center center; background-size: cover;">
+<div class="full-bg-img">
+<div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+<div class="banner-text text-center fade-in-up">
+<div class="h2">
+<span id="subtitle">PY32F0系列CMake开发环境配置(PY32F030,PY32F002...)</span>
+</div>
+<div class="mt-3">
+<span class="post-meta">
+<i aria-hidden="true" class="iconfont icon-date-fill"></i>
+<time datetime="2024-02-08 00:00" pubdate="">
+          2024年2月8日
+        </time>
+</span>
+</div>
+<div class="mt-1">
+<span class="post-meta mr-2">
+<i class="iconfont icon-chart"></i>
+        
+          408 字
+        
+      </span>
+<span class="post-meta mr-2">
+<i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          4 分钟
+        
+      </span>
+<span id="busuanzi_container_page_pv" style="display: none">
+<i aria-hidden="true" class="iconfont icon-eye"></i>
+<span id="busuanzi_value_page_pv"></span> 次
+        </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<main>
+<div class="container-fluid nopadding-x">
+<div class="row nomargin-x">
+<div class="side-col d-none d-lg-block col-lg-2">
+</div>
+<div class="col-lg-8 nopadding-x-md">
+<div class="container nopadding-x-md" id="board-ctn">
+<div id="board">
+<article class="post-content mx-auto">
+<h1 id="seo-header">PY32F0系列CMake开发环境配置(PY32F030,PY32F002...)</h1>
+<p class="note note-info" id="updated-time" style="">
+                
+                  
+                    本文最后更新于 2025年6月30日 下午
+                  
+                
+              </p>
+<div class="markdown-body">
+<div style="background-color: pink; /* 设置背景颜色为粉色 */
+    border: 2px solid hotpink; /* 设置边框为2像素的热粉色 */
+    border-radius: 10px; /* 设置边框的圆角半径为10像素 */
+    padding: 10px; /* 设置内边距为10像素 */
+    margin: 10px; /* 设置外边距为10像素 */
+    font-family: Arial, sans-serif; /* 设置字体为Arial或者无衬线字体 */
+    font-size: 16px; /* 设置字体大小为16像素 */
+    color: white; /* 设置字体颜色为白色 */
+    text-align: center; /* 设置文本居中对齐 */">
+<p>模板工程链接：<a href="https://github.com/decaday/py32f0-cmake" rel="noopener" target="_blank">https://github.com/decaday/py32f0-cmake</a></p>
+<p>文档链接：<a href="https://github.com/decaday/PY32_Docs" rel="noopener" target="_blank">https://github.com/decaday/PY32_Docs</a></p>
+</div>
+<h1 id="PY32F0系列CMake开发环境配置"><a class="headerlink" href="#PY32F0系列CMake开发环境配置" title="PY32F0系列CMake开发环境配置"></a>PY32F0系列CMake开发环境配置</h1><h2 id="支持的MCU"><a class="headerlink" href="#支持的MCU" title="支持的MCU"></a>支持的MCU</h2><h3 id="—PY32F002B-Series—"><a class="headerlink" href="#—PY32F002B-Series—" title="—PY32F002B Series—"></a>—PY32F002B Series—</h3><p><strong>Puya</strong> PY32F002B</p>
+<p><strong>Xinlinggo</strong> XL32F001*, XL32F002B*</p>
+<h3 id="—PY32F0xx-Series—"><a class="headerlink" href="#—PY32F0xx-Series—" title="—PY32F0xx Series—"></a>—PY32F0xx Series—</h3><p><strong>Puya</strong> PY32F002A, PY32F003, PY32F030</p>
+<p><strong>Xinlinggo</strong> XL32F003*, XL32F002A*</p>
+<p><strong>Luat</strong> AIR001</p>
+<h3 id="—PY32F07x-Series—-TODO"><a class="headerlink" href="#—PY32F07x-Series—-TODO" title="—PY32F07x Series—(TODO)"></a>—PY32F07x Series—(TODO)</h3><p><strong>Puya</strong> PY32F040, PY32F(M)070*, PY32F071, PY32F072</p>
+<p>*:通过其特征猜测，并未实际尝试</p>
+<h2 id="制作这个工程模版"><a class="headerlink" href="#制作这个工程模版" title="制作这个工程模版"></a>制作这个工程模版</h2><p>最近想用py32做一些东西玩玩，原因如下：</p>
+<ul>
+<li><p>Cortex-M0+核心，支持多种编译器和C语言标准，低功耗，支持SWD调试接口，有各种外设和接口。</p>
+</li>
+<li><p>价格便宜，最便宜的py32才四毛多，原厂py32f030才一块多的价格，而且有XL32等同晶圆的，还能更便宜点。</p>
+</li>
+<li><p>封装多，tssop20，qfn20，qfn32……都有。</p>
+</li>
+<li><p>没那么难买，立创商城该有的都有，淘宝也有不少家代理零售。</p>
+</li>
+<li><p>py32官方提供HAL和LL库，极为先进。</p>
+</li>
+</ul>
+<p>我早就盯上了项目<a href="https://github.com/IOsetting/py32f0-template" rel="noopener" target="_blank">IOsetting/py32f0-template</a>，clone，一看，居然是linux平台下的Makefile…………</p>
+<p>于是，我搓了CMake跨平台开发环境，可以在任何平台上使用，能用Vscode，Clion等等IDE。</p>
+<p>并将Drivers作为git子模块。</p>
+<p>还是借用了<a href="https://github.com/IOsetting/py32f0-template" rel="noopener" target="_blank">IOsetting/py32f0-template</a>项目的ld文件和gcc startup启动文件。，感谢大佬！</p>
+<p>国内网上能搜到的几篇py32教程，也都是IOsetting大佬写的。</p>
+<p>模板工程链接：<a href="https://github.com/decaday/py32f0-cmake" rel="noopener" target="_blank">https://github.com/decaday/py32f0-cmake</a><br/> 文档链接：<a href="https://github.com/decaday/PY32_Docs" rel="noopener" target="_blank">https://github.com/decaday/PY32_Docs</a></p>
+<h2 id="吐槽"><a class="headerlink" href="#吐槽" title="吐槽"></a>吐槽</h2><p>我严重怀疑Puya普冉是开封测厂的，PY32F003一个系列，TSSOP20封装，出了六种Pinout（TB能买到四种），还不算同一晶圆的PY32F002A，030的TSSOP20 pinout（我看了下并不完全重合，但是懒得对比）</p>
+<p>然后MSOP10，SOP14，DFN8，SOP8，QFN20，QFN32，TSSOP20，SOP20，SOP16,封装出的一应俱全，，</p>
+<img alt="image-20240208175226685" lazyload="" src="image-20240208175226685.png" srcset="/blog/img/loading.gif" style="zoom:50%;"/>
+<img alt="image-20240208175439648" lazyload="" src="image-20240208175439648.png" srcset="/blog/img/loading.gif" style="zoom:67%;"/>
+<img alt="image-20240208175448614" lazyload="" src="image-20240208175448614.png" srcset="/blog/img/loading.gif" style="zoom: 67%;"/>
+</div>
+<hr/>
+<div>
+<div class="post-metas my-3">
+<div class="post-meta">
+<i class="iconfont icon-tags"></i>
+<a class="print-no-link" href="/blog/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/">#嵌入式</a>
+<a class="print-no-link" href="/blog/tags/PY32/">#PY32</a>
+<a class="print-no-link" href="/blog/tags/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/">#环境搭建</a>
+</div>
+</div>
+<div class="license-box my-3">
+<div class="license-title">
+<div>PY32F0系列CMake开发环境配置(PY32F030,PY32F002...)</div>
+<div>https://decaday.github.io/blog/py32f0-cmake/</div>
+</div>
+<div class="license-meta">
+<div class="license-meta-item">
+<div>作者</div>
+<div>星期十</div>
+</div>
+<div class="license-meta-item license-meta-date">
+<div>发布于</div>
+<div>2024年2月8日</div>
+</div>
+<div class="license-meta-item license-meta-date">
+<div>更新于</div>
+<div>2025年6月30日</div>
+</div>
+<div class="license-meta-item">
+<div>许可协议</div>
+<div>
+<a class="print-no-link" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">
+<span aria-label="BY - 署名" class="hint--top hint--rounded">
+<i class="iconfont icon-cc-by"></i>
+</span>
+</a>
+<a class="print-no-link" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">
+<span aria-label="NC - 非商业性使用" class="hint--top hint--rounded">
+<i class="iconfont icon-cc-nc"></i>
+</span>
+</a>
+</div>
+</div>
+</div>
+<div class="license-icon iconfont"></div>
+</div>
+<div class="post-prevnext my-3">
+<article class="post-prev col-6">
+<a href="/blog/lvgl-rust-build/" title="编译构建LVGL-rust，用rust开发LVGL">
+<i class="iconfont icon-arrowleft"></i>
+<span class="hidden-mobile">编译构建LVGL-rust，用rust开发LVGL</span>
+<span class="visible-mobile">上一篇</span>
+</a>
+</article>
+<article class="post-next col-6">
+<a href="/blog/stc8051-talk/" title="STC-51单片机闲谈">
+<span class="hidden-mobile">STC-51单片机闲谈</span>
+<span class="visible-mobile">下一篇</span>
+<i class="iconfont icon-arrowright"></i>
+</a>
+</article>
+</div>
+</div>
+<article id="comments" lazyload="">
+<div class="giscus" id="giscus"></div>
+<script type="text/javascript">
+      Fluid.utils.loadComments('#giscus', function() {
+        var options = {"repo":"decaday/blog","repo-id":"R_kgDOLNAOjg","category":"Announcements","category-id":"DIC_kwDOLNAOjs4CdRDg","theme-light":"light","theme-dark":"dark","mapping":"pathname","reactions-enabled":1,"emit-metadata":0,"input-position":"top","lang":"zh-CN"};
+        var attributes = {};
+        for (let option in options) {
+          if (!option.startsWith('theme-')) {
+            var key = option.startsWith('data-') ? option : 'data-' + option;
+            attributes[key] = options[option];
+          }
+        }
+        var light = 'light';
+        var dark = 'dark';
+        window.GiscusThemeLight = light;
+        window.GiscusThemeDark = dark;
+        attributes['data-theme'] = document.documentElement.getAttribute('data-user-color-scheme') === 'dark' ? dark : light;
+        for (let attribute in attributes) {
+          var value = attributes[attribute];
+          if (value === undefined || value === null || value === '') {
+            delete attributes[attribute];
+          }
+        }
+        var s = document.createElement('script');
+        s.setAttribute('src', 'https://giscus.app/client.js');
+        s.setAttribute('crossorigin', 'anonymous');
+        for (let attribute in attributes) {
+          s.setAttribute(attribute, attributes[attribute]);
+        }
+        var ss = document.getElementsByTagName('script');
+        var e = ss.length > 0 ? ss[ss.length - 1] : document.head || document.documentElement;
+        e.parentNode.insertBefore(s, e.nextSibling);
+      });
+    </script>
+<noscript>Please enable JavaScript to view the comments</noscript>
+</article>
+</article>
+</div>
+</div>
+</div>
+<div class="side-col d-none d-lg-block col-lg-2">
+<aside class="sidebar" style="margin-left: -1rem">
+<div id="toc">
+<p class="toc-header">
+<i class="iconfont icon-list"></i>
+<span>目录</span>
+</p>
+<div class="toc-body" id="toc-body"></div>
+</div>
+</aside>
+</div>
+</div>
+</div>
+<a aria-label="TOP" href="#" id="scroll-top-button" role="button">
+<i aria-hidden="true" class="iconfont icon-arrowup"></i>
+</a>
+<div aria-hidden="true" aria-labelledby="ModalLabel" class="modal fade" id="modalSearch" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+<div class="modal-content">
+<div class="modal-header text-center">
+<h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+<button aria-label="Close" class="close" data-dismiss="modal" id="local-search-close" type="button">
+<span aria-hidden="true">×</span>
+</button>
+</div>
+<div class="modal-body mx-3">
+<div class="md-form mb-5">
+<input class="form-control validate" id="local-search-input" type="text"/>
+<label data-error="x" data-success="v" for="local-search-input">关键词</label>
+</div>
+<div class="list-group" id="local-search-result"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer>
+<div class="footer-inner">
+<div class="footer-content">
+<a href="https://hexo.io" rel="nofollow noopener" target="_blank"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" rel="nofollow noopener" target="_blank"><span>Fluid</span></a>
+</div>
+<div class="statistics">
+<span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+<span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+</div>
+</div>
+</footer>
+<!-- Scripts -->
+<script src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js"></script>
+<link href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet"/>
+<script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+<script src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js"></script>
+<script src="/blog/js/events.js"></script>
+<script src="/blog/js/plugins.js"></script>
+<script src="/blog/js/img-lazyload.js"></script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+<script src="https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js"></script>
+<script>Fluid.plugins.codeWidget();</script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+<script>Fluid.plugins.imageCaption();</script>
+<script src="/blog/js/local-search.js"></script>
+<script defer="" src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script src="/blog/js/boot.js"></script>
+<noscript>
+<div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+</noscript>
+</body>
+</html>

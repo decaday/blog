@@ -1,0 +1,520 @@
+
+<!DOCTYPE html>
+
+<html data-default-color-scheme="auto" lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<link href="/blog/img/favicon.jpg" rel="apple-touch-icon" sizes="76x76"/>
+<link href="/blog/img/favicon.jpg" rel="icon"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no" name="viewport"/>
+<meta content="ie=edge" http-equiv="x-ua-compatible"/>
+<meta content="#2f4154" name="theme-color"/>
+<meta content="星期十" name="author"/>
+<meta content="" name="keywords"/>
+<meta content="由gemini 2.5pro整理。 ADF仓库结构espressif/esp-adf: Espressif Advanced Development Framework 123456789esp-adf/├── components      # 核心组件和第三方库├── docs            # 文档├── examples        # 示例代码├── tools" name="description"/>
+<meta content="website" property="og:type"/>
+<meta content="结构、组件和例程表" property="og:title"/>
+<meta content="https://decaday.github.io/blog/docs/esp-adf-components-examples.html" property="og:url"/>
+<meta content="Decaday's Blogs" property="og:site_name"/>
+<meta content="由gemini 2.5pro整理。 ADF仓库结构espressif/esp-adf: Espressif Advanced Development Framework 123456789esp-adf/├── components      # 核心组件和第三方库├── docs            # 文档├── examples        # 示例代码├── tools" property="og:description"/>
+<meta content="zh_CN" property="og:locale"/>
+<meta content="2025-06-08T16:00:00.000Z" property="article:published_time"/>
+<meta content="2025-07-03T03:04:56.379Z" property="article:modified_time"/>
+<meta content="星期十" property="article:author"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="no-referrer-when-downgrade" name="referrer"/>
+<title>结构、组件和例程表 - Decaday's Blogs</title>
+<link href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" rel="stylesheet">
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+<link href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css" rel="stylesheet"/>
+<link href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css" rel="stylesheet"/>
+<link href="/blog/css/main.css" rel="stylesheet">
+<link href="/blog/css/highlight.css" id="highlight-css" rel="stylesheet">
+<link href="/blog/css/highlight-dark.css" id="highlight-css-dark" rel="stylesheet">
+<script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"decaday.github.io","root":"/blog/","version":"1.9.8","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/blog/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+<script src="/blog/js/utils.js"></script>
+<script src="/blog/js/color-schema.js"></script>
+<meta content="Hexo 7.1.1" name="generator"/></link></link></link></link></head>
+<body>
+<header>
+<div class="header-inner" style="height: 60vh;">
+<nav class="navbar fixed-top navbar-expand-lg navbar-dark scrolling-navbar" id="navbar">
+<div class="container">
+<a class="navbar-brand" href="/blog/">
+<strong>Decaday 星期十的博客</strong>
+</a>
+<button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbarSupportedContent" data-toggle="collapse" id="navbar-toggler-btn" type="button">
+<div class="animated-icon"><span></span><span></span><span></span></div>
+</button>
+<!-- Collapsible content -->
+<div class="collapse navbar-collapse" id="navbarSupportedContent">
+<ul class="navbar-nav ml-auto text-center">
+<li class="nav-item">
+<a class="nav-link" href="/blog/" target="_self">
+<i class="iconfont icon-home-fill"></i>
+<span>首页</span>
+</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="/blog/tags/" target="_self">
+<i class="iconfont icon-tags-fill"></i>
+<span>标签</span>
+</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="/blog/about/" target="_self">
+<i class="iconfont icon-user-fill"></i>
+<span>关于</span>
+</a>
+</li>
+<li class="nav-item" id="search-btn">
+<a aria-label="Search" class="nav-link" data-target="#modalSearch" data-toggle="modal" href="javascript:;" target="_self">
+<i class="iconfont icon-search"></i>
+</a>
+</li>
+<li class="nav-item" id="color-toggle-btn">
+<a aria-label="Color Toggle" class="nav-link" href="javascript:;" target="_self">
+<i class="iconfont icon-dark" id="color-toggle-icon"></i>
+</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<div class="banner" id="banner" parallax="true" style="background: url('/blog/images/esp-adf.png') no-repeat center center; background-size: cover;">
+<div class="full-bg-img">
+<div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+<div class="banner-text text-center fade-in-up">
+<div class="h2">
+<span id="subtitle">结构、组件和例程表</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<main>
+<div class="container nopadding-x-md">
+<div id="board">
+<div class="container">
+<div class="row">
+<div class="col-12 col-md-10 m-auto">
+<article class="page-content">
+<p>由gemini 2.5pro整理。</p>
+<h1 id="ADF仓库结构"><a class="headerlink" href="#ADF仓库结构" title="ADF仓库结构"></a>ADF仓库结构</h1><p><a href="https://github.com/espressif/esp-adf" rel="noopener" target="_blank">espressif/esp-adf: Espressif Advanced Development Framework</a></p>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/></pre></td><td class="code"><pre><code class="hljs jboss-cli">esp-adf/<br/>├── components      <span class="hljs-comment"># 核心组件和第三方库</span><br/>├── docs            <span class="hljs-comment"># 文档</span><br/>├── examples        <span class="hljs-comment"># 示例代码</span><br/>├── tools           <span class="hljs-comment"># 实用工具</span><br/>├── CMakeLists.txt  <span class="hljs-comment"># 顶层构建脚本</span><br/>├── esp-idf         <span class="hljs-comment"># idf 作为submodoule</span><br/>├── README.md       <span class="hljs-comment"># 项目根 README</span><br/>└── <span class="hljs-string">...</span>             <span class="hljs-comment"># 其他配置文件</span><br/></code></pre></td></tr></table></figure>
+<h1 id="核心框架组件"><a class="headerlink" href="#核心框架组件" title="核心框架组件"></a>核心框架组件</h1><p><strong>esp-adf/omponents</strong></p>
+<ul>
+<li><strong>audio_pipeline</strong>: 提供了音频管道 (Audio Pipeline) 的核心实现，负责将音频元素（如输入、解码、输出）连接起来，管理数据流和状态。</li>
+<li><strong>audio_stream</strong>: 提供了音频管道中“音频元素”的具体实现，包括：<ul>
+<li><strong>Source</strong>: http_stream, fatfs_stream, i2s_stream, spiffs_stream, raw_stream 等，负责产生音频数据。</li>
+<li>**Filter: 如各种解码器和编码器。</li>
+<li><strong>Sink</strong>: i2s_stream, raw_stream, pwm_stream 等，负责消费最终的音频数据。</li>
+</ul>
+</li>
+<li><strong>audio_sal (Audio System Abstraction Layer)</strong>: 音频系统抽象层，封装 FreeRTOS 的任务、队列、互斥锁、内存管理等功能，为上层应用提供统一接口。</li>
+<li><strong>adf_utils</strong>: 提供常用工具函数，如 aws_sig_v4_signing (AWS 签名)、baidu_access_token (百度令牌获取)、json_utils (JSON 解析工具)。</li>
+<li><strong>esp_dispatcher</strong>: 事件分发器，基于事件源和优先级执行动作，将服务与具体动作解耦，提高灵活性。</li>
+</ul>
+<h3 id="硬件抽象层-HAL"><a class="headerlink" href="#硬件抽象层-HAL" title="硬件抽象层 (HAL)"></a>硬件抽象层 (HAL)</h3><ul>
+<li><strong>audio_hal</strong>: 音频硬件抽象层，定义标准接口控制音频编解码芯片 (Codec)，如初始化、配置音量、设置采样率，与硬件解耦。</li>
+<li><strong>esp_codec_dev</strong>: 新一代 Codec 设备抽象层，提供通用可扩展接口，支持控制接口（I2C, SPI）和数据接口（I2S）的灵活组合。</li>
+<li><strong>audio_board</strong>: 针对乐鑫官方开发板（如 ESP32-LyraT, ESP32-S3-Korvo-2）的板级支持，初始化引脚、外设和 audio_hal 接口。</li>
+</ul>
+<h3 id="服务-Services"><a class="headerlink" href="#服务-Services" title="服务 (Services)"></a>服务 (Services)</h3><p>服务是一些封装了特定功能的后台任务，可通过事件与应用层交互。</p>
+<ul>
+<li><strong>esp_peripherals</strong>: 外设管理服务，统一管理按键、Wi-Fi、SD 卡、触摸板等外设，通过 audio_event_iface 传递事件。</li>
+<li><strong>input_key_service</strong>: 统一按键事件处理服务，支持单击、双击、长按等事件，可自定义按键功能。</li>
+<li><strong>wifi_service</strong>: 专用 Wi-Fi 服务，封装连接、断线重连、获取 IP 等功能，支持 SmartConfig、AirKiss 等配网方式。</li>
+<li><strong>bluetooth_service</strong>: 蓝牙服务，封装 A2DP（音频流传输）、AVRCP（远程控制）、HFP（免提通话）等协议，简化蓝牙音频开发。</li>
+<li><strong>ota_service</strong>: 提供 OTA (Over-the-Air) 固件升级服务，支持通过 HTTP/HTTPS 下载并升级固件。</li>
+<li><strong>display_service</strong>: 显示服务，用于在带屏幕设备上显示信息，如通过 LED 灯条（WS2812）或 LED 点阵展示 Wi-Fi、播放状态。</li>
+<li><strong>battery_service</strong>: 电池服务，监控电池电压，估算剩余电量。</li>
+<li><strong>coredump_upload_service</strong>: 将设备崩溃时的 Core Dump 信息上传至服务器，便于远程调试和分析。</li>
+</ul>
+<h3 id="音频处理与高级功能"><a class="headerlink" href="#音频处理与高级功能" title="音频处理与高级功能"></a>音频处理与高级功能</h3><ul>
+<li><strong>audio_mixer</strong>: 提供音频混音功能，将多个音频流（如背景音乐和提示音）混合成单声道或双声道音频流。</li>
+<li><strong>audio_recorder</strong>: 提供高级录音功能，支持编码存储，集成语音唤醒 (WakeNet) 和语音活动检测 (VAD)，在检测到有效语音时开始录音。</li>
+<li><strong>playlist</strong>: 提供播放列表管理功能，支持从 SD 卡或 Flash 扫描音频文件，管理播放顺序（如上一首、下一首、随机播放）。</li>
+<li><strong>tone_partition</strong>: 管理存储在 Flash 分区中的提示音，应用可通过 URI (tone://…) 访问和播放预置音频。</li>
+</ul>
+<h3 id="第三方服务与action"><a class="headerlink" href="#第三方服务与action" title="第三方服务与action"></a>第三方服务与action</h3><ul>
+<li><strong>dueros_service</strong>: 专为百度 DuerOS 平台提供的组件，封装与 DuerOS 交互的逻辑。</li>
+<li><strong>esp_coze</strong>: 与 Coze (扣子) AI Agent 平台集成，允许设备与基于 Coze 平台的 AI 机器人进行语音交互。</li>
+<li><strong>esp_actions</strong>: 定义与服务相关的actions，如 wifi_action（连接、断开 Wi-Fi）、player_action（播放、暂停）等，可被 esp_dispatcher 调用。</li>
+<li><strong>esp_event_cast</strong>: 事件转换库，将一种事件类型转换为另一种，增强组件间事件交互的灵活性。</li>
+</ul>
+<p>好复杂好丰富啊……</p>
+<h1 id="Examples"><a class="headerlink" href="#Examples" title="Examples"></a>Examples</h1><table>
+<thead>
+<tr>
+<th><strong>目录分类</strong></th>
+<th><strong>主要功能</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>get-started</code></td>
+<td><strong>入门指南</strong>：提供最基础的音频播放、控制和连接示例，适合初学者快速上手。</td>
+</tr>
+<tr>
+<td><code>player</code></td>
+<td><strong>播放器应用</strong>：专注于各种音源（HTTP, HLS, SD卡, Flash, 蓝牙等）的播放功能。</td>
+</tr>
+<tr>
+<td><code>recorder</code></td>
+<td><strong>录音机应用</strong>：展示如何从麦克风录制音频，并编码存储为不同格式。</td>
+</tr>
+<tr>
+<td><code>speech_recognition</code></td>
+<td><strong>语音识别</strong>：包含语音唤醒 (Wake Word Engine) 和语音活动检测 (VAD) 的示例。</td>
+</tr>
+<tr>
+<td><code>protocols</code></td>
+<td><strong>网络协议</strong>：演示了基于特定网络协议的音视频应用，如 RTMP, RTSP, VoIP。</td>
+</tr>
+<tr>
+<td><code>system</code></td>
+<td><strong>系统功能</strong>：提供系统级功能的示例，如低功耗管理、CoreDump 上传、电池管理等。</td>
+</tr>
+<tr>
+<td><code>display</code></td>
+<td><strong>显示与交互</strong>：展示如何结合显示屏或 LED 灯带，为音频应用提供可视化交互。</td>
+</tr>
+<tr>
+<td><code>cloud_services</code></td>
+<td><strong>云服务集成</strong>：演示如何对接到云服务平台，实现语音合成 (TTS) 和翻译等功能。</td>
+</tr>
+<tr>
+<td><code>audio_processing</code></td>
+<td><strong>音频处理</strong>：包含了各种音频后处理算法的示例，如均衡器、变声、重采样等。</td>
+</tr>
+<tr>
+<td><code>advanced_examples</code></td>
+<td><strong>高级应用</strong>：提供更复杂的综合性应用示例，如多房间同步、DLNA、灵活管道构建等。</td>
+</tr>
+<tr>
+<td><code>ai_agent</code></td>
+<td><strong>AI 代理</strong>：展示如何与 AI 代理平台（如 Coze）进行集成，实现智能对话机器人。</td>
+</tr>
+<tr>
+<td><code>cli</code></td>
+<td><strong>命令行</strong>：提供一个基于命令行的交互式示例，用于测试和控制 ADF 功能。</td>
+</tr>
+<tr>
+<td><code>checks</code></td>
+<td><strong>硬件检查</strong>：用于快速验证开发板上外设（如按键、LED）功能是否正常。</td>
+</tr>
+<tr>
+<td><code>korvo_du1906</code></td>
+<td><strong>特定项目</strong>：一个完整的智能音箱解决方案，集成了百度 DUEROS 服务。</td>
+</tr>
+</tbody></table>
+<h3 id="1-get-started-入门指南"><a class="headerlink" href="#1-get-started-入门指南" title="1. get-started (入门指南)"></a>1. <code>get-started</code> (入门指南)</h3><ul>
+<li><strong><code>play_mp3_control</code></strong><ul>
+<li><strong>简介</strong>: 最基础的 MP3 播放示例。它从代码中嵌入的 MP3 文件数据中读取并解码播放，同时展示了如何通过 <code>audio_event_iface</code> 监听按键事件来控制播放、暂停和音量。</li>
+<li><strong>Pipeline</strong>: <code>i2s_stream_writer</code> (作为 Sink) &lt;— <code>mp3_decoder</code> &lt;— <code>i2s_stream_reader</code> (作为 Source，但数据实际来自内存)。</li>
+</ul>
+</li>
+<li><strong><code>pipeline_a2dp_sink_and_hfp</code></strong>  （<em>你管这叫get-started？？）</em><ul>
+<li><strong>简介</strong>: 演示了蓝牙音频 (A2DP Sink) 和蓝牙通话 (HFP) 功能的结合。设备既可以作为蓝牙音箱播放手机音乐，也可以接听和拨打电话。</li>
+<li>Pipelines:<ul>
+<li><strong>A2DP 播放</strong>: <code>i2s_stream_writer</code> &lt;— <code>bluetooth_service</code> (内部处理 A2DP 数据流)</li>
+<li><strong>HFP 通话</strong>: <code>i2s_stream_writer</code> &lt;–&gt; <code>hfp_stream</code> &lt;–&gt; <code>bluetooth_service</code> (双向数据流)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong><code>pipeline_tcp_client</code></strong><ul>
+<li><strong>简介</strong>: 演示了如何创建一个 TCP 客户端流，从一个 TCP 服务器接收音频数据并播放。</li>
+<li><strong>Pipeline</strong>: <code>i2s_stream_writer</code> &lt;— <code>mp3_decoder</code> &lt;— <code>tcp_client_stream</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="2-player-播放器应用"><a class="headerlink" href="#2-player-播放器应用" title="2. player (播放器应用)"></a>2. <code>player</code> (播放器应用)</h3><ul>
+<li><p><strong><code>pipeline_a2dp_sink_stream</code> / <code>pipeline_bt_sink</code></strong></p>
+<ul>
+<li><strong>简介</strong>: 功能类似的蓝牙音箱 (A2DP Sink) 示例。手机连接开发板后，可以将手机上的音乐通过蓝牙传输给开发板播放。</li>
+<li><strong>Pipeline</strong>: <code>i2s_stream_writer</code> &lt;— <code>a2dp_stream</code></li>
+</ul>
+</li>
+<li><p><strong><code>pipeline_a2dp_source_stream</code> / <code>pipeline_bt_source</code></strong></p>
+<ul>
+<li><strong>简介</strong>: 蓝牙音频发射 (A2DP Source) 示例。开发板主动连接到蓝牙耳机或音箱，并将本地的音频文件通过蓝牙发送出去播放。</li>
+<li><strong>Pipeline</strong>: <code>a2dp_stream</code> &lt;— <code>mp3_decoder</code> &lt;— <code>fatfs_stream</code></li>
+</ul>
+</li>
+<li><p><strong><code>pipeline_embed_flash_tone</code></strong></p>
+<ul>
+<li><strong>简介</strong>: 播放嵌入在代码中的提示音。音频数据作为 C 数组直接编译到固件中。</li>
+<li><strong>Pipeline</strong>: <code>i2s_stream_writer</code> &lt;— <code>mp3_decoder</code> &lt;— <code>embed_flash_stream</code></li>
+</ul>
+</li>
+<li><p><strong><code>pipeline_flash_tone</code></strong></p>
+<ul>
+<li><strong>简介</strong>: 播放存储在 Flash 特定分区 (<code>tone</code>) 中的提示音，通过 <code>tone://</code> URI 进行访问。</li>
+<li><strong>Pipeline</strong>: <code>i2s_stream_writer</code> &lt;— <code>mp3_decoder</code> &lt;— <code>tone_stream</code></li>
+</ul>
+</li>
+<li><p><strong><code>pipeline_hfp_stream</code></strong></p>
+<ul>
+<li><strong>简介</strong>: 蓝牙免提通话 (HFP) 的独立示例，实现了完整的双向通话链路。</li>
+<li><strong>Pipeline</strong>: <code>i2s_stream_writer</code> (扬声器输出) &lt;— <code>hfp_stream</code> &lt;— <code>i2s_stream_reader</code> (麦克风输入)</li>
+</ul>
+</li>
+<li><p><strong><code>pipeline_http_mp3</code></strong></p>
+<ul>
+<li><strong>简介</strong>: 播放一个网络上的 MP3 文件。</li>
+<li><strong>Pipeline</strong>: <code>i2s_stream_writer</code> &lt;— <code>mp3_decoder</code> &lt;— <code>http_stream</code></li>
+</ul>
+</li>
+<li><p><strong><code>pipeline_http_select_decoder</code></strong></p>
+<ul>
+<li><strong>简介</strong>: 演示如何根据网络流的内容类型 (Content-Type) 动态选择合适的解码器 (MP3/AAC) 进行播放。</li>
+<li><strong>Pipeline</strong>: <code>i2s_stream_writer</code> &lt;— <code>[mp3_decoder/aac_decoder]</code> &lt;— <code>http_stream</code> (动态链接)</li>
+</ul>
+</li>
+<li><p><strong><code>pipeline_living_stream</code></strong></p>
+<ul>
+<li><strong>简介</strong>: 播放 HLS (HTTP Live Streaming) 直播流。</li>
+<li><strong>Pipeline</strong>: <code>i2s_stream_writer</code> &lt;— <code>mp3_decoder</code> &lt;— <code>hls_stream</code> (http_stream 的一种变体)</li>
+</ul>
+</li>
+<li><p><strong><code>pipeline_loop_playback_without_gap</code></strong></p>
+<ul>
+<li><p><strong>简介</strong>: 演示如何实现两路 pipeline 的无缝循环播放，消除切换间隙。</p>
+</li>
+<li><p>Pipeline</p>
+<p>: 两个并行的 Pipeline，交替播放。</p>
+<ul>
+<li>Pipeline 1: <code>i2s_stream_writer</code> &lt;— <code>mp3_decoder</code> &lt;— <code>fatfs_stream</code></li>
+<li>Pipeline 2: <code>i2s_stream_writer</code> &lt;— <code>mp3_decoder</code> &lt;— <code>fatfs_stream</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong><code>pipeline_play_mp3_with_dac_or_pwm</code></strong></p>
+<ul>
+<li><strong>简介</strong>: 展示如何使用内部 DAC 或 PWM 作为音频输出，适用于不外接 Codec 芯片的场景。</li>
+<li><strong>Pipeline</strong>: <code>[pwm_stream_writer/dac_stream_writer]</code> &lt;— <code>mp3_decoder</code> &lt;— <code>i2s_stream_reader</code> (数据来自内存)</li>
+</ul>
+</li>
+<li><p><strong><code>pipeline_play_sdcard_music</code></strong></p>
+<ul>
+<li><strong>简介</strong>: 自动扫描 SD 卡中的所有音乐文件，并使用 <code>playlist</code> 组件进行列表播放。</li>
+<li><strong>Pipeline</strong>: <code>i2s_stream_writer</code> &lt;— <code>[decoder]</code> &lt;— <code>fatfs_stream</code></li>
+</ul>
+</li>
+<li><p><strong><code>pipeline_sdcard_mp3_control</code></strong></p>
+<ul>
+<li><strong>简介</strong>: 播放 SD 卡上的单个 MP3 文件，并支持按键控制。</li>
+<li><strong>Pipeline</strong>: <code>i2s_stream_writer</code> &lt;— <code>mp3_decoder</code> &lt;— <code>fatfs_stream</code></li>
+</ul>
+</li>
+<li><p><strong><code>pipeline_spiffs_mp3</code></strong></p>
+<ul>
+<li><strong>简介</strong>: 播放存储在 SPIFFS 文件系统中的 MP3 文件。</li>
+<li><strong>Pipeline</strong>: <code>i2s_stream_writer</code> &lt;— <code>mp3_decoder</code> &lt;— <code>spiffs_stream</code></li>
+</ul>
+</li>
+<li><p><strong><code>pipeline_tts_stream</code></strong></p>
+<ul>
+<li><strong>简介</strong>: 演示了文本转语音 (TTS) 流的使用。TTS 数据可以来自云端或本地。</li>
+<li><strong>Pipeline</strong>: <code>i2s_stream_writer</code> &lt;— <code>mp3_decoder</code> &lt;— <code>tts_stream</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="3-recorder-录音机应用"><a class="headerlink" href="#3-recorder-录音机应用" title="3. recorder (录音机应用)"></a>3. <code>recorder</code> (录音机应用)</h3><ul>
+<li><strong><code>pipeline_recording_to_sdcard</code></strong><ul>
+<li><strong>简介</strong>: 基础录音示例，将麦克风采集的原始 PCM 数据直接写入 SD 卡的 WAV 文件中。</li>
+<li><strong>Pipeline</strong>: <code>fatfs_stream_writer</code> &lt;— <code>i2s_stream_reader</code></li>
+</ul>
+</li>
+<li><strong><code>pipeline_raw_http</code></strong><ul>
+<li><strong>简介</strong>: 将麦克风采集的原始音频数据通过 HTTP POST 请求实时上传到服务器。</li>
+<li><strong>Pipeline</strong>: <code>http_stream_writer</code> &lt;— <code>raw_stream_reader</code> &lt;— <code>i2s_stream_reader</code></li>
+</ul>
+</li>
+<li><strong><code>pipeline_wav_amr_sdcard</code></strong><ul>
+<li><strong>简介</strong>: 演示了录音并进行 AMR 编码。首先录制 WAV 文件，然后另起一个 pipeline 读取 WAV 文件，编码为 AMR 格式并存入 SD 卡。</li>
+<li><strong>Pipeline 1 (录制WAV)</strong>: <code>fatfs_stream_writer</code> &lt;— <code>i2s_stream_reader</code></li>
+<li><strong>Pipeline 2 (转码AMR)</strong>: <code>fatfs_stream_writer</code> &lt;— <code>amr_encoder</code> &lt;— <code>wav_decoder</code> &lt;— <code>fatfs_stream_reader</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="4-speech-recognition-语音识别"><a class="headerlink" href="#4-speech-recognition-语音识别" title="4. speech_recognition (语音识别)"></a>4. <code>speech_recognition</code> (语音识别)</h3><ul>
+<li><strong><code>vad</code> (Voice Activity Detection)</strong><ul>
+<li><strong>简介</strong>: 语音活动检测。使用 VAD 算法来检测环境中的语音片段，当检测到语音时，通过 <code>esp_peripherals</code> 发出事件。</li>
+<li><strong>Pipeline</strong>: <code>vad_stream</code> &lt;— <code>i2s_stream_reader</code> (VAD 作为 Sink，但不输出数据，只产生事件)</li>
+</ul>
+</li>
+<li><strong><code>wwe</code> (Wake Word Engine)</strong><ul>
+<li><strong>简介</strong>: 语音唤醒示例。使用乐鑫的 WakeNet 模型来识别特定的唤醒词（如“嗨，乐鑫”）。</li>
+<li><strong>Pipeline</strong>: <code>i2s_stream_writer</code> (用于回采) &lt;— <code>raw_stream_reader</code> … <code>esp_wn_iface</code> (唤醒引擎) &lt;— <code>i2s_stream_reader</code> (麦克风输入)。(唤醒部分不完全是标准的 pipeline，更多是算法组件的直接调用)</li>
+</ul>
+</li>
+</ul>
+<h3 id="5-protocols-网络协议"><a class="headerlink" href="#5-protocols-网络协议" title="5. protocols (网络协议)"></a>5. <code>protocols</code> (网络协议)</h3><ul>
+<li><strong><code>voip</code></strong><ul>
+<li><strong>简介</strong>: 一个完整的 VoIP (网络电话) 客户端示例。使用 SIP 协议进行信令交互，RTP 协议传输 G.711 编码的音频数据，实现了网络通话功能。</li>
+<li><strong>Pipeline</strong>: <code>i2s_stream_writer</code> &lt;— <code>raw_stream_reader</code> (接收) 和 <code>raw_stream_writer</code> &lt;— <code>i2s_stream_reader</code> (发送)。数据在 <code>sip_service</code> 中通过 RTP 协议收发。</li>
+</ul>
+</li>
+<li><strong><code>esp-rtsp</code> / <code>esp-rtc</code></strong><ul>
+<li><strong>简介</strong>: 分别演示了 RTSP (实时流协议) 和 ESP-RTC (乐鑫自定义的实时通信协议) 的音视频传输。</li>
+<li><strong>Pipeline</strong>: 类似于 VoIP，通过 <code>rtsp_stream</code> 或自定义的服务处理音视频数据的收发和 pipeline 的构建。</li>
+</ul>
+</li>
+<li><strong><code>rtmp</code></strong><ul>
+<li><strong>简介</strong>: 演示了 RTMP (实时消息传输协议) 的推流和拉流。可以将本地音视频数据推送到 RTMP 服务器，或从服务器拉取音视频流播放。</li>
+<li><strong>Pipeline</strong>: <code>i2s_stream_writer</code> &lt;— <code>[decoder]</code> &lt;— <code>rtmp_stream</code> (拉流) 或 <code>rtmp_stream</code> &lt;— <code>[encoder]</code> &lt;— <code>i2s_stream_reader</code> (推流)。</li>
+</ul>
+</li>
+</ul>
+<h3 id="6-system-系统功能"><a class="headerlink" href="#6-system-系统功能" title="6. system (系统功能)"></a>6. <code>system</code> (系统功能)</h3><ul>
+<li><strong><code>battery</code></strong><ul>
+<li><strong>简介</strong>: 使用 <code>battery_service</code> 通过 ADC 采样来监控电池电压，并上报事件。</li>
+<li><strong>Pipeline</strong>: 无音频 Pipeline，仅使用服务。</li>
+</ul>
+</li>
+<li><strong><code>coredump</code></strong><ul>
+<li><strong>简介</strong>: 演示了 CoreDump 功能。当系统崩溃时，可以将核心转储信息存储到 Flash 或通过网络上传，以便后续分析。</li>
+<li><strong>Pipeline</strong>: 无音频 Pipeline。</li>
+</ul>
+</li>
+<li><strong><code>power_save</code></strong><ul>
+<li><strong>简介</strong>: 展示了 ESP-ADF 的低功耗管理。在不播放音频时，系统可以进入 Light-sleep 模式以降低功耗，并通过 GPIO 或定时器唤醒。</li>
+<li><strong>Pipeline</strong>: 无音频 Pipeline。</li>
+</ul>
+</li>
+<li><strong><code>wpa2_enterprise</code></strong><ul>
+<li><strong>简介</strong>: 演示如何连接到需要 WPA2-Enterprise 认证的 Wi-Fi 网络。</li>
+<li><strong>Pipeline</strong>: 无音频 Pipeline。</li>
+</ul>
+</li>
+</ul>
+<h3 id="7-advanced-examples-高级应用"><a class="headerlink" href="#7-advanced-examples-高级应用" title="7. advanced_examples (高级应用)"></a>7. <code>advanced_examples</code> (高级应用)</h3><ul>
+<li><strong><code>aec</code> (Acoustic Echo Cancellation)</strong><ul>
+<li><strong>简介</strong>: 回声消除示例。在需要双工通话的场景（如免提通话），此算法可以消除扬声器播放的声音被麦克风重新采集而产生的回声。</li>
+<li><strong>Pipeline</strong>: <code>aec_stream</code> &lt;— <code>i2s_stream_reader</code> (AEC 元素需要两路输入：麦克风信号和参考信号，参考信号由 <code>aec_stream_set_playback</code> 写入)。</li>
+</ul>
+</li>
+<li><strong><code>audio_mixer_tone</code></strong><ul>
+<li><strong>简介</strong>: 音频混音示例。演示了如何使用 <code>audio_mixer</code> 将一个正在播放的音乐流和一个提示音流混合后输出。</li>
+<li><strong>Pipeline</strong>: <code>i2s_stream_writer</code> &lt;— <code>audio_mixer</code>。<code>audio_mixer</code> 有两个输入环形缓冲区，分别接收来自音乐播放 Pipeline 和提示音播放 Pipeline 的数据。</li>
+</ul>
+</li>
+<li><strong><code>dlna</code></strong><ul>
+<li><strong>简介</strong>: 实现 DLNA 的数字媒体渲染器 (DMR) 功能。允许局域网内的 DLNA 控制点（如手机 App）发现设备，并将音乐推送到设备上播放。</li>
+<li><strong>Pipeline</strong>: <code>i2s_stream_writer</code> &lt;— <code>[decoder]</code> &lt;— <code>http_stream</code>。其中 <code>http_stream</code> 的 URL 由 DLNA 服务动态设置。</li>
+</ul>
+</li>
+<li><strong><code>flexible_pipeline</code></strong><ul>
+<li><strong>简介</strong>: 展示如何动态地构建和修改音频管道，例如在播放过程中切换音源（HTTP 和 SD 卡）。</li>
+<li><strong>Pipeline</strong>: 动态变化。<code>[http_stream/fatfs_stream]</code> &lt;-&gt; <code>audio_element_switch</code> —&gt; <code>i2s_stream_writer</code>。</li>
+</ul>
+</li>
+<li><strong><code>http_play_and_save_to_file</code></strong><ul>
+<li><strong>简介</strong>: 演示如何一边通过 HTTP 播放在线音乐，一边将下载的数据保存到 SD 卡中，实现边听边缓存。</li>
+<li><strong>Pipeline</strong>: <code>i2s_stream_writer</code> &lt;— <code>mp3_decoder</code> &lt;— <code>fatfs_stream_writer</code> &lt;— <code>http_stream_reader</code>。</li>
+</ul>
+</li>
+<li><strong><code>multi-room</code></strong><ul>
+<li><strong>简介</strong>: 多房间音频同步示例。允许多个设备在局域网内同步播放相同的音乐。通过 ESP-NOW 进行设备间的时间同步和控制。</li>
+<li><strong>Pipeline</strong>: 主设备: <code>i2s_stream_writer</code> &lt;— <code>[decoder]</code> &lt;— <code>fatfs_stream</code>，并向从设备广播数据。从设备: <code>i2s_stream_writer</code> &lt;— <code>[decoder]</code> &lt;— <code>raw_stream</code> (接收主设备的数据)。</li>
+</ul>
+</li>
+<li><strong><code>nvs_dispatcher</code></strong><ul>
+<li><strong>简介</strong>: 演示了如何使用 <code>esp_dispatcher</code> 框架，并结合 NVS (非易失性存储) 来实现持久化的配置和动作分发。</li>
+<li><strong>Pipeline</strong>: 这是一个框架使用示例，不一定包含完整的音频 Pipeline。</li>
+</ul>
+</li>
+<li><strong><code>wifi_bt_ble_coex</code></strong><ul>
+<li><strong>简介</strong>: Wi-Fi, 经典蓝牙 (BT), 低功耗蓝牙 (BLE) 共存的综合示例。展示了设备在播放 Wi-Fi 音乐的同时，还能响应 BLE 的控制命令。</li>
+<li><strong>Pipeline</strong>: <code>i2s_stream_writer</code> &lt;— <code>mp3_decoder</code> &lt;— <code>http_stream</code>，同时 BLE 服务在后台运行。</li>
+</ul>
+</li>
+</ul>
+</article>
+</div>
+</div>
+</div>
+</div>
+</div>
+<a aria-label="TOP" href="#" id="scroll-top-button" role="button">
+<i aria-hidden="true" class="iconfont icon-arrowup"></i>
+</a>
+<div aria-hidden="true" aria-labelledby="ModalLabel" class="modal fade" id="modalSearch" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+<div class="modal-content">
+<div class="modal-header text-center">
+<h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+<button aria-label="Close" class="close" data-dismiss="modal" id="local-search-close" type="button">
+<span aria-hidden="true">×</span>
+</button>
+</div>
+<div class="modal-body mx-3">
+<div class="md-form mb-5">
+<input class="form-control validate" id="local-search-input" type="text"/>
+<label data-error="x" data-success="v" for="local-search-input">关键词</label>
+</div>
+<div class="list-group" id="local-search-result"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer>
+<div class="footer-inner">
+<div class="footer-content">
+<a href="https://hexo.io" rel="nofollow noopener" target="_blank"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" rel="nofollow noopener" target="_blank"><span>Fluid</span></a>
+</div>
+<div class="statistics">
+<span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+<span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+</div>
+</div>
+</footer>
+<!-- Scripts -->
+<script src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js"></script>
+<link href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet"/>
+<script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+<script src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js"></script>
+<script src="/blog/js/events.js"></script>
+<script src="/blog/js/plugins.js"></script>
+<script src="/blog/js/img-lazyload.js"></script>
+<script src="/blog/js/local-search.js"></script>
+<script defer="" src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script src="/blog/js/boot.js"></script>
+<noscript>
+<div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+</noscript>
+</body>
+</html>

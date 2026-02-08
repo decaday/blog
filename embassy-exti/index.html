@@ -1,0 +1,510 @@
+
+<!DOCTYPE html>
+
+<html data-default-color-scheme="auto" lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<link href="/blog/img/favicon.jpg" rel="apple-touch-icon" sizes="76x76"/>
+<link href="/blog/img/favicon.jpg" rel="icon"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no" name="viewport"/>
+<meta content="ie=edge" http-equiv="x-ua-compatible"/>
+<meta content="#2f4154" name="theme-color"/>
+<meta content="星期十" name="author"/>
+<meta content="" name="keywords"/>
+<meta content="Embassy是一个基于Rust的异步嵌入式开发框架： Embassy: The next-generation framework for embedded applications Embassy不仅包含了异步运行时，还提供了STM32、RP2xxx，NRF等芯片的异步HAL实现、usb、[蓝牙(trouble)](embassy-rs/trouble: A Rust Host BL" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="从EXTI实现看Embassy:异步Rust嵌入式框架" property="og:title"/>
+<meta content="https://decaday.github.io/blog/embassy-exti/index.html" property="og:url"/>
+<meta content="Decaday's Blogs" property="og:site_name"/>
+<meta content="Embassy是一个基于Rust的异步嵌入式开发框架： Embassy: The next-generation framework for embedded applications Embassy不仅包含了异步运行时，还提供了STM32、RP2xxx，NRF等芯片的异步HAL实现、usb、[蓝牙(trouble)](embassy-rs/trouble: A Rust Host BL" property="og:description"/>
+<meta content="zh_CN" property="og:locale"/>
+<meta content="https://decaday.github.io/blog/images/embassy-webside.jpg" property="og:image"/>
+<meta content="2024-10-20T16:00:00.000Z" property="article:published_time"/>
+<meta content="2026-02-08T06:34:01.613Z" property="article:modified_time"/>
+<meta content="星期十" property="article:author"/>
+<meta content="嵌入式" property="article:tag"/>
+<meta content="Rust" property="article:tag"/>
+<meta content="Embassy" property="article:tag"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="https://decaday.github.io/blog/images/embassy-webside.jpg" name="twitter:image"/>
+<meta content="no-referrer-when-downgrade" name="referrer"/>
+<title>从EXTI实现看Embassy:异步Rust嵌入式框架 - Decaday's Blogs</title>
+<link href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" rel="stylesheet">
+<link href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" rel="stylesheet"/>
+<link href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet"/>
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+<link href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css" rel="stylesheet"/>
+<link href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css" rel="stylesheet"/>
+<link href="/blog/css/main.css" rel="stylesheet">
+<link href="/blog/css/highlight.css" id="highlight-css" rel="stylesheet">
+<link href="/blog/css/highlight-dark.css" id="highlight-css-dark" rel="stylesheet"/>
+<script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"decaday.github.io","root":"/blog/","version":"1.9.8","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/blog/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+<script src="/blog/js/utils.js"></script>
+<script src="/blog/js/color-schema.js"></script>
+<meta content="Hexo 7.1.1" name="generator"/></link></link></link></link></head>
+<body>
+<header>
+<div class="header-inner" style="height: 70vh;">
+<nav class="navbar fixed-top navbar-expand-lg navbar-dark scrolling-navbar" id="navbar">
+<div class="container">
+<a class="navbar-brand" href="/blog/">
+<strong>Decaday 星期十的博客</strong>
+</a>
+<button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbarSupportedContent" data-toggle="collapse" id="navbar-toggler-btn" type="button">
+<div class="animated-icon"><span></span><span></span><span></span></div>
+</button>
+<!-- Collapsible content -->
+<div class="collapse navbar-collapse" id="navbarSupportedContent">
+<ul class="navbar-nav ml-auto text-center">
+<li class="nav-item">
+<a class="nav-link" href="/blog/" target="_self">
+<i class="iconfont icon-home-fill"></i>
+<span>首页</span>
+</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="/blog/tags/" target="_self">
+<i class="iconfont icon-tags-fill"></i>
+<span>标签</span>
+</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="/blog/about/" target="_self">
+<i class="iconfont icon-user-fill"></i>
+<span>关于</span>
+</a>
+</li>
+<li class="nav-item" id="search-btn">
+<a aria-label="Search" class="nav-link" data-target="#modalSearch" data-toggle="modal" href="javascript:;" target="_self">
+<i class="iconfont icon-search"></i>
+</a>
+</li>
+<li class="nav-item" id="color-toggle-btn">
+<a aria-label="Color Toggle" class="nav-link" href="javascript:;" target="_self">
+<i class="iconfont icon-dark" id="color-toggle-icon"></i>
+</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<div class="banner" id="banner" parallax="true" style="background: url('/blog/images/embassy-webside.jpg') no-repeat center center; background-size: cover;">
+<div class="full-bg-img">
+<div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+<div class="banner-text text-center fade-in-up">
+<div class="h2">
+<span id="subtitle">从EXTI实现看Embassy:异步Rust嵌入式框架</span>
+</div>
+<div class="mt-3">
+<span class="post-meta">
+<i aria-hidden="true" class="iconfont icon-date-fill"></i>
+<time datetime="2024-10-21 00:00" pubdate="">
+          2024年10月21日
+        </time>
+</span>
+</div>
+<div class="mt-1">
+<span class="post-meta mr-2">
+<i class="iconfont icon-chart"></i>
+        
+          3.4k 字
+        
+      </span>
+<span class="post-meta mr-2">
+<i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          29 分钟
+        
+      </span>
+<span id="busuanzi_container_page_pv" style="display: none">
+<i aria-hidden="true" class="iconfont icon-eye"></i>
+<span id="busuanzi_value_page_pv"></span> 次
+        </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<main>
+<div class="container-fluid nopadding-x">
+<div class="row nomargin-x">
+<div class="side-col d-none d-lg-block col-lg-2">
+</div>
+<div class="col-lg-8 nopadding-x-md">
+<div class="container nopadding-x-md" id="board-ctn">
+<div id="board">
+<article class="post-content mx-auto">
+<h1 id="seo-header">从EXTI实现看Embassy:异步Rust嵌入式框架</h1>
+<p class="note note-info" id="updated-time" style="">
+                
+                  
+                    本文最后更新于 2026年2月8日 下午
+                  
+                
+              </p>
+<div class="markdown-body">
+<p>Embassy是一个基于Rust的异步嵌入式开发框架：</p>
+<p><a href="https://embassy.dev/" rel="noopener" target="_blank">Embassy: The next-generation framework for embedded applications</a></p>
+<p>Embassy不仅包含了异步运行时，还提供了STM32、RP2xxx，NRF等芯片的异步HAL实现、usb、[蓝牙(trouble)](<a href="https://github.com/embassy-rs/trouble/" rel="noopener" target="_blank">embassy-rs/trouble: A Rust Host BLE stack with a future goal of qualification.</a>)等，乐鑫官方的<a href="https://github.com/esp-rs" rel="noopener" target="_blank">esp-rs</a>也是将embassy作为默认框架使用。</p>
+<p>最近研究了embassy-stm32的部分实现，写在博客里作为记录吧。Exti最简单也有点Async味，就先写这个吧。</p>
+<p>注意：本文撰写时，Embassy尚未1.0 release，此文可能在您读的时候已经过时。为了博客的清晰，部分代码被简化。</p>
+<h2 id="EXTI"><a class="headerlink" href="#EXTI" title="EXTI"></a>EXTI</h2><p><strong>EXTI</strong> 是 Extended Interrupts and Events Controller 的缩写，即“扩展中断和事件控制器”。</p>
+<p>它的核心作用可以概括为一句话：让STM32能够响应来自外部（或内部通道）的异步信号，如IO上升沿、IO高电平，并在这些事件发生时触发中断或事件请求，从而执行特定的任务，尤其擅长将MCU从低功耗模式中唤醒。</p>
+<p>embassy-stm32的exti驱动，我们从顶向下看。</p>
+<p>源码链接：<a href="https://github.com/embassy-rs/embassy/blob/1b440342085a0a4f752c795937cc038b41ca1e78/embassy-stm32/src/exti.rs" rel="noopener" target="_blank">embassy/embassy-stm32/src · embassy-rs/embassy</a></p>
+<p>整个代码的逻辑如下：</p>
+<p><img alt="exti-embassy-sequence" lazyload="" src="/blog/embassy-exti/exti-embassy-sequence.svg" srcset="/blog/img/loading.gif"/></p>
+<h2 id="ExtiInput"><a class="headerlink" href="#ExtiInput" title="ExtiInput&lt;’d&gt;"></a>ExtiInput&lt;’d&gt;</h2><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-comment">/// EXTI input driver.</span><br/><span class="hljs-comment">///</span><br/><span class="hljs-comment">/// This driver augments a GPIO `Input` with EXTI functionality. EXTI is not</span><br/><span class="hljs-comment">/// built into `Input` itself because it needs to take ownership of the corresponding</span><br/><span class="hljs-comment">/// EXTI channel, which is a limited resource.</span><br/><span class="hljs-comment">///</span><br/><span class="hljs-comment">/// Pins PA5, PB5, PC5... all use EXTI channel 5, so you can't use EXTI on, say, PA5 and PC5 at the same time.</span><br/><span class="hljs-keyword">pub</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">ExtiInput</span>&lt;<span class="hljs-symbol">'d</span>&gt; {<br/>  pin: Input&lt;<span class="hljs-symbol">'d</span>&gt;,<br/>}<br/></code></pre></td></tr></table></figure>
+<p>这是可被用户直接使用的<code>ExtiInput</code>类型。</p>
+<p>其内部包含了一个Input类型（其实Input类型内部也是包含了一个<code>FlexPin</code>类型）</p>
+<h3 id="构造函数"><a class="headerlink" href="#构造函数" title="构造函数"></a>构造函数</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/><span class="line">12</span><br/><span class="line">13</span><br/><span class="line">14</span><br/><span class="line">15</span><br/><span class="line">16</span><br/><span class="line">17</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-keyword">impl</span>&lt;<span class="hljs-symbol">'d</span>&gt; ExtiInput&lt;<span class="hljs-symbol">'d</span>&gt; {<br/>    <span class="hljs-comment">/// Create an EXTI input.</span><br/>    <span class="hljs-keyword">pub</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">new</span>&lt;T: GpioPin&gt;(<br/>        pin: <span class="hljs-keyword">impl</span> <span class="hljs-title class_">Peripheral</span>&lt;P = T&gt; + <span class="hljs-symbol">'d</span>,<br/>        ch: <span class="hljs-keyword">impl</span> <span class="hljs-title class_">Peripheral</span>&lt;P = T::ExtiChannel&gt; + <span class="hljs-symbol">'d</span>,<br/>        pull: Pull,<br/>    ) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-keyword">Self</span> {<br/>        into_ref!(pin, ch);<br/><br/>        <span class="hljs-comment">// Needed if using AnyPin+AnyChannel.</span><br/>        <span class="hljs-built_in">assert_eq!</span>(pin.<span class="hljs-title function_ invoke__">pin</span>(), ch.<span class="hljs-title function_ invoke__">number</span>());<br/><br/>        <span class="hljs-keyword">Self</span> {<br/>            pin: Input::<span class="hljs-title function_ invoke__">new</span>(pin, pull),<br/>        }<br/>    }<br/>    ...<br/></code></pre></td></tr></table></figure>
+<p>new函数我们主要说一下 <code>impl Peripheral&lt;P = T::ExtiChannel&gt;</code>：</p>
+<ul>
+<li><code>impl Peripheral&lt;...&gt;</code>: 表明 <code>pin</code> 必须是一个实现了 <code>Peripheral</code> trait 的类型。 <code>Peripheral</code> 用来标记硬件外设所有权，来自<a href="https://github.com/embassy-rs/embassy/tree/main/embassy-hal-internal" rel="noopener" target="_blank">embassy-hal-internal</a>。</li>
+<li><code>&lt;P = T&gt;</code>: 这是一个关联类型约束，意味着这个外设的实体类型就是泛型 <code>T</code>（比如 <code>peripherals::PA4</code>）。</li>
+<li><code>&lt;P = T::ExtiChannel&gt;</code>：<code>T::ExtiChannel</code>是Trait <code>T</code>的关联类型，这个我们将在下面看到。它意味着这个外设的实体类型要与 “与T对应的ExtiChannel” 的类型匹配。</li>
+<li><code>+ 'd</code>: 这是一个生命周期约束，确保传入的外设引用至少和 <code>ExtiInput</code> 实例活得一样长。这在处理外设的可变借用时非常重要。</li>
+</ul>
+<p>这个类型限制是这样的：</p>
+<p><code>T</code>是GpioPin，是某个引脚的类型（比如PA4，PA5，都是单独的类型，都可以是<code>T</code>）</p>
+<p><code>pin</code> 参数要走了 <code>T</code> 的所有权，目的是使得用户无法直接将PA4再用作I2C。其形式通常是单例Singleton，也就是传统rust hal库结构的<code>let p = Peripheral.take()</code> 所获得的外设的所有权（以后可能单独写博客讲单例）。</p>
+<p><code>ch</code> 参数限定了其自身必须是<code>T</code>的关联类型<code>ExtiChannel</code> （<code>P = T::ExtiChannel</code>），我们在下面细说，这要求了channel必须与pin对应，比如PA4必须提供EXTI4。</p>
+<h3 id="类型系统"><a class="headerlink" href="#类型系统" title="类型系统"></a>类型系统</h3><p>EXTI单例（Singleton）类型的定义在<code>_generated.rs</code>（由<code>build.rs</code>生成的）中的<code>embassy_hal_internal::peripherals_definition!</code>宏中。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-comment">// （embassy-stm32/target/thumbv7em-none-eabi/.../out/_generated.rs）</span><br/>embassy_hal_internal::peripherals_definition!(<br/>    ADC1,<br/>    ...<br/>    EXTI0,<br/>    EXTI1,<br/>    EXTI2,<br/>    EXTI3,<br/>    ...<br/>)<br/></code></pre></td></tr></table></figure>
+<p>这些外设信息来自芯片的CubeMX数据库。经过<a href="https://github.com/embassy-rs/stm32-data" rel="noopener" target="_blank">stm32-data</a>和embassy-stm32宏的层层处理，实现了完善的类型限制和不同型号间高度的代码复用。</p>
+<h4 id="Channel-Trait"><a class="headerlink" href="#Channel-Trait" title="Channel Trait"></a><code>Channel</code> Trait</h4><p>Exit的<code>Channel</code> Trait使用了密封（Sealed）Trait，这样可以保证Channel Trait在包外可见，但是不能在外部被实现（因为外部实现privite trait <code>SealedChannel</code> ）</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/><span class="line">12</span><br/><span class="line">13</span><br/><span class="line">14</span><br/><span class="line">15</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-keyword">trait</span> <span class="hljs-title class_">SealedChannel</span> {}<br/><span class="hljs-meta">#[allow(private_bounds)]</span><br/><span class="hljs-keyword">pub</span> <span class="hljs-keyword">trait</span> <span class="hljs-title class_">Channel</span>: SealedChannel + <span class="hljs-built_in">Sized</span> {<br/>    <span class="hljs-comment">/// Get the EXTI channel number.</span><br/>    <span class="hljs-keyword">fn</span> <span class="hljs-title function_">number</span>(&amp;<span class="hljs-keyword">self</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">u8</span>;<br/><br/>    <span class="hljs-comment">/// Type-erase (degrade) this channel into an `AnyChannel`.</span><br/>    <span class="hljs-comment">///</span><br/>    <span class="hljs-comment">/// This converts EXTI channel singletons (`EXTI0`, `EXTI1`, ...), which</span><br/>    <span class="hljs-comment">/// are all different types, into the same type. It is useful for</span><br/>    <span class="hljs-comment">/// creating arrays of channels, or avoiding generics.</span><br/>    <span class="hljs-keyword">fn</span> <span class="hljs-title function_">degrade</span>(<span class="hljs-keyword">self</span>) <span class="hljs-punctuation">-&gt;</span> AnyChannel {<br/>        AnyChannel { number: <span class="hljs-keyword">self</span>.<span class="hljs-title function_ invoke__">number</span>() <span class="hljs-keyword">as</span> <span class="hljs-type">u8</span>, }<br/>    }<br/>}<br/></code></pre></td></tr></table></figure>
+<p>在实现上比较简单，embassy-stm32使用宏来简化了代码。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/><span class="line">12</span><br/><span class="line">13</span><br/><span class="line">14</span><br/><span class="line">15</span><br/><span class="line">16</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-built_in">macro_rules!</span> impl_exti {<br/>    ($<span class="hljs-keyword">type</span>:ident, $number:expr) =&gt; {<br/>        <span class="hljs-keyword">impl</span> <span class="hljs-title class_">SealedChannel</span> <span class="hljs-keyword">for</span> <span class="hljs-title class_">peripherals</span>::$<span class="hljs-keyword">type</span> {}<br/>        <span class="hljs-keyword">impl</span> <span class="hljs-title class_">Channel</span> <span class="hljs-keyword">for</span> <span class="hljs-title class_">peripherals</span>::$<span class="hljs-keyword">type</span> {<br/>            <span class="hljs-keyword">fn</span> <span class="hljs-title function_">number</span>(&amp;<span class="hljs-keyword">self</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">u8</span> {<br/>                $number<br/>            }<br/>        }<br/>    };<br/>}<br/><br/>impl_exti!(EXTI0, <span class="hljs-number">0</span>);<br/>impl_exti!(EXTI1, <span class="hljs-number">1</span>);<br/>impl_exti!(EXTI2, <span class="hljs-number">2</span>);<br/>impl_exti!(EXTI3, <span class="hljs-number">3</span>);<br/><span class="hljs-comment">// ...</span><br/></code></pre></td></tr></table></figure>
+<h4 id="Pin-Trait"><a class="headerlink" href="#Pin-Trait" title="Pin Trait"></a><code>Pin</code> Trait</h4><p><code>Pin</code> Trait同样使用了Sealed Trait。AnyPin部分我们先不研究，我们只看Exti部分：Pin Trait设置了一个关联类型，指向<code>exti::Channel</code> Trait。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/><span class="line">12</span><br/><span class="line">13</span><br/><span class="line">14</span><br/><span class="line">15</span><br/><span class="line">16</span><br/><span class="line">17</span><br/><span class="line">18</span><br/><span class="line">19</span><br/><span class="line">20</span><br/><span class="line">21</span><br/><span class="line">22</span><br/><span class="line">23</span><br/><span class="line">24</span><br/><span class="line">25</span><br/><span class="line">26</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-comment">// embassy-stm32/src/gpio.rs</span><br/><br/><span class="hljs-keyword">pub</span> <span class="hljs-keyword">trait</span> <span class="hljs-title class_">Pin</span>: Peripheral&lt;P = <span class="hljs-keyword">Self</span>&gt; + <span class="hljs-built_in">Into</span>&lt;AnyPin&gt; + SealedPin + <span class="hljs-built_in">Sized</span> + <span class="hljs-symbol">'static</span> {<br/>    <span class="hljs-comment">/// EXTI channel assigned to this pin. For example, PC4 uses EXTI4.</span><br/>    <span class="hljs-meta">#[cfg(feature = <span class="hljs-string">"exti"</span>)]</span><br/>    <span class="hljs-keyword">type</span> <span class="hljs-title class_">ExtiChannel</span>: crate::exti::Channel;<br/><br/>    <br/>    <span class="hljs-meta">#[inline]</span> <span class="hljs-comment">// Number of the pin within the port (0..31)</span><br/>    <span class="hljs-keyword">fn</span> <span class="hljs-title function_">pin</span>(&amp;<span class="hljs-keyword">self</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">u8</span> { <span class="hljs-keyword">self</span>._pin() }<br/><br/>    <span class="hljs-meta">#[inline]</span> <span class="hljs-comment">// Port of the pin</span><br/>    <span class="hljs-keyword">fn</span> <span class="hljs-title function_">port</span>(&amp;<span class="hljs-keyword">self</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">u8</span> { <span class="hljs-keyword">self</span>._port() }<br/><br/>    <span class="hljs-comment">/// Type-erase (degrade) this pin into an `AnyPin`.</span><br/>    <span class="hljs-comment">///</span><br/>    <span class="hljs-comment">/// This converts pin singletons (`PA5`, `PB6`, ...), which</span><br/>    <span class="hljs-comment">/// are all different types, into the same type. It is useful for</span><br/>    <span class="hljs-comment">/// creating arrays of pins, or avoiding generics.</span><br/>    <span class="hljs-meta">#[inline]</span><br/>    <span class="hljs-keyword">fn</span> <span class="hljs-title function_">degrade</span>(<span class="hljs-keyword">self</span>) <span class="hljs-punctuation">-&gt;</span> AnyPin {<br/>        AnyPin {<br/>            pin_port: <span class="hljs-keyword">self</span>.<span class="hljs-title function_ invoke__">pin_port</span>(),<br/>        }<br/>    }<br/>}<br/></code></pre></td></tr></table></figure>
+<p>在Impl上也是用了大量的codegen和宏，其最终是 <code>foreach_pin</code> 这个宏：(foreach_pin的原型在build.rs生成的<code>_macro.rs</code>内，稍微有点绕，不再详细叙述)</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-comment">// （embassy-stm32/src/gpio.rs）</span><br/>foreach_pin!(<br/>    ($pin_name:ident, $port_name:ident, $port_num:expr, $pin_num:expr, $exti_ch:ident) =&gt; {<br/>        <span class="hljs-keyword">impl</span> <span class="hljs-title class_">Pin</span> <span class="hljs-keyword">for</span> <span class="hljs-title class_">peripherals</span>::$pin_name {<br/>            <span class="hljs-meta">#[cfg(feature = <span class="hljs-string">"exti"</span>)]</span><br/>            <span class="hljs-keyword">type</span> <span class="hljs-title class_">ExtiChannel</span> = peripherals::$exti_ch;<br/>        }<br/>        <span class="hljs-keyword">impl</span> <span class="hljs-title class_">SealedPin</span> <span class="hljs-keyword">for</span> <span class="hljs-title class_">peripherals</span>::$pin_name { <span class="hljs-comment">/* ... */</span>} <br/>        <span class="hljs-keyword">impl</span> <span class="hljs-title class_">From</span>&lt;peripherals::$pin_name&gt; <span class="hljs-keyword">for</span> <span class="hljs-title class_">AnyPin</span> { <span class="hljs-comment">/* ... */</span>} <br/>    };<br/>);<br/></code></pre></td></tr></table></figure>
+<p>其它IO复用也是通过codegen和宏实现的。比如，经过数据处理后，可能生成这样的代码：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-comment">// （_generated.rs）</span><br/>impl_adc_pin!(ADC3, PC2, <span class="hljs-number">12u8</span>);<br/>impl_adc_pin!(ADC3, PC3, <span class="hljs-number">13u8</span>);<br/>pin_trait_impl!(crate::can::RxPin, CAN1, PA11, <span class="hljs-number">9u8</span>);<br/>pin_trait_impl!(crate::can::TxPin, CAN1, PA12, <span class="hljs-number">9u8</span>);<br/></code></pre></td></tr></table></figure>
+<p>这种情况下就限制死了alternate function，从而在编译期就能发现问题，而且通过代码提示就能获知可用的IO而不用翻手册。不得不说，这就是人们希望类型系统所做到的！</p>
+<h3 id="wait-for-high"><a class="headerlink" href="#wait-for-high" title="wait_for_high"></a>wait_for_high</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/><span class="line">12</span><br/><span class="line">13</span><br/><span class="line">14</span><br/><span class="line">15</span><br/><span class="line">16</span><br/><span class="line">17</span><br/><span class="line">18</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-comment">/// Asynchronously wait until the pin is high.</span><br/><span class="hljs-comment">///</span><br/><span class="hljs-comment">/// This returns immediately if the pin is already high.</span><br/><span class="hljs-keyword">pub</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">wait_for_high</span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>) {<br/>    <span class="hljs-keyword">let</span> <span class="hljs-variable">fut</span> = ExtiInputFuture::<span class="hljs-title function_ invoke__">new</span>(<span class="hljs-keyword">self</span>.pin.pin.pin.<span class="hljs-title function_ invoke__">pin</span>(), <span class="hljs-keyword">self</span>.pin.pin.pin.<span class="hljs-title function_ invoke__">port</span>(), <span class="hljs-literal">true</span>, <span class="hljs-literal">false</span>);<br/>    <span class="hljs-keyword">if</span> <span class="hljs-keyword">self</span>.<span class="hljs-title function_ invoke__">is_high</span>() {<br/>        <span class="hljs-keyword">return</span>;<br/>    }<br/>    fut.<span class="hljs-keyword">await</span><br/>}<br/>...<br/><span class="hljs-comment">/// Asynchronously wait until the pin sees a rising edge.</span><br/><span class="hljs-comment">///</span><br/><span class="hljs-comment">/// If the pin is already high, it will wait for it to go low then back high.</span><br/><span class="hljs-keyword">pub</span> <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">wait_for_rising_edge</span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>) {<br/>    ExtiInputFuture::<span class="hljs-title function_ invoke__">new</span>(<span class="hljs-keyword">self</span>.pin.pin.pin.<span class="hljs-title function_ invoke__">pin</span>(), <span class="hljs-keyword">self</span>.pin.pin.pin.<span class="hljs-title function_ invoke__">port</span>(), <span class="hljs-literal">true</span>, <span class="hljs-literal">false</span>).<span class="hljs-keyword">await</span><br/>}<br/>...<br/></code></pre></td></tr></table></figure>
+<p>这个self.pin.pin.pin.pin()有够吐槽的。解释起来是这样的： <code>ExtiInput.Input.FlexPin.PeripheralRef&lt;AnyPin&gt;.pin()</code>。</p>
+<p>我们看见的<code>wait_for_high</code>或是<code>wait_for_rising_edge</code>新建了一个<code>ExtiInputFuture</code>，我们来看看：</p>
+<h2 id="ExtiInputFuture"><a class="headerlink" href="#ExtiInputFuture" title="ExtiInputFuture&lt;’a&gt;"></a>ExtiInputFuture&lt;’a&gt;</h2><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-meta">#[must_use = <span class="hljs-string">"futures do nothing unless you `.await` or poll them"</span>]</span><br/><span class="hljs-keyword">struct</span> <span class="hljs-title class_">ExtiInputFuture</span>&lt;<span class="hljs-symbol">'a</span>&gt; {<br/>    pin: <span class="hljs-type">u8</span>,<br/>    phantom: PhantomData&lt;&amp;<span class="hljs-symbol">'a</span> <span class="hljs-keyword">mut</span> AnyPin&gt;,<br/>}<br/></code></pre></td></tr></table></figure>
+<p>ExtiInputFuture并不存储外设实例，而只存一个pin_num，这有利于所有权的编写和更加灵活。实际上，STM32也只有16个Channel嘛，我们可以用一些全局标志位。</p>
+<h3 id="new和drop"><a class="headerlink" href="#new和drop" title="new和drop"></a>new和drop</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/><span class="line">12</span><br/><span class="line">13</span><br/><span class="line">14</span><br/><span class="line">15</span><br/><span class="line">16</span><br/><span class="line">17</span><br/><span class="line">18</span><br/><span class="line">19</span><br/><span class="line">20</span><br/><span class="line">21</span><br/><span class="line">22</span><br/><span class="line">23</span><br/><span class="line">24</span><br/><span class="line">25</span><br/><span class="line">26</span><br/><span class="line">27</span><br/><span class="line">28</span><br/><span class="line">29</span><br/><span class="line">30</span><br/><span class="line">31</span><br/><span class="line">32</span><br/><span class="line">33</span><br/><span class="line">34</span><br/></pre></td><td class="code"><pre><code class="hljs rust">    <span class="hljs-keyword">fn</span> <span class="hljs-title function_">new</span>(pin: <span class="hljs-type">u8</span>, port: <span class="hljs-type">u8</span>, rising: <span class="hljs-type">bool</span>, falling: <span class="hljs-type">bool</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-keyword">Self</span> {<br/>        critical_section::<span class="hljs-title function_ invoke__">with</span>(|_| {<br/>            <span class="hljs-keyword">let</span> <span class="hljs-variable">pin</span> = pin <span class="hljs-keyword">as</span> <span class="hljs-type">usize</span>;<br/>            <span class="hljs-title function_ invoke__">exticr_regs</span>().<span class="hljs-title function_ invoke__">exticr</span>(pin / <span class="hljs-number">4</span>).<span class="hljs-title function_ invoke__">modify</span>(|w| w.<span class="hljs-title function_ invoke__">set_exti</span>(pin % <span class="hljs-number">4</span>, port));<br/>            EXTI.<span class="hljs-title function_ invoke__">rtsr</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_ invoke__">modify</span>(|w| w.<span class="hljs-title function_ invoke__">set_line</span>(pin, rising));<br/>            EXTI.<span class="hljs-title function_ invoke__">ftsr</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_ invoke__">modify</span>(|w| w.<span class="hljs-title function_ invoke__">set_line</span>(pin, falling));<br/><br/>            <span class="hljs-comment">// clear pending bit</span><br/>            <span class="hljs-meta">#[cfg(not(any(exti_c0, exti_g0, exti_u0, exti_l5, exti_u5, exti_h5, exti_h50)))]</span><br/>            EXTI.<span class="hljs-title function_ invoke__">pr</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_ invoke__">write</span>(|w| w.<span class="hljs-title function_ invoke__">set_line</span>(pin, <span class="hljs-literal">true</span>));<br/>            <span class="hljs-meta">#[cfg(any(exti_c0, exti_g0, exti_u0, exti_l5, exti_u5, exti_h5, exti_h50))]</span><br/>            {<br/>                EXTI.<span class="hljs-title function_ invoke__">rpr</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_ invoke__">write</span>(|w| w.<span class="hljs-title function_ invoke__">set_line</span>(pin, <span class="hljs-literal">true</span>));<br/>                EXTI.<span class="hljs-title function_ invoke__">fpr</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_ invoke__">write</span>(|w| w.<span class="hljs-title function_ invoke__">set_line</span>(pin, <span class="hljs-literal">true</span>));<br/>            }<br/><br/>            <span class="hljs-title function_ invoke__">cpu_regs</span>().<span class="hljs-title function_ invoke__">imr</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_ invoke__">modify</span>(|w| w.<span class="hljs-title function_ invoke__">set_line</span>(pin, <span class="hljs-literal">true</span>));<br/>        });<br/><br/>        <span class="hljs-keyword">Self</span> {<br/>            pin,<br/>            phantom: PhantomData,<br/>        }<br/>    }<br/>}<br/><br/><span class="hljs-keyword">impl</span>&lt;<span class="hljs-symbol">'a</span>&gt; <span class="hljs-built_in">Drop</span> <span class="hljs-keyword">for</span> <span class="hljs-title class_">ExtiInputFuture</span>&lt;<span class="hljs-symbol">'a</span>&gt; {<br/>    <span class="hljs-keyword">fn</span> <span class="hljs-title function_">drop</span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>) {<br/>        critical_section::<span class="hljs-title function_ invoke__">with</span>(|_| {<br/>            <span class="hljs-keyword">let</span> <span class="hljs-variable">pin</span> = <span class="hljs-keyword">self</span>.pin <span class="hljs-keyword">as</span> _;<br/>            <span class="hljs-title function_ invoke__">cpu_regs</span>().<span class="hljs-title function_ invoke__">imr</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_ invoke__">modify</span>(|w| w.<span class="hljs-title function_ invoke__">set_line</span>(pin, <span class="hljs-literal">false</span>));<br/>        });<br/>    }<br/>}<br/></code></pre></td></tr></table></figure>
+<p>new函数使用了一个<a href="https://docs.rs/critical-section/latest/critical_section/" rel="noopener" target="_blank">critical_section</a>。“<code>critical_section::with</code> 创建了一个<code>临界区</code>。在嵌入式系统中，临界区是一段在执行期间不会被中断打断的代码。对于单核微控制器，最简单的实现方式就是临时禁用所有中断（这也是默认实现）。这确保了在配置 EXTI 寄存器这种需要多个步骤的操作时，不会被一个突如其来的中断打乱，从而保证了操作的原子性。</p>
+<p><code>new</code>函数初始化了选择引脚端口、设置触发边沿等与EXTI相关的寄存器（就不展开细看了），最后一行设置了IMR（Interrupt mask register）寄存器，表示取消屏蔽（Mask）该位，此时该通道可产生中断。</p>
+<img alt="image-20241021110821260" lazyload="" src="image-20241021110821260.png" srcset="/blog/img/loading.gif" style="zoom:80%;">
+<h3 id="impl-Future-poll"><a class="headerlink" href="#impl-Future-poll" title="impl Future (poll)"></a>impl Future (poll)</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/><span class="line">12</span><br/><span class="line">13</span><br/><span class="line">14</span><br/><span class="line">15</span><br/><span class="line">16</span><br/><span class="line">17</span><br/><span class="line">18</span><br/><span class="line">19</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-keyword">const</span> EXTI_COUNT: <span class="hljs-type">usize</span> = <span class="hljs-number">16</span>;<br/><span class="hljs-keyword">const</span> NEW_AW: AtomicWaker = AtomicWaker::<span class="hljs-title function_ invoke__">new</span>();<br/><span class="hljs-keyword">static</span> EXTI_WAKERS: [AtomicWaker; EXTI_COUNT] = [NEW_AW; EXTI_COUNT];<br/>...<br/>...<br/><span class="hljs-keyword">impl</span>&lt;<span class="hljs-symbol">'a</span>&gt; Future <span class="hljs-keyword">for</span> <span class="hljs-title class_">ExtiInputFuture</span>&lt;<span class="hljs-symbol">'a</span>&gt; {<br/>    <span class="hljs-keyword">type</span> <span class="hljs-title class_">Output</span> = ();<br/><br/>    <span class="hljs-keyword">fn</span> <span class="hljs-title function_">poll</span>(<span class="hljs-keyword">self</span>: Pin&lt;&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">Self</span>&gt;, cx: &amp;<span class="hljs-keyword">mut</span> Context&lt;<span class="hljs-symbol">'_</span>&gt;) <span class="hljs-punctuation">-&gt;</span> Poll&lt;<span class="hljs-keyword">Self</span>::Output&gt; {<br/>        EXTI_WAKERS[<span class="hljs-keyword">self</span>.pin <span class="hljs-keyword">as</span> <span class="hljs-type">usize</span>].<span class="hljs-title function_ invoke__">register</span>(cx.<span class="hljs-title function_ invoke__">waker</span>());<br/><br/>        <span class="hljs-keyword">let</span> <span class="hljs-variable">imr</span> = <span class="hljs-title function_ invoke__">cpu_regs</span>().<span class="hljs-title function_ invoke__">imr</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_ invoke__">read</span>();<br/>        <span class="hljs-keyword">if</span> !imr.<span class="hljs-title function_ invoke__">line</span>(<span class="hljs-keyword">self</span>.pin <span class="hljs-keyword">as</span> _) {<br/>            Poll::<span class="hljs-title function_ invoke__">Ready</span>(())<br/>        } <span class="hljs-keyword">else</span> {<br/>            Poll::Pending<br/>        }<br/>    }<br/>}<br/></code></pre></td></tr></table></figure>
+<p>在这里我们实现了 <code>Future</code> trait。使得 <code>ExtiInputFuture</code> 可以用于 <code>async</code>/<code>await</code> 机制。</p>
+<p><code>Future</code> trait 代表一个异步计算/运行的结果，可以被执行器（executor）轮询（poll）以检查是否完成。 在 <code>poll</code> 方法中，我们做了以下几件事：</p>
+<ol>
+<li><p><strong>注册 <code>waker</code></strong> ： waker是唤醒器。因为持续的轮询会消耗大量的cpu资源(如果持续poll，那就是<a href="https://docs.rs/nb/1.1.0/nb/" rel="noopener" target="_blank">nb模式</a>）。所以，一个聪明的executor仅第一次和被<code>waker</code>唤醒后，才会执行一次poll。这里的唤醒者是中断函数。</p>
+<p><code>EXTI_WAKERS</code> 是一个全局的 <code>AtomicWaker</code> 数组，每个 <code>pin</code> 对应一个 <code>AtomicWaker</code>，用于存储 <code>waker</code>。 <code>poll</code> 调用时会将 <code>waker</code> 存入 <code>EXTI_WAKERS[self.pine]</code>，这样当中断发生时，可以使用这个 <code>waker</code> 唤醒 <code>Future</code>。</p>
+</li>
+<li><p><strong>检查中断是否发生</strong>：它通过检查IMR寄存器判断中断是否发生。<strong>因为我们的中断函数(<code>on_irq</code>)在触发后会立刻通过<code>imr(0).modify(|w| w.0 &amp;= !bits)</code>来屏蔽该中断线</strong>。所以，如果在<code>poll</code>时发现IMR位被清零了（即被屏蔽了），就说明在我们<code>await</code>的这段时间里，中断已经来过了。这时就可以返回<code>Poll::Ready</code>了。如果IMR位仍然是1（未屏蔽），则说明中断还没来，返回<code>Poll::Pending</code>继续等待。” 这样就把<code>poll</code>和<code>on_irq</code>的行为联系起来了，逻辑更清晰。</p>
+</li>
+</ol>
+<p>提一下，AtomicWaker这个底层实现在<a href="https://crates.io/crates/embassy-sync" rel="noopener" target="_blank">embassy-sync</a>中，平台有Atomic的情况下用AtomicPtr实现，没有的话用Mutex实现。</p>
+<h2 id="中断"><a class="headerlink" href="#中断" title="中断"></a>中断</h2><h3 id="on-irq"><a class="headerlink" href="#on-irq" title="on_irq"></a>on_irq</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/><span class="line">12</span><br/><span class="line">13</span><br/><span class="line">14</span><br/><span class="line">15</span><br/><span class="line">16</span><br/><span class="line">17</span><br/><span class="line">18</span><br/><span class="line">19</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">on_irq</span>() {<br/>    <span class="hljs-meta">#[cfg(not(any(exti_c0, exti_g0, exti_u0, exti_l5, exti_u5, exti_h5, exti_h50)))]</span><br/>    <span class="hljs-keyword">let</span> <span class="hljs-variable">bits</span> = EXTI.<span class="hljs-title function_ invoke__">pr</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_ invoke__">read</span>().<span class="hljs-number">0</span>;<br/>    <span class="hljs-meta">#[cfg(any(exti_c0, exti_g0, exti_u0, exti_l5, exti_u5, exti_h5, exti_h50))]</span><br/>    <span class="hljs-keyword">let</span> <span class="hljs-variable">bits</span> = EXTI.<span class="hljs-title function_ invoke__">rpr</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_ invoke__">read</span>().<span class="hljs-number">0</span> | EXTI.<span class="hljs-title function_ invoke__">fpr</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_ invoke__">read</span>().<span class="hljs-number">0</span>;<br/>    <span class="hljs-comment">// ...</span><br/><br/>    <span class="hljs-comment">// Mask all the channels that fired.</span><br/>    <span class="hljs-title function_ invoke__">cpu_regs</span>().<span class="hljs-title function_ invoke__">imr</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_ invoke__">modify</span>(|w| w.<span class="hljs-number">0</span> &amp;= !bits);<br/><br/>    <span class="hljs-comment">// Wake the tasks</span><br/>    <span class="hljs-keyword">for</span> <span class="hljs-variable">pin</span> <span class="hljs-keyword">in</span> <span class="hljs-title function_ invoke__">BitIter</span>(bits) {<br/>        EXTI_WAKERS[pin <span class="hljs-keyword">as</span> <span class="hljs-type">usize</span>].<span class="hljs-title function_ invoke__">wake</span>();<br/>    }<br/><br/>    <span class="hljs-comment">// Clear pending</span><br/>    EXTI.<span class="hljs-title function_ invoke__">pr</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_ invoke__">write_value</span>(<span class="hljs-title function_ invoke__">Lines</span>(bits));<br/>    ...<br/>}<br/></code></pre></td></tr></table></figure>
+<p><code>on_irq</code> 函数的主要作用是在外部中断发生时，处理触发的 <code>ExtiChannel</code> 并唤醒相应的 <code>Future</code>。</p>
+<ol>
+<li>读取<code>PR</code>（Pending Register）或者 <code>RPR/FPR</code>（Rising/Falling Edge Pending Register）因为多个EXTI线可能共用一个中断向量，所以<code>on_irq</code>首先读取<code>PR</code>来确定具体是哪些线触发了中断。</li>
+<li>通过修改 <code>IMR</code>（Interrupt Mask Register），屏蔽已触发的中断通道，以防止重复触发。</li>
+<li>为了处理多个Channel都触发的情况，Embassy通过 <code>BitIter(bits)</code> 遍历所有触发的 <code>pin</code>，并调用 <code>EXTI_WAKERS[pin as usize].wake()</code> 唤醒相应的 <code>Future</code>。这个<code>BitIter</code>会在下面讲到。</li>
+<li>在 <code>EXTI.pr</code> 或 <code>EXTI.rpr/EXTI.fpr</code> 中清除对应的位，以便后续的中断可以正确触发。</li>
+</ol>
+<h3 id="绑定"><a class="headerlink" href="#绑定" title="绑定"></a>绑定</h3><p>Embassy通过一系列宏将EXTI中断绑定到on_irq上。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/><span class="line">12</span><br/><span class="line">13</span><br/><span class="line">14</span><br/><span class="line">15</span><br/><span class="line">16</span><br/><span class="line">17</span><br/><span class="line">18</span><br/><span class="line">19</span><br/><span class="line">20</span><br/><span class="line">21</span><br/><span class="line">22</span><br/><span class="line">23</span><br/><span class="line">24</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-built_in">macro_rules!</span> foreach_exti_irq {<br/>    ($action:ident) =&gt; {<br/>        foreach_interrupt!(<br/>            (EXTI0)  =&gt; { $action!(EXTI0); };<br/>            (EXTI1)  =&gt; { $action!(EXTI1); };<br/>			...<br/>            <span class="hljs-comment">// plus the weird ones</span><br/>            (EXTI0_1)   =&gt; { $action!( EXTI0_1 ); };<br/>            (EXTI15_10) =&gt; { $action!(EXTI15_10); };<br/>			...<br/>        );<br/>    };<br/>}<br/><br/><span class="hljs-built_in">macro_rules!</span> impl_irq {<br/>    ($e:ident) =&gt; {<br/>        <span class="hljs-meta">#[allow(non_snake_case)]</span><br/>        <span class="hljs-meta">#[cfg(feature = <span class="hljs-string">"rt"</span>)]</span><br/>        <span class="hljs-meta">#[interrupt]</span><br/>        <span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">fn</span> $<span class="hljs-title function_ invoke__">e</span>() {<br/>            <span class="hljs-title function_ invoke__">on_irq</span>()<br/>        }<br/>    };<br/>}<br/></code></pre></td></tr></table></figure>
+<p>因为EXTI中断比较复杂，有多个外设共用一个中断向量的情况，而且不同的系列共用中断向量的情况还不一样，在exti上难以使用<code>bind_irqs!</code>这样的模式、embassy_stm32的其它外设，以及embassy_rp等hal都是使用的<code>bind_irqs!</code>。这其实是将更多的中断访问权交给了用户。</p>
+<p>但是exti就不行了，想要让hal不占用中断向量，就只能关闭<code>exti</code> feature来关闭整个模块，或者关闭<code>rt</code> feature，自行管理启动和所有中断。</p>
+<h3 id="BitIter"><a class="headerlink" href="#BitIter" title="BitIter"></a>BitIter</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/><span class="line">12</span><br/><span class="line">13</span><br/><span class="line">14</span><br/><span class="line">15</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">BitIter</span>(<span class="hljs-type">u32</span>);<br/><br/><span class="hljs-keyword">impl</span> <span class="hljs-title class_">Iterator</span> <span class="hljs-keyword">for</span> <span class="hljs-title class_">BitIter</span> {<br/>    <span class="hljs-keyword">type</span> <span class="hljs-title class_">Item</span> = <span class="hljs-type">u32</span>;<br/><br/>    <span class="hljs-keyword">fn</span> <span class="hljs-title function_">next</span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Option</span>&lt;<span class="hljs-keyword">Self</span>::Item&gt; {<br/>        <span class="hljs-keyword">match</span> <span class="hljs-keyword">self</span>.<span class="hljs-number">0</span>.<span class="hljs-title function_ invoke__">trailing_zeros</span>() {<br/>            <span class="hljs-number">32</span> =&gt; <span class="hljs-literal">None</span>,<br/>            b =&gt; {<br/>                <span class="hljs-keyword">self</span>.<span class="hljs-number">0</span> &amp;= !(<span class="hljs-number">1</span> &lt;&lt; b);<br/>                <span class="hljs-title function_ invoke__">Some</span>(b)<br/>            }<br/>        }<br/>    }<br/>}<br/></code></pre></td></tr></table></figure>
+<p><code>BitIter</code> 是一个简单的位迭代器，用于遍历 <code>bits</code> 中的所有 <code>1</code> 位。</p>
+<p><code>trailing_zeros()</code> 返回最低有效位（LSB）之前 <code>0</code> 的个数。然后<code>self.0 &amp;= !(1 &lt;&lt; b)</code> 清除该位，以便在下一次 <code>next()</code> 调用时继续遍历。</p>
+<p>这种方式确保了 <code>on_irq</code> 处理多个 <code>EXTI</code> 事件时能够逐一唤醒对应的 <code>Future</code>。</p>
+<h2 id="embedded-hal"><a class="headerlink" href="#embedded-hal" title="embedded_hal"></a>embedded_hal</h2><p>exti.rs还提供了embedded_hal（略） 和 embedded_hal_async Trait的实现：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/><span class="line">12</span><br/><span class="line">13</span><br/><span class="line">14</span><br/><span class="line">15</span><br/><span class="line">16</span><br/><span class="line">17</span><br/><span class="line">18</span><br/><span class="line">19</span><br/><span class="line">20</span><br/><span class="line">21</span><br/><span class="line">22</span><br/><span class="line">23</span><br/><span class="line">24</span><br/><span class="line">25</span><br/><span class="line">26</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-keyword">impl</span>&lt;<span class="hljs-symbol">'d</span>&gt; embedded_hal_async::digital::Wait <span class="hljs-keyword">for</span> <span class="hljs-title class_">ExtiInput</span>&lt;<span class="hljs-symbol">'d</span>&gt; {<br/>    <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">wait_for_high</span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Result</span>&lt;(), <span class="hljs-keyword">Self</span>::Error&gt; {<br/>        <span class="hljs-keyword">self</span>.<span class="hljs-title function_ invoke__">wait_for_high</span>().<span class="hljs-keyword">await</span>;<br/>        <span class="hljs-title function_ invoke__">Ok</span>(())<br/>    }<br/><br/>    <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">wait_for_low</span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Result</span>&lt;(), <span class="hljs-keyword">Self</span>::Error&gt; {<br/>        <span class="hljs-keyword">self</span>.<span class="hljs-title function_ invoke__">wait_for_low</span>().<span class="hljs-keyword">await</span>;<br/>        <span class="hljs-title function_ invoke__">Ok</span>(())<br/>    }<br/><br/>    <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">wait_for_rising_edge</span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Result</span>&lt;(), <span class="hljs-keyword">Self</span>::Error&gt; {<br/>        <span class="hljs-keyword">self</span>.<span class="hljs-title function_ invoke__">wait_for_rising_edge</span>().<span class="hljs-keyword">await</span>;<br/>        <span class="hljs-title function_ invoke__">Ok</span>(())<br/>    }<br/><br/>    <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">wait_for_falling_edge</span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Result</span>&lt;(), <span class="hljs-keyword">Self</span>::Error&gt; {<br/>        <span class="hljs-keyword">self</span>.<span class="hljs-title function_ invoke__">wait_for_falling_edge</span>().<span class="hljs-keyword">await</span>;<br/>        <span class="hljs-title function_ invoke__">Ok</span>(())<br/>    }<br/><br/>    <span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">wait_for_any_edge</span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Result</span>&lt;(), <span class="hljs-keyword">Self</span>::Error&gt; {<br/>        <span class="hljs-keyword">self</span>.<span class="hljs-title function_ invoke__">wait_for_any_edge</span>().<span class="hljs-keyword">await</span>;<br/>        <span class="hljs-title function_ invoke__">Ok</span>(())<br/>    }<br/>}<br/></code></pre></td></tr></table></figure>
+<p>然后我们就可以愉快地使用：</p>
+<p><code>button.wait_for_low().await</code>啦！</p>
+<h1 id="总结"><a class="headerlink" href="#总结" title="总结"></a>总结</h1><p>这个EXTI模块复杂性比较低，主要用于EXTI最低级也是最常用的用法：等待上升沿、等待高电平等。</p>
+<p>但是由于stm32系列太多，又有很多<code>EXTI15_10</code>这种共用向量情况，embassy-stm32直接接管了所有EXTI中断（对于普通向量则一般使用bind_interrupts的模式）。所以如果用户想用EXTI完成更加复杂和即时的操作，就只能关闭<code>exti</code> feature来关闭整个模块，或者关闭<code>rt</code> feature，自行管理启动和所有中断。</p>
+<p>Embassy HAL设计了一套优秀的类型系统和HAL范式，为社区提供了学习榜样。其类型系统一部分在<a href="https://github.com/embassy-rs/embassy/tree/main/embassy-hal-internal" rel="noopener" target="_blank">embassy-hal-internal</a>中完成，一部分在HAL内部完成。通过这套类型系统和约束，我们可以避免很多恼人的错误，也能很大程度上简化代码（比如，永远不会设置错、忘设置IO AF，也不用再去查AF表）。</p>
+<p><a href="https://github.com/embassy-rs/embassy/tree/main/embassy-stm32" rel="noopener" target="_blank">embassy-stm32</a> 的创新主要是其codegen和metapac：使用了复杂的数据预处理和codegen实现了对stm32外设的包罗万象。<a href="https://github.com/embassy-rs/stm32-data" rel="noopener" target="_blank">stm32-data</a> 通过来自CubeMX等的数据，生成带有元数据的PAC：stm32-metapac，避免了像<a href="https://github.com/stm32-rs" rel="noopener" target="_blank">stm32-rs</a> 一样的重复和分散、不统一的代码。</p>
+<p>当然，包罗万象是有代价的。好在对于用户来说基本感受不到。比如：<a href="https://github.com/embassy-rs/embassy/blob/de33d113a5fb70ca5086058cc894a2ce192c27d6/embassy-stm32/build.rs" rel="noopener" target="_blank">embassy/embassy-stm32/build.rs</a> <del>极其芜杂</del>的代码，hal内部复杂的宏嵌套和不清楚的内部宏命名（尤其是codegen生成的_macro.rs的那些macro）。</p>
+<p>这些代价在我编写维护<a href="https://github.com/py32-rs/py32-hal" rel="noopener" target="_blank">py32-hal</a>的时候深深体验过。。不过，吃水不忘挖井人，没有embassy-stm32就不会有py32-hal，只是这套框架对于py32太过于庞大了。到后面，我做 <a href="https://github.com/OpenSiFli/sifli-rs" rel="noopener" target="_blank">sifli-rs</a> 虽然使用了embassy范式，但是重做了codegen流程。</p>
+</img></div>
+<hr/>
+<div>
+<div class="post-metas my-3">
+<div class="post-meta">
+<i class="iconfont icon-tags"></i>
+<a class="print-no-link" href="/blog/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/">#嵌入式</a>
+<a class="print-no-link" href="/blog/tags/Rust/">#Rust</a>
+<a class="print-no-link" href="/blog/tags/Embassy/">#Embassy</a>
+</div>
+</div>
+<div class="license-box my-3">
+<div class="license-title">
+<div>从EXTI实现看Embassy:异步Rust嵌入式框架</div>
+<div>https://decaday.github.io/blog/embassy-exti/</div>
+</div>
+<div class="license-meta">
+<div class="license-meta-item">
+<div>作者</div>
+<div>星期十</div>
+</div>
+<div class="license-meta-item license-meta-date">
+<div>发布于</div>
+<div>2024年10月21日</div>
+</div>
+<div class="license-meta-item license-meta-date">
+<div>更新于</div>
+<div>2026年2月8日</div>
+</div>
+<div class="license-meta-item">
+<div>许可协议</div>
+<div>
+<a class="print-no-link" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">
+<span aria-label="BY - 署名" class="hint--top hint--rounded">
+<i class="iconfont icon-cc-by"></i>
+</span>
+</a>
+<a class="print-no-link" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">
+<span aria-label="NC - 非商业性使用" class="hint--top hint--rounded">
+<i class="iconfont icon-cc-nc"></i>
+</span>
+</a>
+</div>
+</div>
+</div>
+<div class="license-icon iconfont"></div>
+</div>
+<div class="post-prevnext my-3">
+<article class="post-prev col-6">
+<a href="/blog/stack-overflow-learn/" title="一次Stack Overflow的学习，踩坑与疑惑">
+<i class="iconfont icon-arrowleft"></i>
+<span class="hidden-mobile">一次Stack Overflow的学习，踩坑与疑惑</span>
+<span class="visible-mobile">上一篇</span>
+</a>
+</article>
+<article class="post-next col-6">
+<a href="/blog/lvgl-rust-build/" title="编译构建LVGL-rust，用rust开发LVGL">
+<span class="hidden-mobile">编译构建LVGL-rust，用rust开发LVGL</span>
+<span class="visible-mobile">下一篇</span>
+<i class="iconfont icon-arrowright"></i>
+</a>
+</article>
+</div>
+</div>
+<article id="comments" lazyload="">
+<div class="giscus" id="giscus"></div>
+<script type="text/javascript">
+      Fluid.utils.loadComments('#giscus', function() {
+        var options = {"repo":"decaday/blog","repo-id":"R_kgDOLNAOjg","category":"Announcements","category-id":"DIC_kwDOLNAOjs4CdRDg","theme-light":"light","theme-dark":"dark","mapping":"pathname","reactions-enabled":1,"emit-metadata":0,"input-position":"top","lang":"zh-CN"};
+        var attributes = {};
+        for (let option in options) {
+          if (!option.startsWith('theme-')) {
+            var key = option.startsWith('data-') ? option : 'data-' + option;
+            attributes[key] = options[option];
+          }
+        }
+        var light = 'light';
+        var dark = 'dark';
+        window.GiscusThemeLight = light;
+        window.GiscusThemeDark = dark;
+        attributes['data-theme'] = document.documentElement.getAttribute('data-user-color-scheme') === 'dark' ? dark : light;
+        for (let attribute in attributes) {
+          var value = attributes[attribute];
+          if (value === undefined || value === null || value === '') {
+            delete attributes[attribute];
+          }
+        }
+        var s = document.createElement('script');
+        s.setAttribute('src', 'https://giscus.app/client.js');
+        s.setAttribute('crossorigin', 'anonymous');
+        for (let attribute in attributes) {
+          s.setAttribute(attribute, attributes[attribute]);
+        }
+        var ss = document.getElementsByTagName('script');
+        var e = ss.length > 0 ? ss[ss.length - 1] : document.head || document.documentElement;
+        e.parentNode.insertBefore(s, e.nextSibling);
+      });
+    </script>
+<noscript>Please enable JavaScript to view the comments</noscript>
+</article>
+</article>
+</div>
+</div>
+</div>
+<div class="side-col d-none d-lg-block col-lg-2">
+<aside class="sidebar" style="margin-left: -1rem">
+<div id="toc">
+<p class="toc-header">
+<i class="iconfont icon-list"></i>
+<span>目录</span>
+</p>
+<div class="toc-body" id="toc-body"></div>
+</div>
+</aside>
+</div>
+</div>
+</div>
+<a aria-label="TOP" href="#" id="scroll-top-button" role="button">
+<i aria-hidden="true" class="iconfont icon-arrowup"></i>
+</a>
+<div aria-hidden="true" aria-labelledby="ModalLabel" class="modal fade" id="modalSearch" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+<div class="modal-content">
+<div class="modal-header text-center">
+<h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+<button aria-label="Close" class="close" data-dismiss="modal" id="local-search-close" type="button">
+<span aria-hidden="true">×</span>
+</button>
+</div>
+<div class="modal-body mx-3">
+<div class="md-form mb-5">
+<input class="form-control validate" id="local-search-input" type="text"/>
+<label data-error="x" data-success="v" for="local-search-input">关键词</label>
+</div>
+<div class="list-group" id="local-search-result"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer>
+<div class="footer-inner">
+<div class="footer-content">
+<a href="https://hexo.io" rel="nofollow noopener" target="_blank"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" rel="nofollow noopener" target="_blank"><span>Fluid</span></a>
+</div>
+<div class="statistics">
+<span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+<span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+</div>
+</div>
+</footer>
+<!-- Scripts -->
+<script src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js"></script>
+<link href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet"/>
+<script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+<script src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js"></script>
+<script src="/blog/js/events.js"></script>
+<script src="/blog/js/plugins.js"></script>
+<script src="/blog/js/img-lazyload.js"></script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+<script src="https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js"></script>
+<script>Fluid.plugins.codeWidget();</script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+<script>Fluid.plugins.imageCaption();</script>
+<script src="/blog/js/local-search.js"></script>
+<script defer="" src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script src="/blog/js/boot.js"></script>
+<noscript>
+<div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+</noscript>
+</body>
+</html>

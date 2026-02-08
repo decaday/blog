@@ -1,0 +1,599 @@
+
+<!DOCTYPE html>
+
+<html data-default-color-scheme="auto" lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<link href="/blog/img/favicon.jpg" rel="apple-touch-icon" sizes="76x76"/>
+<link href="/blog/img/favicon.jpg" rel="icon"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no" name="viewport"/>
+<meta content="ie=edge" http-equiv="x-ua-compatible"/>
+<meta content="#2f4154" name="theme-color"/>
+<meta content="星期十" name="author"/>
+<meta content="" name="keywords"/>
+<meta content="PY32的musb(Mentor USB)的Rust支持     仓库链接：https://github.com/decaday/musb   py32-hal仓库：https://github.com/py32-rs/py32-hal    最近在给PY32做Rust HAL支持。这个HAL等我改天写一篇Blog再细讲，先留着位置：传送门（未生效） py32-rs/py32-hal:" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="PY32的musb(Mentor USB)的Rust支持" property="og:title"/>
+<meta content="https://decaday.github.io/blog/py32-musb/index.html" property="og:url"/>
+<meta content="Decaday's Blogs" property="og:site_name"/>
+<meta content="PY32的musb(Mentor USB)的Rust支持     仓库链接：https://github.com/decaday/musb   py32-hal仓库：https://github.com/py32-rs/py32-hal    最近在给PY32做Rust HAL支持。这个HAL等我改天写一篇Blog再细讲，先留着位置：传送门（未生效） py32-rs/py32-hal:" property="og:description"/>
+<meta content="zh_CN" property="og:locale"/>
+<meta content="https://decaday.github.io/blog/images/musb-vscode.jpg" property="og:image"/>
+<meta content="2025-01-31T16:00:00.000Z" property="article:published_time"/>
+<meta content="2026-02-08T06:29:09.067Z" property="article:modified_time"/>
+<meta content="星期十" property="article:author"/>
+<meta content="嵌入式" property="article:tag"/>
+<meta content="PY32" property="article:tag"/>
+<meta content="Rust" property="article:tag"/>
+<meta content="USB" property="article:tag"/>
+<meta content="RMK" property="article:tag"/>
+<meta content="musb" property="article:tag"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="https://decaday.github.io/blog/images/musb-vscode.jpg" name="twitter:image"/>
+<meta content="no-referrer-when-downgrade" name="referrer"/>
+<title>PY32的musb(Mentor USB)的Rust支持 - Decaday's Blogs</title>
+<link href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" rel="stylesheet">
+<link href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" rel="stylesheet"/>
+<link href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet"/>
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+<link href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css" rel="stylesheet"/>
+<link href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css" rel="stylesheet"/>
+<link href="/blog/css/main.css" rel="stylesheet">
+<link href="/blog/css/highlight.css" id="highlight-css" rel="stylesheet">
+<link href="/blog/css/highlight-dark.css" id="highlight-css-dark" rel="stylesheet"/>
+<script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"decaday.github.io","root":"/blog/","version":"1.9.8","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/blog/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+<script src="/blog/js/utils.js"></script>
+<script src="/blog/js/color-schema.js"></script>
+<meta content="Hexo 7.1.1" name="generator"/></link></link></link></link></head>
+<body>
+<header>
+<div class="header-inner" style="height: 70vh;">
+<nav class="navbar fixed-top navbar-expand-lg navbar-dark scrolling-navbar" id="navbar">
+<div class="container">
+<a class="navbar-brand" href="/blog/">
+<strong>Decaday 星期十的博客</strong>
+</a>
+<button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbarSupportedContent" data-toggle="collapse" id="navbar-toggler-btn" type="button">
+<div class="animated-icon"><span></span><span></span><span></span></div>
+</button>
+<!-- Collapsible content -->
+<div class="collapse navbar-collapse" id="navbarSupportedContent">
+<ul class="navbar-nav ml-auto text-center">
+<li class="nav-item">
+<a class="nav-link" href="/blog/" target="_self">
+<i class="iconfont icon-home-fill"></i>
+<span>首页</span>
+</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="/blog/tags/" target="_self">
+<i class="iconfont icon-tags-fill"></i>
+<span>标签</span>
+</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="/blog/about/" target="_self">
+<i class="iconfont icon-user-fill"></i>
+<span>关于</span>
+</a>
+</li>
+<li class="nav-item" id="search-btn">
+<a aria-label="Search" class="nav-link" data-target="#modalSearch" data-toggle="modal" href="javascript:;" target="_self">
+<i class="iconfont icon-search"></i>
+</a>
+</li>
+<li class="nav-item" id="color-toggle-btn">
+<a aria-label="Color Toggle" class="nav-link" href="javascript:;" target="_self">
+<i class="iconfont icon-dark" id="color-toggle-icon"></i>
+</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<div class="banner" id="banner" parallax="true" style="background: url('/blog/images/musb-vscode.jpg') no-repeat center center; background-size: cover;">
+<div class="full-bg-img">
+<div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+<div class="banner-text text-center fade-in-up">
+<div class="h2">
+<span id="subtitle">PY32的musb(Mentor USB)的Rust支持</span>
+</div>
+<div class="mt-3">
+<span class="post-meta">
+<i aria-hidden="true" class="iconfont icon-date-fill"></i>
+<time datetime="2025-02-01 00:00" pubdate="">
+          2025年2月1日
+        </time>
+</span>
+</div>
+<div class="mt-1">
+<span class="post-meta mr-2">
+<i class="iconfont icon-chart"></i>
+        
+          4.2k 字
+        
+      </span>
+<span class="post-meta mr-2">
+<i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          36 分钟
+        
+      </span>
+<span id="busuanzi_container_page_pv" style="display: none">
+<i aria-hidden="true" class="iconfont icon-eye"></i>
+<span id="busuanzi_value_page_pv"></span> 次
+        </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<main>
+<div class="container-fluid nopadding-x">
+<div class="row nomargin-x">
+<div class="side-col d-none d-lg-block col-lg-2">
+</div>
+<div class="col-lg-8 nopadding-x-md">
+<div class="container nopadding-x-md" id="board-ctn">
+<div id="board">
+<article class="post-content mx-auto">
+<h1 id="seo-header">PY32的musb(Mentor USB)的Rust支持</h1>
+<p class="note note-info" id="updated-time" style="">
+                
+                  
+                    本文最后更新于 2026年2月8日 下午
+                  
+                
+              </p>
+<div class="markdown-body">
+<h1 id="PY32的musb-Mentor-USB-的Rust支持"><a class="headerlink" href="#PY32的musb-Mentor-USB-的Rust支持" title="PY32的musb(Mentor USB)的Rust支持"></a>PY32的musb(Mentor USB)的Rust支持</h1><div style="background-color: pink; /* 设置背景颜色为粉色 */
+    border: 2px solid hotpink; /* 设置边框为2像素的粉色 */
+    border-radius: 10px; /* 设置边框的圆角半径为10像素 */
+    padding: 10px; /* 设置内边距为10像素 */
+    margin: 10px; /* 设置外边距为10像素 */
+    font-family: Arial, sans-serif; /* 设置字体为Arial或者无衬线字体 */
+    font-size: 16px; /* 设置字体大小为16像素 */
+    color: white; /* 设置字体颜色为白色 */
+    text-align: center; /* 设置文本居中对齐 */">
+<p>仓库链接：<a href="https://github.com/decaday/musb" rel="noopener" target="_blank">https://github.com/decaday/musb</a></p>
+<p>py32-hal仓库：<a href="https://github.com/py32-rs/py32-hal" rel="noopener" target="_blank">https://github.com/py32-rs/py32-hal</a></p>
+</div>
+<p>最近在给PY32做Rust HAL支持。这个HAL等我改天写一篇Blog再细讲，先留着位置：传送门（未生效）</p>
+<p><a href="https://github.com/py32-rs/py32-hal" rel="noopener" target="_blank">py32-rs/py32-hal: Rust HAL implementation for py32 mcu.</a></p>
+<p>不知不觉中，也给py32-hal，py32-data拉了将近40个PR了。</p>
+<p>大部分外设跟STM32非常像，就是抄的STM32，但又不完全一致。除了USART，其他的直接copy都跑不了，还得修一番。</p>
+<p>但是，这些外设的高级功能、不常用的寄存器差别比较大。不过，embassy-stm32还都没支持这些功能，我也暂时不支持就好了（比如ADC使用其它触发源，USART自动波特率等）。</p>
+<p>下面是一大段吐槽，技术分析在：<a href="#%E7%BC%96%E5%86%99rust%E9%A9%B1%E5%8A%A8">编写Rust驱动</a></p>
+<p>Puya这种厂，基本不可能自己做IP的，所有内核、外设IP都是买的（除了他们厂自己的Flash）。</p>
+<p>之前看过CherryUSB，CherryUSB是基于IP来实现的移植层。USB IP就那么几家，如果能知道PY32用的IP，说不定就能抄别人的Rust实现。</p>
+<p>于是，半糖佬告诉我，是个阉割版的musb。</p>
+<p><img lazyload="" src="/blog/py32-musb/2024-12-07-20-40-38-image.png" srcset="/blog/img/loading.gif"/></p>
+<p>其实我当时还不知道musb是啥，问ai，ai说是micro usb……</p>
+<p><img lazyload="" src="/blog/py32-musb/2024-12-07-20-42-44-image.png" srcset="/blog/img/loading.gif"/></p>
+<p>Jason就是隔壁群主<a href="https://github.com/haobogu" rel="noopener" target="_blank">HaoboGu</a>，<a href="https://github.com/haobogu/rmk" rel="noopener" target="_blank">rmk</a>作者，也是<a href="https://github.com/hpmicro/hpm-hal" rel="noopener" target="_blank">hpm-hal</a>的维护者之一。我当时想的是，等我给py32的主要功能做好了，看大佬有没有空。那时候我基本上不懂USB。</p>
+<p>后来，半糖送了我三片py32板子</p>
+<p><img lazyload="" src="/blog/py32-musb/2024-12-07-20-45-06-image.png" srcset="/blog/img/loading.gif"/></p>
+<p>玩了几周，做了几个外设，感觉简单外设都是一个套路，挺没意思的。</p>
+<p>有一天在大巴上，闲着没事，想着学一学USB，于是找了个教程开始听。</p>
+<p><a href="https://www.bilibili.com/video/BV1sy4y1n7d9" rel="noopener" target="_blank">《USB技术应用与开发》</a></p>
+<p>这教程是沁恒出的，不得不说质量相当不错。听了几集，发现基本能看懂USB移植层了，草，自己试试好了</p>
+<p>USB移植层在Rust上也就1k行代码左右，复杂的事情都由USB IP或USB Stack管了，移植层本身不麻烦，做移植层也是在Package（包）层去管理的USB，不用涉及更底层的协议内容（比如JK信号，NZI编码等）。</p>
+<h2 id="生成寄存器操作到Rust"><a class="headerlink" href="#生成寄存器操作到Rust" title="生成寄存器操作到Rust"></a>生成寄存器操作到Rust</h2><p>比较奇特的是，py32的USB寄存器是8位的：</p>
+<blockquote>
+<p>34.5. USB 寄存器<br/>注意：在对USB寄存器进行写操作时只能按照字节（byte）或者字（word）操作，在对USB寄存器进行读操作时只能按照字节（byte）操作。</p>
+</blockquote>
+<p>普冉提供的SVD文件中，USB寄存器是按照32位进行划分的（与手册一致），如果直接生成Rust，可能会碰到无法读出数据的问题？</p>
+<p>于是，<del>在AI的帮助下</del> 在AI的捣乱下，我写了个8位的寄存器描述yaml：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/><span class="line">12</span><br/><span class="line">13</span><br/><span class="line">14</span><br/><span class="line">15</span><br/><span class="line">16</span><br/><span class="line">17</span><br/><span class="line">18</span><br/><span class="line">19</span><br/></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">block/USB:</span><br/>  <span class="hljs-attr">description:</span> <span class="hljs-string">USB</span> <span class="hljs-string">control</span> <span class="hljs-string">and</span> <span class="hljs-string">status</span> <span class="hljs-string">registers</span> <span class="hljs-string">for</span> <span class="hljs-string">managing</span> <span class="hljs-string">USB</span> <span class="hljs-string">operations.</span><br/>  <span class="hljs-attr">items:</span><br/>  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">ADDR</span><br/>    <span class="hljs-attr">description:</span> <span class="hljs-string">Function</span> <span class="hljs-string">address</span> <span class="hljs-string">of</span> <span class="hljs-string">the</span> <span class="hljs-string">USB</span> <span class="hljs-string">device.</span><br/>    <span class="hljs-attr">byte_offset:</span> <span class="hljs-number">0x00</span><br/>    <span class="hljs-attr">bit_size:</span> <span class="hljs-number">8</span><br/>    <span class="hljs-attr">fieldset:</span> <span class="hljs-string">ADDR</span><br/>  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">POWER</span><br/>    <span class="hljs-attr">description:</span> <span class="hljs-string">USB</span> <span class="hljs-string">power</span> <span class="hljs-string">management</span> <span class="hljs-string">register.</span><br/>    <span class="hljs-attr">byte_offset:</span> <span class="hljs-number">0x01</span><br/>    <span class="hljs-attr">bit_size:</span> <span class="hljs-number">8</span><br/>    <span class="hljs-attr">fieldset:</span> <span class="hljs-string">POWER</span><br/>  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">INT_USB</span><br/>    <span class="hljs-attr">description:</span> <span class="hljs-string">USB</span> <span class="hljs-string">interrupt</span> <span class="hljs-string">status</span> <span class="hljs-string">register.</span><br/>    <span class="hljs-attr">byte_offset:</span> <span class="hljs-number">0x04</span><br/>    <span class="hljs-attr">bit_size:</span> <span class="hljs-number">8</span><br/>    <span class="hljs-attr">fieldset:</span> <span class="hljs-string">INT_USB</span><br/><span class="hljs-string">...</span><br/></code></pre></td></tr></table></figure>
+<p><a href="https://github.com/py32-rs/py32-data/blob/2b4f4f89c3749cc23ace3267f4bc49ebefc7b4a9/data/registers/usb_v1.yaml" rel="noopener" target="_blank">完整代码：py32-data</a></p>
+<p>说来，4o真不行，有几个寄存器offset错误搞得我浪费了很长时间，想念我的claude-sonnet-3.5了……</p>
+<p>stm32-data的代码生成之后再讲，大概就是，调用 <a href="https://github.com/embassy-rs/chiptool" rel="noopener" target="_blank">embassy-rs/chiptool</a> 将yaml转为Rust。</p>
+<h2 id="资料"><a class="headerlink" href="#资料" title="资料"></a>资料</h2><p>Puya官方提供的资料只有一个CherryUSB的移植层，以及Reference Manual，还有SVD。</p>
+<p>SVD里其他外设还好，USB这有好几个错误，而且没有描述。</p>
+<p>移植层很明显是用CherryUSB官方的musb port改的，比如，这个：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/></pre></td><td class="code"><pre><code class="hljs c">fifo_size = pyusb_get_fifo_size(ep_cfg-&gt;ep_mps, &amp;used);<br/>USB-&gt;MAX_PKT_IN = fifo_size;<br/>g_pyusb_udc.fifo_size_offset += used;<br/></code></pre></td></tr></table></figure>
+<p>g_pyusb_udc.fifo_size_offset在整个文件中只有赋值而没有使用。这是因为，py32的musb是定长FIFO，而musb是可以变长的，而py32修改移植层时没有删除这个成员。这个下面再细说。</p>
+<p>他们的手册也做的很差，比如：</p>
+<p><img alt="f655fd8657778f72c59bcfd45ffb59bf.png" lazyload="" src="/blog/py32-musb/428d71b3162731ef1523a252b57f882ca6388b5b.png" srcset="/blog/img/loading.gif"/></p>
+<p><img alt="5884d3002bf938d3933f15541198a951.png" lazyload="" src="/blog/py32-musb/bfb138234f7b215fc25e1522c08eaaeec945b751.png" srcset="/blog/img/loading.gif"/></p>
+<p>最新版本的Reference Manual 0.7，估计是他们直接copy然后忘记改offset了……</p>
+<p>我之前按本地存的是0.4，这个更离谱，</p>
+<blockquote>
+<p>EP1最大使用512字节缓冲区，EP2、EP3、EP4都是使用128字节缓冲区，EP5使用64字节缓冲区</p>
+</blockquote>
+<p>0.7版本修复了，不然就麻烦了……（幸好后来下载了新版Reference Manual）</p>
+<blockquote>
+<p>EP1最大使用64字节缓冲区，EP2、EP3、EP4都是使用128字节缓冲区，EP5使用512字节缓冲区</p>
+</blockquote>
+<p>musb是8位/16位寄存器嘛，我当时想起来STC了，疑惑：STC用的啥USB IP？之前有人猜测是STC自己搓的，但是STC又没啥IP自研能力，更何况是USB，一看，草，还是，musb。</p>
+<p>而且阉割程度几乎跟py32一模一样，我称之为mini musb。</p>
+<p><img lazyload="" src="/blog/py32-musb/2024-12-07-21-12-45-image.png" srcset="/blog/img/loading.gif"/></p>
+<p>AI8051u.pdf</p>
+<p>好了，这下有参考资料了。事实上，我后面写USB驱动，大部分就是参考的STC的手册。</p>
+<p><img lazyload="" src="/blog/py32-musb/2024-12-07-21-14-22-image.png" srcset="/blog/img/loading.gif"/></p>
+<p>其实STC的手册并没有好太多，py好歹还机翻了功能模块描述，stc没有。（我基本写完后才找到musb_programing_guide.pdf）</p>
+<p>比如，寄存器描述中对于<code>SetupEnd</code>位的描述：</p>
+<p>STC：读不懂，看起来是机翻+人工润色，SETUP翻成安装包可海星。。另外STC给PDF上锁不让复制也太离谱了</p>
+<blockquote>
+<p>SETUP 安装包结束标志。当一次控制传输在软件向DATAEND位写“1”之前结束时，硬件将此只读位置“1”。当软件向SSUEND写’1’后，硬件将该位清“0”</p>
+</blockquote>
+<p>Puya：机翻无疑</p>
+<blockquote>
+<p>该位在控制传输结束，DataEnd置1前置1，会产生中断并清除FIFO</p>
+</blockquote>
+<p>Puya 英文手册：这，，，英译中译英？绷不住了</p>
+<blockquote>
+<p>This bit, at the end of the control transfer, DataEnd set 1 precedes 1, generates an interrupt and clears the FIFO;</p>
+</blockquote>
+<p>musb_programming_guide原文：</p>
+<blockquote>
+<p>This bit will be set when a control transaction ends before the DataEnd bit has been set.<br/>An interrupt will be generated and the FIFO flushed at this time. The bit is cleared by the CPU writing a 1 to the ServicedSetupEnd bit.</p>
+</blockquote>
+<p>另外，不同厂商对寄存器命名也是不同的，比如，OUT_CSR1，在musb_programming_guide中为RXCSRL。后面我都以musb的标准名称为准。</p>
+<h2 id="编写Rust驱动"><a class="headerlink" href="#编写Rust驱动" title="编写Rust驱动"></a>编写Rust驱动</h2><p>embassy-usb似乎是目前Embedded Rust唯二的USB协议栈（另一个是<a href="https://github.com/rust-embedded-community/usb-device" rel="noopener" target="_blank">usb-device</a>）。embassy多好！啥都给了。我实现 <a href="https://crates.io/crates/embassy-usb-driver" rel="noopener" target="_blank">embassy-usb-driver</a> 就OK了。</p>
+<p>（更新，<a href="https://github.com/tock/tock" rel="noopener" target="_blank">tock</a>也有一个usb协议栈）</p>
+<p>我参考的是embassy-stm32的实现。stm32好像有一部分用的自研IP，带OTG的用的synopsys的IP（dwc2）。Embassy也给dwc2做了独立crate的实现：<a href="https://github.com/embassy-rs/embassy/blob/main/embassy-usb-synopsys-otg/" rel="noopener" target="_blank">embassy/embassy-usb-synopsys-otg</a></p>
+<p><a href="https://crates.io/crates/embassy-usb-driver" rel="noopener" target="_blank">embassy-usb-driver</a> 分为四个Trait。分别是：</p>
+<ul>
+<li><p><code>Driver</code>。真就是一个驱动。在USB开始工作前用的，包含<code>alloc_endpoint_in/out</code>和<code>start</code>函数。</p>
+</li>
+<li><p><code>Bus</code>。管理总线事务。有enable，disable，poll，endpoint_set_enabled，endpoint_set_stalled，endpoint_is_stalled，还有两个可选的force_reset和remote_wakeup。若不支持则直接返回<code>Unsupported</code>即可。 </p>
+</li>
+<li><p><code>Endpoint</code>，又包含<code>EndpointIn</code>和<code>EndpointOut</code>，也就是async的读写函数。</p>
+</li>
+<li><p><code>ControlPipe</code>。专门管控制传输的EP0的。包含了max_packet_size, data_out, data_in, accept, reject, accept_set_address。</p>
+</li>
+</ul>
+<h3 id="Driver-实现"><a class="headerlink" href="#Driver-实现" title="Driver 实现"></a><code>Driver</code> 实现</h3><p>Driver包含<code>alloc_endpoint_in/out</code>和<code>start</code>函数。</p>
+<p>Embassy似乎用“alloc”这种方式的地方很多，比如<code>time-driver</code>的<code>alarm</code>。</p>
+<p><code>alloc_endpoint</code>由usb stack来调用，分配可用的endpoint。在使用一块RAM作为端点数据或动态大小FIFO的情况下，还要根据max packet size来计算和安排FIFO大小。</p>
+<p>这样做确实是损失了一定的灵活性，比如，用户没法特定地去选择哪个EP使用双缓冲区。（更新：<a href="https://crates.io/crates/embassy-usb-driver" rel="noopener" target="_blank">embassy-usb-driver</a> 2.0 能够指定Endpoint ID了）</p>
+<p>py32f072的musb是固定大小FIFO，且同一个端点的两个方向共享FIFO。经测试，跑各种HID例程，包括<a href="https://github.com/HaoboGu/rmk" rel="noopener" target="_blank">RMK</a>，都没问题，但是跑CDC串口不行。不共用ep的话，能跑CDC。CDC有两个Bluk端点嘛。刚好f403是不共享FIFO的，到时候可以试试究竟是Bluk必须单向端点，还是共享FIFO的原因。</p>
+<p><code>start</code>: alloc个EP0装进Self::ControlPipe里，然后返回(Self::Bus, Self::ControlPipe)，销毁自身。</p>
+<h3 id="ControlPipe-实现"><a class="headerlink" href="#ControlPipe-实现" title="ControlPipe 实现"></a><code>ControlPipe</code> 实现</h3><p>embassy-usb将EP0的控制传输独立出来整了个ControlPipe。我感觉和musb还是挺契合的，musb的EP0和其它的EP使用的也不是同一个控制寄存器，操作逻辑也不太一致。</p>
+<p><img alt="image-20241217220829835" lazyload="" src="/blog/py32-musb/image-20241217220829835.png" srcset="/blog/img/loading.gif"/></p>
+<p>首先是Setup：</p>
+<p><img alt="image-20241220113705270" lazyload="" src="/blog/py32-musb/image-20241220113705270.png" srcset="/blog/img/loading.gif"/></p>
+<p>在Data从总线加载进FIFO后，会产生一个EP0中断。我们需要做的就是右下角的小字：从FIFO读出，清标志位。</p>
+<p>然后根据需求设置InPktRdy或DataEnd。因为embassy-usb会根据setup包内容来进一步操作，比如调用data_in等，所以我们不用处理。</p>
+<p>这个模型可以很好地做到Async框架上：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/><span class="line">12</span><br/><span class="line">13</span><br/><span class="line">14</span><br/><span class="line">15</span><br/><span class="line">16</span><br/><span class="line">17</span><br/><span class="line">18</span><br/><span class="line">19</span><br/><span class="line">20</span><br/><span class="line">21</span><br/><span class="line">22</span><br/><span class="line">23</span><br/><span class="line">24</span><br/><span class="line">25</span><br/><span class="line">26</span><br/><span class="line">27</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">setup</span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>) <span class="hljs-punctuation">-&gt;</span> [<span class="hljs-type">u8</span>; <span class="hljs-number">8</span>] {<br/>        <span class="hljs-keyword">let</span> <span class="hljs-variable">regs</span> = T::<span class="hljs-title function_ invoke__">regs</span>();<br/>        <span class="hljs-keyword">loop</span> {<br/>            <span class="hljs-title function_ invoke__">poll_fn</span>(|cx| {<br/>                EP_RX_WAKERS[<span class="hljs-number">0</span>].<span class="hljs-title function_ invoke__">register</span>(cx.<span class="hljs-title function_ invoke__">waker</span>());<br/>                regs.<span class="hljs-title function_ invoke__">index</span>().<span class="hljs-title function_ invoke__">write</span>(|w| w.<span class="hljs-title function_ invoke__">set_index</span>(<span class="hljs-number">0</span>));<br/>                <span class="hljs-keyword">if</span> regs.<span class="hljs-title function_ invoke__">csr0l</span>().<span class="hljs-title function_ invoke__">read</span>().<span class="hljs-title function_ invoke__">rx_pkt_rdy</span>() {<br/>                    Poll::<span class="hljs-title function_ invoke__">Ready</span>(())<br/>                } <span class="hljs-keyword">else</span> {<br/>                    Poll::Pending<br/>                }<br/>            })<br/>            .<span class="hljs-keyword">await</span>;<br/><br/>            regs.<span class="hljs-title function_ invoke__">index</span>().<span class="hljs-title function_ invoke__">write</span>(|w| w.<span class="hljs-title function_ invoke__">set_index</span>(<span class="hljs-number">0</span>));<br/>            <span class="hljs-keyword">if</span> regs.<span class="hljs-title function_ invoke__">count0</span>().<span class="hljs-title function_ invoke__">read</span>().<span class="hljs-title function_ invoke__">count</span>() != <span class="hljs-number">8</span> {<br/>                trace!(<span class="hljs-string">"SETUP read failed: {:?}"</span>, regs.<span class="hljs-title function_ invoke__">count0</span>().<span class="hljs-title function_ invoke__">read</span>().<span class="hljs-title function_ invoke__">count</span>());<br/>                <span class="hljs-keyword">continue</span>;<br/>            }<br/>            <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">buf</span> = [<span class="hljs-number">0</span>; <span class="hljs-number">8</span>];<br/>            (&amp;<span class="hljs-keyword">mut</span> buf).<span class="hljs-title function_ invoke__">into_iter</span>().for_each(|b|<br/>                *b = regs.<span class="hljs-title function_ invoke__">fifo</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_ invoke__">read</span>().<span class="hljs-title function_ invoke__">data</span>()<br/>            );<br/>            regs.<span class="hljs-title function_ invoke__">csr0l</span>().<span class="hljs-title function_ invoke__">modify</span>(|w| w.<span class="hljs-title function_ invoke__">set_serviced_rx_pkt_rdy</span>(<span class="hljs-literal">true</span>));<br/>            <span class="hljs-keyword">return</span> buf;<br/>        }<br/>    }<br/></code></pre></td></tr></table></figure>
+<p><code>T</code>是这些Usb有关的struct的Instance泛型。</p>
+<p>然后我们使用<code>poll_fn</code>函数，创建一个Future。这个函数在第一次执行，注册<code>EP_RX_WAKERS</code>的时候也相当于执行了一次，所以如果包已经读入FIFO了，就可以直接Ready继续执行。如果还没有读入FIFO，则会await，等中断wake <code>EP_RX_WAKERS</code>，再次被Poll并执行。</p>
+<p>EP_RX_WAKERS是一个全局<code>AtomicWaker</code>，在中断中检查标志位并wake它们。然后判断<code>csr0l.RxPktRdy</code>来返回结果。</p>
+<p>在<code>poll_fn</code>闭包中，我们在读取csr0l寄存器之前，设置了index寄存器。这是因为，musb有一块寄存器是<code>Indexed Register</code>，也就是设置了index才能访问到的寄存器。比如，EP1-15共享的RXCSRL，RXCSRH等。</p>
+<blockquote>
+<p>The action of the following registers when the selected endpoint has not been configured is undefined.</p>
+</blockquote>
+<p>EP0虽然有独享的寄存器CSR0H、CSR0L，但也属于<code>Indexed Register</code>，需要设置index。在CSR0H中也写了：<code>Address: 12h (with the Index register set to 0)</code></p>
+<p>然后就是读fifo，清标志位等。</p>
+<p>发送数据的data_in/out等到后面说EP了再讲。除了DataEnd外流程都是一致的。</p>
+<p>接下来是空的accept()函数，其他USB IP的行为似乎是发送一个空包，但是musb不需要这一行为，当没有stall的时候，直接就自动accept了。</p>
+<p>accept_set_address函数也比较简单。因为不同的IP有不同的顺序要求，有的需要在设置地址前accept，有的需要在设置地址后应答。而musb就不用考虑这么多了，向FADDR寄存器填入地址就行。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">accept_set_address</span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>, addr: <span class="hljs-type">u8</span>) {<br/>    <span class="hljs-comment">// self.accept().await; // 在设置地址前accept</span><br/>    <span class="hljs-keyword">let</span> <span class="hljs-variable">regs</span> = T::<span class="hljs-title function_ invoke__">regs</span>();<br/>    regs.<span class="hljs-title function_ invoke__">faddr</span>().<span class="hljs-title function_ invoke__">write</span>(|w| w.<span class="hljs-title function_ invoke__">set_func_addr</span>(addr));<br/>    <span class="hljs-comment">// self.accept().await; // 在设置地址后accept</span><br/>}<br/></code></pre></td></tr></table></figure>
+<h3 id="Endpoint-实现"><a class="headerlink" href="#Endpoint-实现" title="Endpoint 实现"></a><code>Endpoint</code> 实现</h3><p>这里以写入（In）函数为例。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/><span class="line">12</span><br/><span class="line">13</span><br/><span class="line">14</span><br/><span class="line">15</span><br/><span class="line">16</span><br/><span class="line">17</span><br/><span class="line">18</span><br/><span class="line">19</span><br/><span class="line">20</span><br/><span class="line">21</span><br/><span class="line">22</span><br/><span class="line">23</span><br/><span class="line">24</span><br/><span class="line">25</span><br/><span class="line">26</span><br/><span class="line">27</span><br/><span class="line">28</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">write</span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>, buf: &amp;[<span class="hljs-type">u8</span>]) <span class="hljs-punctuation">-&gt;</span> <span class="hljs-type">Result</span>&lt;(), EndpointError&gt; {<br/>        <span class="hljs-keyword">if</span> buf.<span class="hljs-title function_ invoke__">len</span>() &gt; <span class="hljs-keyword">self</span>.info.max_packet_size <span class="hljs-keyword">as</span> <span class="hljs-type">usize</span> {<br/>            <span class="hljs-keyword">return</span> <span class="hljs-title function_ invoke__">Err</span>(EndpointError::BufferOverflow);<br/>        }<br/><br/>        <span class="hljs-keyword">let</span> <span class="hljs-variable">index</span> = <span class="hljs-keyword">self</span>.info.addr.<span class="hljs-title function_ invoke__">index</span>();<br/>        <span class="hljs-keyword">let</span> <span class="hljs-variable">regs</span> = T::<span class="hljs-title function_ invoke__">regs</span>();<br/><br/>        <span class="hljs-keyword">let</span> <span class="hljs-variable">_</span> = <span class="hljs-title function_ invoke__">poll_fn</span>(|cx| {<br/>            EP_TX_WAKERS[index].<span class="hljs-title function_ invoke__">register</span>(cx.<span class="hljs-title function_ invoke__">waker</span>());<br/>            regs.<span class="hljs-title function_ invoke__">index</span>().<span class="hljs-title function_ invoke__">write</span>(|w| w.<span class="hljs-title function_ invoke__">set_index</span>(index <span class="hljs-keyword">as</span> _));<br/><br/>            <span class="hljs-keyword">let</span> <span class="hljs-variable">unready</span> = regs.<span class="hljs-title function_ invoke__">txcsrl</span>().<span class="hljs-title function_ invoke__">read</span>().<span class="hljs-title function_ invoke__">tx_pkt_rdy</span>();<br/>            <span class="hljs-keyword">if</span> unready {<br/>                Poll::Pending<br/>            } <span class="hljs-keyword">else</span> {<br/>                Poll::<span class="hljs-title function_ invoke__">Ready</span>(())<br/>            }<br/>        })<br/>        .<span class="hljs-keyword">await</span>;<br/><br/>        regs.<span class="hljs-title function_ invoke__">index</span>().<span class="hljs-title function_ invoke__">write</span>(|w| w.<span class="hljs-title function_ invoke__">set_index</span>(index <span class="hljs-keyword">as</span> _));<br/>        buf.<span class="hljs-title function_ invoke__">into_iter</span>().for_each(|b| <br/>            regs.<span class="hljs-title function_ invoke__">fifo</span>(index).<span class="hljs-title function_ invoke__">write</span>(|w| w.<span class="hljs-title function_ invoke__">set_data</span>(*b))<br/>        );<br/>        regs.<span class="hljs-title function_ invoke__">txcsrl</span>().<span class="hljs-title function_ invoke__">modify</span>(|w| w.<span class="hljs-title function_ invoke__">set_tx_pkt_rdy</span>(<span class="hljs-literal">true</span>));<br/>        <span class="hljs-title function_ invoke__">Ok</span>(())<br/>    }<br/></code></pre></td></tr></table></figure>
+<p>仍然是使用全局的<code>EP_TX_WAKERS</code>，通过判断tx_pkt_rdy是否被清掉，来确定上一个传输是否完成。然后，我们使用一个迭代器将buf写入fifo中，并设置tx_pkt_rdy位。</p>
+<p>有一点需要注意，我们在这个函数中反复设置了index寄存器。这是因为是await函数，可能并不会一次执行完整个函数。中间如果有别的端点插嘴，index就错了。</p>
+<p>此外，当MaxPktSize小于1/2的FIFOSIze的时候，musb有个双包缓存功能可用，但我还没做，未来有需要了做一下。</p>
+<h3 id="Bus-实现"><a class="headerlink" href="#Bus-实现" title="Bus 实现"></a><code>Bus</code> 实现</h3><p>endpoint_set_enabled函数如下，功能是开关某个端点。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/><span class="line">12</span><br/><span class="line">13</span><br/><span class="line">14</span><br/><span class="line">15</span><br/><span class="line">16</span><br/><span class="line">17</span><br/><span class="line">18</span><br/><span class="line">19</span><br/><span class="line">20</span><br/><span class="line">21</span><br/><span class="line">22</span><br/><span class="line">23</span><br/><span class="line">24</span><br/><span class="line">25</span><br/><span class="line">26</span><br/><span class="line">27</span><br/><span class="line">28</span><br/><span class="line">29</span><br/><span class="line">30</span><br/><span class="line">31</span><br/><span class="line">32</span><br/><span class="line">33</span><br/><span class="line">34</span><br/><span class="line">35</span><br/><span class="line">36</span><br/><span class="line">37</span><br/><span class="line">38</span><br/><span class="line">39</span><br/><span class="line">40</span><br/><span class="line">41</span><br/><span class="line">42</span><br/><span class="line">43</span><br/><span class="line">44</span><br/><span class="line">45</span><br/><span class="line">46</span><br/><span class="line">47</span><br/><span class="line">48</span><br/><span class="line">49</span><br/><span class="line">50</span><br/><span class="line">51</span><br/><span class="line">52</span><br/><span class="line">53</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-keyword">fn</span> <span class="hljs-title function_">endpoint_set_enabled</span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>, ep_addr: EndpointAddress, enabled: <span class="hljs-type">bool</span>) {<br/>    <span class="hljs-keyword">let</span> <span class="hljs-variable">ep_index</span> = ep_addr.<span class="hljs-title function_ invoke__">index</span>();<br/><br/>    <span class="hljs-keyword">if</span> enabled {<br/>        T::<span class="hljs-title function_ invoke__">regs</span>().<span class="hljs-title function_ invoke__">index</span>().<span class="hljs-title function_ invoke__">write</span>(|w| w.<span class="hljs-title function_ invoke__">set_index</span>(ep_index <span class="hljs-keyword">as</span> <span class="hljs-type">u8</span>));<br/>        <span class="hljs-keyword">match</span> ep_addr.<span class="hljs-title function_ invoke__">direction</span>() {<br/>            Direction::Out =&gt; {<br/>                <span class="hljs-keyword">if</span> ep_index == <span class="hljs-number">0</span> {<br/>                    T::<span class="hljs-title function_ invoke__">regs</span>().<span class="hljs-title function_ invoke__">intrtxe</span>().<span class="hljs-title function_ invoke__">modify</span>(|w| <br/>                        w.<span class="hljs-title function_ invoke__">set_ep_txe</span>(<span class="hljs-number">0</span>, <span class="hljs-literal">true</span>))<br/>                } <span class="hljs-keyword">else</span> {<br/>                    T::<span class="hljs-title function_ invoke__">regs</span>().<span class="hljs-title function_ invoke__">intrrxe</span>().<span class="hljs-title function_ invoke__">modify</span>(|w| <br/>                        w.<span class="hljs-title function_ invoke__">set_ep_rxe</span>(ep_index, <span class="hljs-literal">true</span>)<br/>                    );<br/>                }<br/>                T::<span class="hljs-title function_ invoke__">regs</span>().<span class="hljs-title function_ invoke__">rxmaxp</span>().<span class="hljs-title function_ invoke__">write</span>(|w|<br/>                    w.<span class="hljs-title function_ invoke__">set_maxp</span>(<span class="hljs-keyword">self</span>.ep_confs[ep_index].rx_max_fifo_size_dword)<br/>                );<br/>                T::<span class="hljs-title function_ invoke__">regs</span>().<span class="hljs-title function_ invoke__">rxcsrl</span>().<span class="hljs-title function_ invoke__">write</span>(|w| {<br/>                    w.<span class="hljs-title function_ invoke__">set_clr_data_tog</span>(<span class="hljs-literal">true</span>);<br/>                });<br/>                <span class="hljs-keyword">if</span> <span class="hljs-keyword">self</span>.ep_confs[ep_index].ep_type == EndpointType::Isochronous {<br/>                    T::<span class="hljs-title function_ invoke__">regs</span>().<span class="hljs-title function_ invoke__">rxcsrh</span>().<span class="hljs-title function_ invoke__">write</span>(|w| {<br/>                        w.<span class="hljs-title function_ invoke__">set_iso</span>(<span class="hljs-literal">true</span>);<br/>                    });<br/>                }<br/>                <span class="hljs-keyword">if</span> T::<span class="hljs-title function_ invoke__">regs</span>().<span class="hljs-title function_ invoke__">rxcsrl</span>().<span class="hljs-title function_ invoke__">read</span>().<span class="hljs-title function_ invoke__">rx_pkt_rdy</span>() {<br/>                    T::<span class="hljs-title function_ invoke__">regs</span>().<span class="hljs-title function_ invoke__">rxcsrl</span>().<span class="hljs-title function_ invoke__">modify</span>(|w| <br/>                        w.<span class="hljs-title function_ invoke__">set_flush_fifo</span>(<span class="hljs-literal">true</span>)<br/>                    );<br/>                    T::<span class="hljs-title function_ invoke__">regs</span>().<span class="hljs-title function_ invoke__">rxcsrl</span>().<span class="hljs-title function_ invoke__">modify</span>(|w| <br/>                        w.<span class="hljs-title function_ invoke__">set_flush_fifo</span>(<span class="hljs-literal">true</span>)<br/>                    );<br/>                }<br/>                <span class="hljs-keyword">let</span> <span class="hljs-variable">flags</span> = EP_RX_ENABLED.<span class="hljs-title function_ invoke__">load</span>(Ordering::Acquire) | ep_index <span class="hljs-keyword">as</span> <span class="hljs-type">u16</span>;<br/>                EP_RX_ENABLED.<span class="hljs-title function_ invoke__">store</span>(flags, Ordering::Release);<br/>                <span class="hljs-comment">// Wake `Endpoint::wait_enabled()`</span><br/>                EP_RX_WAKERS[ep_index].<span class="hljs-title function_ invoke__">wake</span>();<br/>            }<br/>            Direction::In =&gt; {} <span class="hljs-comment">// 省略</span><br/>        }<br/>    }<br/>    <span class="hljs-keyword">else</span> {<br/>        <span class="hljs-comment">// py32 official CherryUsb port does nothing when disable an endpoint</span><br/>        <span class="hljs-keyword">match</span> ep_addr.<span class="hljs-title function_ invoke__">direction</span>() {<br/>            Direction::Out =&gt; {<br/>                <span class="hljs-keyword">let</span> <span class="hljs-variable">flags</span> = EP_RX_ENABLED.<span class="hljs-title function_ invoke__">load</span>(Ordering::Acquire) &amp; !(ep_index <span class="hljs-keyword">as</span> <span class="hljs-type">u16</span>);<br/>                EP_RX_ENABLED.<span class="hljs-title function_ invoke__">store</span>(flags, Ordering::Release);<br/>            }<br/>            Direction::In =&gt; {} <span class="hljs-comment">// 省略</span><br/>        }<br/>    }<br/>}<br/></code></pre></td></tr></table></figure>
+<p>开启的时候，我们分别设置了INTRTXE、RXMAXP、ClrDataTrg寄存器，根据模式开启ISO寄存器，然后清了两次FIFO（当使用双包缓存时需要清两次）。然后设置EP_RX_ENABLED和唤醒EP_RX_WAKERS。这是为了实现Endpoint::wait_enabled()。</p>
+<p>关闭的时候就简单设置了标志位。py32的musb移植层在关闭端点的时候什么都没有做，而我简单看了别的使用musb的芯片的USB驱动。在关闭ep的时候还是能做点事情的，这个等之后实现好了。</p>
+<p>poll函数，处理总线事务，比如Reset、Suspend。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/><span class="line">12</span><br/><span class="line">13</span><br/><span class="line">14</span><br/><span class="line">15</span><br/><span class="line">16</span><br/><span class="line">17</span><br/><span class="line">18</span><br/><span class="line">19</span><br/><span class="line">20</span><br/><span class="line">21</span><br/><span class="line">22</span><br/><span class="line">23</span><br/><span class="line">24</span><br/><span class="line">25</span><br/><span class="line">26</span><br/><span class="line">27</span><br/><span class="line">28</span><br/><span class="line">29</span><br/><span class="line">30</span><br/><span class="line">31</span><br/><span class="line">32</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-keyword">async</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">poll</span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>) <span class="hljs-punctuation">-&gt;</span> Event {<br/>     <span class="hljs-title function_ invoke__">poll_fn</span>(<span class="hljs-keyword">move</span> |cx| {<br/>         BUS_WAKER.<span class="hljs-title function_ invoke__">register</span>(cx.<span class="hljs-title function_ invoke__">waker</span>());<span class="hljs-keyword">let</span> <span class="hljs-variable">regs</span> = T::<span class="hljs-title function_ invoke__">regs</span>();<br/><br/>        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> implement VBUS detection.</span><br/>        <span class="hljs-keyword">if</span> !<span class="hljs-keyword">self</span>.inited {<br/>            <span class="hljs-keyword">self</span>.inited = <span class="hljs-literal">true</span>;<br/>            <span class="hljs-keyword">return</span> Poll::<span class="hljs-title function_ invoke__">Ready</span>(Event::PowerDetected);<br/>        }<br/><br/>        <span class="hljs-keyword">if</span> IRQ_RESUME.<span class="hljs-title function_ invoke__">load</span>(Ordering::Acquire) {<br/>            IRQ_RESUME.<span class="hljs-title function_ invoke__">store</span>(<span class="hljs-literal">false</span>, Ordering::Relaxed);<br/>            <span class="hljs-keyword">return</span> Poll::<span class="hljs-title function_ invoke__">Ready</span>(Event::Resume);<br/>        }<br/><br/>        <span class="hljs-keyword">if</span> IRQ_RESET.<span class="hljs-title function_ invoke__">load</span>(Ordering::Acquire) {<br/>            IRQ_RESET.<span class="hljs-title function_ invoke__">store</span>(<span class="hljs-literal">false</span>, Ordering::Relaxed);<br/>            regs.<span class="hljs-title function_ invoke__">power</span>().<span class="hljs-title function_ invoke__">write</span>(|w| w.<span class="hljs-title function_ invoke__">set_suspend_mode</span>(<span class="hljs-literal">true</span>));<br/>            <span class="hljs-keyword">for</span> <span class="hljs-variable">w</span> <span class="hljs-keyword">in</span> &amp;EP_TX_WAKERS { w.<span class="hljs-title function_ invoke__">wake</span>() }<br/>            <span class="hljs-keyword">for</span> <span class="hljs-variable">w</span> <span class="hljs-keyword">in</span> &amp;EP_RX_WAKERS { w.<span class="hljs-title function_ invoke__">wake</span>() }<br/>            <span class="hljs-keyword">return</span> Poll::<span class="hljs-title function_ invoke__">Ready</span>(Event::Reset);<br/>        }<br/><br/>        <span class="hljs-keyword">if</span> IRQ_SUSPEND.<span class="hljs-title function_ invoke__">load</span>(Ordering::Acquire) {<br/>            IRQ_SUSPEND.<span class="hljs-title function_ invoke__">store</span>(<span class="hljs-literal">false</span>, Ordering::Relaxed);<br/>            <span class="hljs-keyword">return</span> Poll::<span class="hljs-title function_ invoke__">Ready</span>(Event::Suspend);<br/>        }<br/><br/>        Poll::Pending<br/>    })<br/>    .<span class="hljs-keyword">await</span><br/>}<br/></code></pre></td></tr></table></figure>
+<h3 id="测试"><a class="headerlink" href="#测试" title="测试"></a>测试</h3><p>经过测试，运行HID例子，CDC例子都表现良好。</p>
+<p><a href="https://github.com/py32-rs/py32-hal/tree/main/examples/py32f072" rel="noopener" target="_blank">py32-hal/examples/py32f072</a></p>
+<p><img lazyload="" src="/blog/py32-musb/2025-01-01-14-19-30-image.png" srcset="/blog/img/loading.gif"/></p>
+<p><img lazyload="" src="/blog/py32-musb/2025-01-01-14-19-57-image.png" srcset="/blog/img/loading.gif"/></p>
+<p>测试<a href="https://github.com/HaoboGu/rmk/" rel="noopener" target="_blank">RMK</a>也运行良好，我还给RMK写了个example：<a href="https://github.com/HaoboGu/rmk/pull/173" rel="noopener" target="_blank"> #173</a></p>
+<p>做embassy-usb-driver其实挺顺利，在后期的测试中，发现并修复了很多问题，但是这些问题都没有在前期太影响USB的行为。</p>
+<p>纠结时间比较长的是SetupEnd位，尤其是在找到musb_programming_guide之前，STC和PY的手册的离谱翻译都无法体现出该位的意思（在<a href="#%E8%B5%84%E6%96%99">资料</a>这引用了原文）。</p>
+<p>该位的作用其实是检测突然而来的Setup包，而DataEnd还未被置位，musb认为上一次控制传输还没有结束，下一次控制传输就开始了。这个寄存器目前在embassy-usb-driver impl中没有用到，到后面做usb-device driver时才用到（见下）。</p>
+<h2 id="musb-crate"><a class="headerlink" href="#musb-crate" title="musb crate"></a><code>musb</code> crate</h2><p>后面，我发现SiFli（思澈）的USB也是musb，于是，我注册了个<a href="https://crates.io/crates/musb" rel="noopener" target="_blank">musb</a>的crate名，并把驱动代码转进去，改用musb的标准寄存器名，并借助AI重新生成了寄存器信息，弄了个寄存器生成构建程序，可以适配不同的魔改阉割musb，只需要编写profile和特定的寄存器描述yaml。然后，使用<a href="https://github.com/embedded-drivers/yaml2pac" rel="noopener" target="_blank">yaml2pac</a> (基于<a href="https://github.com/embassy-rs/chiptool" rel="noopener" target="_blank">chiptool</a>) 生成寄存器代码。同时，也提供prebuild，详细信息请参考<a href="https://crates.io/crates/musb" rel="noopener" target="_blank">musb</a>的README。</p>
+<p>截止目前，SiFli他们的开发板还没做出来，虽然可以申请芯片和模块，但是我懒得画板子……</p>
+<h2 id="usb-device-的实现"><a class="headerlink" href="#usb-device-的实现" title="usb-device 的实现"></a><code>usb-device</code> 的实现</h2><p>embassy-usb并不是rust嵌入式唯一的USB Stack，另一个是<a href="https://github.com/rust-embedded-community/usb-device" rel="noopener" target="_blank">usb-device</a>，我也是最近才发现这点。Trait咋一看和embassy-usb-driver区别不大，我想着顺便做了吧？</p>
+<p><a href="https://github.com/rust-embedded-community/usb-device" rel="noopener" target="_blank">usb-device</a>不是Async模式的，而是<a href="https://crates.io/crates/nb" rel="noopener" target="_blank">nb</a> (no-block)模式，通过轮询来推动任务进行。</p>
+<p><a href="https://github.com/rust-embedded-community/usb-device/blob/8ace6c0825df53ad6d1f7221b03c883b68132111/src/bus.rs" rel="noopener" target="_blank">usb-device/src/bus.rs</a> 里则是我们需要实现的Trait：<code>Bus</code>。并没有像embassy-usb-driver这样分为四个Trait。</p>
+<p>但是其实，实现usb-device比embassy-usb-driver难多了，因为具体实现已经在上面讨论过，所以我们这里仅讲述不同的地方。</p>
+<ol>
+<li><p>usb-device并没有单独为控制传输的读写操作设置函数，端点统一使用write和read函数，并没有提供是否是第一个包、最后一个包的信息。（<code>embassy-usb-driver</code>的<code>ControlPipe</code>的<code>data_in</code>和<code>data_out</code>都有<code>first</code>和<code>last</code>的bool参数）而musb IP需要在最后一个包时设置SetupEnd。我只能用workaround和状态机来指示这一点。</p>
+</li>
+<li><p>usb-device未处理在未设置地址时读取设备描述符的行为。在embassy-usb中，有一个特殊处理，保证只会发一个包：<img lazyload="" src="/blog/py32-musb/2025-01-01-14-44-47-image.png" srcset="/blog/img/loading.gif"/></p>
+<p>在测试时，我发现当从机发送两个包后，主机会不再接收，然后发送下一个Setup包。（只有当最大包长小于描述符长度的时候，才能复现)</p>
+</li>
+<li><p>embassy-usb仅会在控制传输之外调用setup函数等待setup包，所以我们直接读取RxPktRdy，看有没有包加载进来就行了。但是usb-device是轮询，无法只读RxPktRdy来判断是不是Setup包，musb也没有特定的判断是否为Setup包的寄存器（虽然musb内部的状态机可以做到，但没有对应的寄存器），usb-device的控制传输状态机的信息，也无法在移植层获取到。</p>
+</li>
+<li><p>usb-device并未提供accept函数的Trait，而是将accept的行为默认为写入一个空包，然而musb不需要这么做。</p>
+</li>
+</ol>
+<p>综上，我在usb-device中写了一个控制传输的状态机，才解决这些问题。</p>
+<p>对于未设置地址时读取设备描述符的问题2，SetupEnd位的作用就体现出来了，在疑似有Setup包进来的时候，可以读取SetupEnd位来重置状态机。</p>
+<p>状态机会在移植层直接读取setup包的长度和方向信息，更新状态，捕获空包写入的行为（问题4），在合适的时候，设置DataEnd位。</p>
+<p>在花费了更长的时间后，我也终于跑通了usb-device。</p>
+<p><img lazyload="" src="/blog/py32-musb/2025-01-01-15-07-52-image.png" srcset="/blog/img/loading.gif"/></p>
+<p>例子：<a href="https://github.com/py32-rs/py32-hal/tree/main/examples/usbd-f072" rel="noopener" target="_blank">py32-hal/examples/usbd-f072</a></p>
+<h2 id="更新"><a class="headerlink" href="#更新" title="更新"></a>更新</h2><p>后面我成功拿到了思澈的板子，也为 <a href="https://github.com/OpenSiFli/sifli-rs" rel="noopener" target="_blank">sifli-rs</a> 移植了这一驱动。</p>
+<p>可以查看 <a href="sf32-usb-no-ack.md">这篇博客</a> ，我写了新的移植日记，更深探索了musb ip以及<code>SetupEnd</code>位。</p>
+</div>
+<hr/>
+<div>
+<div class="post-metas my-3">
+<div class="post-meta">
+<i class="iconfont icon-tags"></i>
+<a class="print-no-link" href="/blog/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/">#嵌入式</a>
+<a class="print-no-link" href="/blog/tags/PY32/">#PY32</a>
+<a class="print-no-link" href="/blog/tags/Rust/">#Rust</a>
+<a class="print-no-link" href="/blog/tags/USB/">#USB</a>
+<a class="print-no-link" href="/blog/tags/RMK/">#RMK</a>
+<a class="print-no-link" href="/blog/tags/musb/">#musb</a>
+</div>
+</div>
+<div class="license-box my-3">
+<div class="license-title">
+<div>PY32的musb(Mentor USB)的Rust支持</div>
+<div>https://decaday.github.io/blog/py32-musb/</div>
+</div>
+<div class="license-meta">
+<div class="license-meta-item">
+<div>作者</div>
+<div>星期十</div>
+</div>
+<div class="license-meta-item license-meta-date">
+<div>发布于</div>
+<div>2025年2月1日</div>
+</div>
+<div class="license-meta-item license-meta-date">
+<div>更新于</div>
+<div>2026年2月8日</div>
+</div>
+<div class="license-meta-item">
+<div>许可协议</div>
+<div>
+<a class="print-no-link" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">
+<span aria-label="BY - 署名" class="hint--top hint--rounded">
+<i class="iconfont icon-cc-by"></i>
+</span>
+</a>
+<a class="print-no-link" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">
+<span aria-label="NC - 非商业性使用" class="hint--top hint--rounded">
+<i class="iconfont icon-cc-nc"></i>
+</span>
+</a>
+</div>
+</div>
+</div>
+<div class="license-icon iconfont"></div>
+</div>
+<div class="post-prevnext my-3">
+<article class="post-prev col-6">
+<a href="/blog/sifli-boot/" title="SiFli思澈芯片的启动流程和rust点灯">
+<i class="iconfont icon-arrowleft"></i>
+<span class="hidden-mobile">SiFli思澈芯片的启动流程和rust点灯</span>
+<span class="visible-mobile">上一篇</span>
+</a>
+</article>
+<article class="post-next col-6">
+<a href="/blog/stack-overflow-learn/" title="一次Stack Overflow的学习，踩坑与疑惑">
+<span class="hidden-mobile">一次Stack Overflow的学习，踩坑与疑惑</span>
+<span class="visible-mobile">下一篇</span>
+<i class="iconfont icon-arrowright"></i>
+</a>
+</article>
+</div>
+</div>
+<article id="comments" lazyload="">
+<div class="giscus" id="giscus"></div>
+<script type="text/javascript">
+      Fluid.utils.loadComments('#giscus', function() {
+        var options = {"repo":"decaday/blog","repo-id":"R_kgDOLNAOjg","category":"Announcements","category-id":"DIC_kwDOLNAOjs4CdRDg","theme-light":"light","theme-dark":"dark","mapping":"pathname","reactions-enabled":1,"emit-metadata":0,"input-position":"top","lang":"zh-CN"};
+        var attributes = {};
+        for (let option in options) {
+          if (!option.startsWith('theme-')) {
+            var key = option.startsWith('data-') ? option : 'data-' + option;
+            attributes[key] = options[option];
+          }
+        }
+        var light = 'light';
+        var dark = 'dark';
+        window.GiscusThemeLight = light;
+        window.GiscusThemeDark = dark;
+        attributes['data-theme'] = document.documentElement.getAttribute('data-user-color-scheme') === 'dark' ? dark : light;
+        for (let attribute in attributes) {
+          var value = attributes[attribute];
+          if (value === undefined || value === null || value === '') {
+            delete attributes[attribute];
+          }
+        }
+        var s = document.createElement('script');
+        s.setAttribute('src', 'https://giscus.app/client.js');
+        s.setAttribute('crossorigin', 'anonymous');
+        for (let attribute in attributes) {
+          s.setAttribute(attribute, attributes[attribute]);
+        }
+        var ss = document.getElementsByTagName('script');
+        var e = ss.length > 0 ? ss[ss.length - 1] : document.head || document.documentElement;
+        e.parentNode.insertBefore(s, e.nextSibling);
+      });
+    </script>
+<noscript>Please enable JavaScript to view the comments</noscript>
+</article>
+</article>
+</div>
+</div>
+</div>
+<div class="side-col d-none d-lg-block col-lg-2">
+<aside class="sidebar" style="margin-left: -1rem">
+<div id="toc">
+<p class="toc-header">
+<i class="iconfont icon-list"></i>
+<span>目录</span>
+</p>
+<div class="toc-body" id="toc-body"></div>
+</div>
+</aside>
+</div>
+</div>
+</div>
+<a aria-label="TOP" href="#" id="scroll-top-button" role="button">
+<i aria-hidden="true" class="iconfont icon-arrowup"></i>
+</a>
+<div aria-hidden="true" aria-labelledby="ModalLabel" class="modal fade" id="modalSearch" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+<div class="modal-content">
+<div class="modal-header text-center">
+<h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+<button aria-label="Close" class="close" data-dismiss="modal" id="local-search-close" type="button">
+<span aria-hidden="true">×</span>
+</button>
+</div>
+<div class="modal-body mx-3">
+<div class="md-form mb-5">
+<input class="form-control validate" id="local-search-input" type="text"/>
+<label data-error="x" data-success="v" for="local-search-input">关键词</label>
+</div>
+<div class="list-group" id="local-search-result"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer>
+<div class="footer-inner">
+<div class="footer-content">
+<a href="https://hexo.io" rel="nofollow noopener" target="_blank"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" rel="nofollow noopener" target="_blank"><span>Fluid</span></a>
+</div>
+<div class="statistics">
+<span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+<span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+</div>
+</div>
+</footer>
+<!-- Scripts -->
+<script src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js"></script>
+<link href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet"/>
+<script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+<script src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js"></script>
+<script src="/blog/js/events.js"></script>
+<script src="/blog/js/plugins.js"></script>
+<script src="/blog/js/img-lazyload.js"></script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+<script src="https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js"></script>
+<script>Fluid.plugins.codeWidget();</script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+<script>Fluid.plugins.imageCaption();</script>
+<script src="/blog/js/local-search.js"></script>
+<script defer="" src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script src="/blog/js/boot.js"></script>
+<noscript>
+<div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+</noscript>
+</body>
+</html>

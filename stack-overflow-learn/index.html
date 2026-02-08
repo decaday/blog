@@ -1,0 +1,531 @@
+
+<!DOCTYPE html>
+
+<html data-default-color-scheme="auto" lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<link href="/blog/img/favicon.jpg" rel="apple-touch-icon" sizes="76x76"/>
+<link href="/blog/img/favicon.jpg" rel="icon"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no" name="viewport"/>
+<meta content="ie=edge" http-equiv="x-ua-compatible"/>
+<meta content="#2f4154" name="theme-color"/>
+<meta content="星期十" name="author"/>
+<meta content="" name="keywords"/>
+<meta content="一次Stack Overflow的学习，踩坑与疑惑—是内存意义上的Stack Overflow(x 我其实挺水的，只会穷举，在这几天时间编译了n次这个固件。看了这篇文章你就知道我有多水，啥都不会。 写这篇文章的目的之一，就是N年后再回头看看，这到底是怎么个事？？？ 起因我最近给py32-hal做了Flash支持，主要是为了能在RMK上跑。我在之前做好usb后，就给rmk拉了PR，添加py32f07" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="一次Stack Overflow的学习，踩坑与疑惑" property="og:title"/>
+<meta content="https://decaday.github.io/blog/stack-overflow-learn/index.html" property="og:url"/>
+<meta content="Decaday's Blogs" property="og:site_name"/>
+<meta content="一次Stack Overflow的学习，踩坑与疑惑—是内存意义上的Stack Overflow(x 我其实挺水的，只会穷举，在这几天时间编译了n次这个固件。看了这篇文章你就知道我有多水，啥都不会。 写这篇文章的目的之一，就是N年后再回头看看，这到底是怎么个事？？？ 起因我最近给py32-hal做了Flash支持，主要是为了能在RMK上跑。我在之前做好usb后，就给rmk拉了PR，添加py32f07" property="og:description"/>
+<meta content="zh_CN" property="og:locale"/>
+<meta content="https://decaday.github.io/blog/images/call-stack.png" property="og:image"/>
+<meta content="2025-01-11T11:56:33.000Z" property="article:published_time"/>
+<meta content="2025-06-30T08:28:49.953Z" property="article:modified_time"/>
+<meta content="星期十" property="article:author"/>
+<meta content="嵌入式" property="article:tag"/>
+<meta content="PY32" property="article:tag"/>
+<meta content="Rust" property="article:tag"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="https://decaday.github.io/blog/images/call-stack.png" name="twitter:image"/>
+<meta content="no-referrer-when-downgrade" name="referrer"/>
+<title>一次Stack Overflow的学习，踩坑与疑惑 - Decaday's Blogs</title>
+<link href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" rel="stylesheet">
+<link href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" rel="stylesheet"/>
+<link href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet"/>
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+<link href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css" rel="stylesheet"/>
+<link href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css" rel="stylesheet"/>
+<link href="/blog/css/main.css" rel="stylesheet">
+<link href="/blog/css/highlight.css" id="highlight-css" rel="stylesheet">
+<link href="/blog/css/highlight-dark.css" id="highlight-css-dark" rel="stylesheet"/>
+<script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"decaday.github.io","root":"/blog/","version":"1.9.8","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/blog/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+<script src="/blog/js/utils.js"></script>
+<script src="/blog/js/color-schema.js"></script>
+<meta content="Hexo 7.1.1" name="generator"/></link></link></link></link></head>
+<body>
+<header>
+<div class="header-inner" style="height: 70vh;">
+<nav class="navbar fixed-top navbar-expand-lg navbar-dark scrolling-navbar" id="navbar">
+<div class="container">
+<a class="navbar-brand" href="/blog/">
+<strong>Decaday 星期十的博客</strong>
+</a>
+<button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbarSupportedContent" data-toggle="collapse" id="navbar-toggler-btn" type="button">
+<div class="animated-icon"><span></span><span></span><span></span></div>
+</button>
+<!-- Collapsible content -->
+<div class="collapse navbar-collapse" id="navbarSupportedContent">
+<ul class="navbar-nav ml-auto text-center">
+<li class="nav-item">
+<a class="nav-link" href="/blog/" target="_self">
+<i class="iconfont icon-home-fill"></i>
+<span>首页</span>
+</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="/blog/tags/" target="_self">
+<i class="iconfont icon-tags-fill"></i>
+<span>标签</span>
+</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="/blog/about/" target="_self">
+<i class="iconfont icon-user-fill"></i>
+<span>关于</span>
+</a>
+</li>
+<li class="nav-item" id="search-btn">
+<a aria-label="Search" class="nav-link" data-target="#modalSearch" data-toggle="modal" href="javascript:;" target="_self">
+<i class="iconfont icon-search"></i>
+</a>
+</li>
+<li class="nav-item" id="color-toggle-btn">
+<a aria-label="Color Toggle" class="nav-link" href="javascript:;" target="_self">
+<i class="iconfont icon-dark" id="color-toggle-icon"></i>
+</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<div class="banner" id="banner" parallax="true" style="background: url('/blog/images/call-stack.png') no-repeat center center; background-size: cover;">
+<div class="full-bg-img">
+<div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+<div class="banner-text text-center fade-in-up">
+<div class="h2">
+<span id="subtitle">一次Stack Overflow的学习，踩坑与疑惑</span>
+</div>
+<div class="mt-3">
+<span class="post-meta">
+<i aria-hidden="true" class="iconfont icon-date-fill"></i>
+<time datetime="2025-01-11 19:56" pubdate="">
+          2025年1月11日
+        </time>
+</span>
+</div>
+<div class="mt-1">
+<span class="post-meta mr-2">
+<i class="iconfont icon-chart"></i>
+        
+          2.4k 字
+        
+      </span>
+<span class="post-meta mr-2">
+<i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          20 分钟
+        
+      </span>
+<span id="busuanzi_container_page_pv" style="display: none">
+<i aria-hidden="true" class="iconfont icon-eye"></i>
+<span id="busuanzi_value_page_pv"></span> 次
+        </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<main>
+<div class="container-fluid nopadding-x">
+<div class="row nomargin-x">
+<div class="side-col d-none d-lg-block col-lg-2">
+</div>
+<div class="col-lg-8 nopadding-x-md">
+<div class="container nopadding-x-md" id="board-ctn">
+<div id="board">
+<article class="post-content mx-auto">
+<h1 id="seo-header">一次Stack Overflow的学习，踩坑与疑惑</h1>
+<p class="note note-info" id="updated-time" style="">
+                
+                  
+                    本文最后更新于 2025年6月30日 下午
+                  
+                
+              </p>
+<div class="markdown-body">
+<h1 id="一次Stack-Overflow的学习，踩坑与疑惑"><a class="headerlink" href="#一次Stack-Overflow的学习，踩坑与疑惑" title="一次Stack Overflow的学习，踩坑与疑惑"></a>一次Stack Overflow的学习，踩坑与疑惑</h1><p>—是内存意义上的Stack Overflow(x</p>
+<p>我其实挺水的，只会穷举，在这几天时间编译了n次这个固件。看了这篇文章你就知道我有多水，啥都不会。</p>
+<p>写这篇文章的目的之一，就是N年后再回头看看，这到底是怎么个事？？？</p>
+<h2 id="起因"><a class="headerlink" href="#起因" title="起因"></a>起因</h2><p>我最近给<a href="https://github.com/py32-rs/py32-hal" rel="noopener" target="_blank">py32-hal</a>做了Flash支持，主要是为了能在<a href="https://github.com/HaoboGu/rmk/" rel="noopener" target="_blank">RMK</a>上跑。我在之前做好usb后，就给rmk拉了PR，添加py32f07x的example。RMK作者HaoboGu这几天还做了个<a href="https://github.com/HaoboGu/pypad" rel="noopener" target="_blank">pypad</a>来玩。</p>
+<p>于是我想再给RMK拉个PR更新<a href="https://github.com/py32-rs/py32-hal" rel="noopener" target="_blank">py32-hal</a>的版本，增加Flash支持，为了能够保存vial改键的数据。</p>
+<p>但是一跑，不对劲了：</p>
+<p><img lazyload="" src="/blog/stack-overflow-learn/0ecbc29f332cc0550456e4f44134d884.png" srcset="/blog/img/loading.gif"/></p>
+<p>但是RMK写死的64：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/></pre></td><td class="code"><pre><code class="hljs rust">usb_config.max_packet_size_0 = <span class="hljs-number">64</span>;<br/></code></pre></td></tr></table></figure>
+<p>在调用embassy_usb的builder之前，值是正常的（图里我写了个11测试），然后builder内部，无论我写多少，传进去再打印都是32。其它的参数暂时没问题。</p>
+<p><img lazyload="" src="/blog/stack-overflow-learn/dbf548e8eeb699e14c9fe0eeea9d68b7.png" srcset="/blog/img/loading.gif"/></p>
+<p>但是判断它是不是32，却匹配不上。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-keyword">match</span> config.max_packet_size_0 {<span class="hljs-number">8</span> | <span class="hljs-number">16</span> | <span class="hljs-number">32</span> | <span class="hljs-number">64</span> =&gt; <span class="hljs-literal">true</span>}<br/>------ <span class="hljs-literal">false</span><br/><span class="hljs-keyword">if</span> config.max_packet_size_0 == <span class="hljs-number">32</span><br/>------ <span class="hljs-literal">true</span><br/></code></pre></td></tr></table></figure>
+<p>怎么会逝呢？我进一步测试：(正确值为11，打印值恒为32)</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/><span class="line">12</span><br/><span class="line">13</span><br/><span class="line">14</span><br/><span class="line">15</span><br/><span class="line">16</span><br/><span class="line">17</span><br/><span class="line">18</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-keyword">if</span> config.max_packet_size_0==<span class="hljs-number">32</span>{<br/>	info!(<span class="hljs-string">"test0 pass"</span>)<br/>} <span class="hljs-keyword">else</span> {<br/>	warn!(<span class="hljs-string">"test0 fail"</span> )<br/>};<br/><span class="hljs-keyword">match</span> config.max_packet_size_0{<br/>	<span class="hljs-number">32</span> =&gt; {info!(<span class="hljs-string">"test1 pass"</span>);},<br/>	<span class="hljs-number">64</span> =&gt; {warn!(<span class="hljs-string">"test1 fail"</span>);},<br/>	_ =&gt; {warn!(<span class="hljs-string">"test1 fail"</span>);},<br/>};<br/><span class="hljs-keyword">match</span> config.max_packet_size_0{<br/>	<span class="hljs-number">32</span> | <span class="hljs-number">64</span> =&gt; {info!(<span class="hljs-string">"test2 pass"</span>);},<br/>	_ =&gt; {warn!(<span class="hljs-string">"test2 fail"</span>);},<br/>};<br/><span class="hljs-keyword">match</span> config.max_packet_size_0{<br/>	<span class="hljs-number">8</span> | <span class="hljs-number">16</span> | <span class="hljs-number">32</span> | <span class="hljs-number">64</span> =&gt; {info!(<span class="hljs-string">"test3 pass"</span>);},<br/>	_ =&gt; {warn!(<span class="hljs-string">"test3 fail"</span>);},<br/>};<br/></code></pre></td></tr></table></figure>
+<p><img lazyload="" src="/blog/stack-overflow-learn/image-20250111201704484.png" srcset="/blog/img/loading.gif"/></p>
+<p>我首先怀疑的是内存对齐问题，猜测是两个crate内结构体内存不对齐导致的。我在builder函数调用前，使用<code>core::mem::offset_of!</code>完全正常，但是在builder函数内，<code>ffset_of!</code>返回的值就非常离谱，比如0xFFFFFFFF。这个时候，我怀疑是栈溢出了。</p>
+<h2 id="确认问题"><a class="headerlink" href="#确认问题" title="确认问题"></a>确认问题</h2><p>确认问题也花了非常长的时间。我决定首先使用probe-rs观察sp(stack pointer)寄存器。</p>
+<p>这是一个典型的cortex-m的栈：</p>
+<img lazyload="" src="image-20250111202338130.png" srcset="/blog/img/loading.gif" style="zoom:50%;">
+<p>程序中使用了flip-link，<code>.bss</code>和<code>.data</code>将被放在高地址：</p>
+<img alt="image-20250111202425172" lazyload="" src="image-20250111202425172.png" srcset="/blog/img/loading.gif" style="zoom:50%;">
+<p>观察sp寄存器，发现sp的值始终恒定，并且远大于0，按理说没有溢出（？）。</p>
+<p><img lazyload="" src="/blog/stack-overflow-learn/7a8d8f0cfdfc40dc38176357c1955fa7.png" srcset="/blog/img/loading.gif"/></p>
+<p>嗯。。。。</p>
+<p>后来，当我使用defmt来打印sp的值的时候，发现sp的值会变化，只是不知道为什么probe-rs的调试窗口sp的值不会变。不过。。sp的地址怎么还不对？</p>
+<p>再后来，我发现在build.rs中，这么写其实不会生效：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-built_in">println!</span>(<span class="hljs-string">"cargo:rustc-linker=flip-link"</span>);<br/></code></pre></td></tr></table></figure>
+<p>通过<code>cargo nm</code>，可以看到<code>_stack_start</code>仍然在最高地址。。。。</p>
+<p><img lazyload="" src="/blog/stack-overflow-learn/e5c6d270486c31fb91659bf39ada09cc.png" srcset="/blog/img/loading.gif"/></p>
+<p>事实上，必须写在.cargo/config.toml中才会生效</p>
+<figure class="highlight toml"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/></pre></td><td class="code"><pre><code class="hljs toml"><span class="hljs-section">[target.'cfg(all(target_arch = "arm", target_os = "none"))']</span><br/><span class="hljs-attr">linker</span> = <span class="hljs-string">"flip-link"</span><br/></code></pre></td></tr></table></figure>
+<p>这两个坑，导致我花了很长时间都没有确认问题。</p>
+<p>当我真的开启flip-link后，一跑就挂掉了</p>
+<p><img lazyload="" src="/blog/stack-overflow-learn/44fc3e2bb9655009415002a6ddd92851.png" srcset="/blog/img/loading.gif"/></p>
+<hr/>
+<p>开始的时候，我希望在HardFault里我希望捕捉一个内存错误之类的，来证明是栈溢出，</p>
+<p>但是，这些cortex-m的SCB寄存器似乎也在thumbv6m中无效：</p>
+<p><img lazyload="" src="/blog/stack-overflow-learn/image-20250111203606742.png" srcset="/blog/img/loading.gif"/></p>
+<p>其实开启flip-link之前，在main函数里，sp已经低到了<code>.bss</code>的范围里(因为有个async 异步运行时)。程序不久后就触发了HardFault。</p>
+<h2 id="深入分析"><a class="headerlink" href="#深入分析" title="深入分析"></a>深入分析</h2><p>同时，我还发现了一个奇怪的现象：使用<a href="https://github.com/py32-rs/py32-hal" rel="noopener" target="_blank">py32-hal</a> 0.2.0版本，<strong>根本不会栈溢出</strong>，最新的RMK仍然如此。但是使用<a href="https://github.com/py32-rs/py32-hal" rel="noopener" target="_blank">py32-hal</a> 0.2.1，<strong>马上就溢出</strong>，而且main函数sp低了将近4K。固件里，embassy的task arena占了4k多，defmt的缓存1k，其它乱七八糟的.bss 2K，栈9K，就爆掉了。。</p>
+<p><a href="https://github.com/py32-rs/py32-hal" rel="noopener" target="_blank">py32-hal</a> 0.2.1到0.2.0，主要是把USB驱动代码移动到<a href="https://github.com/decaday/musb" rel="noopener" target="_blank">musb</a> crate里，增加了Flash支持（还没用到），按理说stack增加4K有点太离谱了。</p>
+<p>我将代码回滚到刚重构完USB驱动代码的时候，那时候musb crate 的内容几乎都是从py32-hal复制出来没怎么修改的，但仍然爆stack。</p>
+<p>我想起来之前测试匹配问题的时候，直接使用crate.io的<code>embassy-usb</code>和从crate.io copy到本地而没有任何修改的<code>embassy-usb</code>，代码行为不太一样（可能是爆stack的位置不同），于是，我又把musb copy回到py32-hal里（当然结构不一样了，主要是musb crate有自己的寄存器访问模块），仍然爆stack。</p>
+<p>这就离谱了。</p>
+<h3 id="cargo-call-stack"><a class="headerlink" href="#cargo-call-stack" title="cargo-call-stack"></a>cargo-call-stack</h3><p>于是，我请出了<a href="https://github.com/japaric/cargo-call-stack" rel="noopener" target="_blank">japaric/cargo-call-stack</a>。这个家伙真的用请的，跑起来它，我用了三个小时。</p>
+<p>它最后能测试的的版本是nightly-2023-11-13，但是这对于咱Nightly Rust来说，已经太古老了。</p>
+<p>比如，这些feature还需要手动开启：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-meta">#![feature(collapse_debuginfo)]</span><br/><span class="hljs-meta">#![feature(inline_const)]</span><br/><span class="hljs-meta">#![feature(slice_ptr_len)]</span><br/></code></pre></td></tr></table></figure>
+<p><code>#[collapse_debuginfo(yes)]</code>在nightly-2023-11-13中也没有yes这样的参数，不幸的是，Embassy系的crate大量使用了这个东西。</p>
+<p><code>cfg-if</code>的core feature会使用这个package:</p>
+<figure class="highlight toml"><table><tr><td class="gutter"><pre><span class="line">1</span><br/></pre></td><td class="code"><pre><code class="hljs toml"><span class="hljs-attr">core</span> = { version = <span class="hljs-string">"1.0.0"</span>, optional = <span class="hljs-literal">true</span>, package = <span class="hljs-string">'rustc-std-workspace-core'</span> }<br/></code></pre></td></tr></table></figure>
+<p>但是在nightly-2023-11-13里会报错。</p>
+<p><img lazyload="" src="/blog/stack-overflow-learn/image-20250111235526895.png" srcset="/blog/img/loading.gif"/></p>
+<p>诸如此类好些问题，我拉了一堆crate到本地打patch，才算是编译过。</p>
+<p>但已运行，又出现了问题：<code>panicked: BUG? no symbol at address 134222428</code> 。查看argo-call-stack源码，call-stack使用<code>addr2name</code>来获取符号，但是这个地址似乎真的没有对应的符号。我只好将它也拉下来，将panic改为warn并跳过。</p>
+<p>这样的warn有五百多个，好在不怎么影响最终效果。</p>
+<p>但总归是跑起来了。生成的svg是这样的：（只是一小部分）</p>
+<p><img lazyload="" src="/blog/stack-overflow-learn/image-20250111195535483.png" srcset="/blog/img/loading.gif"/></p>
+<p>嗯……没有可读性。不过通过对比生成出来的dot文件，我发现唯一的异常之处：</p>
+<figure class="highlight dns"><table><tr><td class="gutter"><pre><span class="line">1</span><br/></pre></td><td class="code"><pre><code class="hljs dns">[label="embassy_executor<span class="hljs-number">::</span>raw<span class="hljs-number">::</span>TaskStorage&lt;F&gt;<span class="hljs-number">::</span>poll\nmax &gt;= <span class="hljs-number">9040</span>\nlocal = <span class="hljs-number">8856</span>"]<br/></code></pre></td></tr></table></figure>
+<p>在使用py32-hal 0.2.0的情况下，这个poll函数的local只有5K多。</p>
+<p>但是这就涉及我的知识盲区了：Async Runtime我大概知道怎么回事，但是细节或者涉及到底层，我就完全不清楚了。为什么poll函数的local这么大，还这么有弹性，就搞不懂了。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/><span class="line">12</span><br/><span class="line">13</span><br/><span class="line">14</span><br/><span class="line">15</span><br/><span class="line">16</span><br/><span class="line">17</span><br/><span class="line">18</span><br/><span class="line">19</span><br/><span class="line">20</span><br/><span class="line">21</span><br/><span class="line">22</span><br/><span class="line">23</span><br/></pre></td><td class="code"><pre><code class="hljs rust"> <span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">poll</span>(p: TaskRef) {<br/>    <span class="hljs-keyword">let</span> <span class="hljs-variable">this</span> = &amp;*p.<span class="hljs-title function_ invoke__">as_ptr</span>().cast::&lt;TaskStorage&lt;F&gt;&gt;();<br/>    <span class="hljs-keyword">let</span> <span class="hljs-variable">future</span> = Pin::<span class="hljs-title function_ invoke__">new_unchecked</span>(this.future.<span class="hljs-title function_ invoke__">as_mut</span>());<br/>    <span class="hljs-keyword">let</span> <span class="hljs-variable">waker</span> = waker::<span class="hljs-title function_ invoke__">from_task</span>(p);<br/>    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut </span><span class="hljs-variable">cx</span> = Context::<span class="hljs-title function_ invoke__">from_waker</span>(&amp;waker);<br/>    <span class="hljs-keyword">match</span> future.<span class="hljs-title function_ invoke__">poll</span>(&amp;<span class="hljs-keyword">mut</span> cx) {<br/>        Poll::<span class="hljs-title function_ invoke__">Ready</span>(_) =&gt; {<br/>            <span class="hljs-comment">// As the future has finished and this function will not be called</span><br/>            <span class="hljs-comment">// again, we can safely drop the future here.</span><br/>            this.future.<span class="hljs-title function_ invoke__">drop_in_place</span>();<br/>            <span class="hljs-comment">// We replace the poll_fn with a despawn function, so that the task is cleaned up</span><br/>            <span class="hljs-comment">// when the executor polls it next.</span><br/>            this.raw.poll_fn.<span class="hljs-title function_ invoke__">set</span>(<span class="hljs-title function_ invoke__">Some</span>(poll_exited));<br/>            <span class="hljs-comment">// Make sure we despawn last, so that other threads can only spawn the task</span><br/>            <span class="hljs-comment">// after we're done with it.</span><br/>            this.raw.state.<span class="hljs-title function_ invoke__">despawn</span>();<br/>        }<br/>        Poll::Pending =&gt; {}<br/>    }<br/>    <span class="hljs-comment">// the compiler is emitting a virtual call for waker drop, but we know</span><br/>    <span class="hljs-comment">// it's a noop for our waker.</span><br/>    mem::forget(waker);<br/>}<br/></code></pre></td></tr></table></figure>
+<p><a href="https://github.com/embassy-rs/embassy/blob/fc7e94ae763592055e180edff3fabf26e5d22ab7/embassy-executor/src/raw/mod.rs#L208-L229" rel="noopener" target="_blank">https://github.com/embassy-rs/embassy/blob/fc7e94ae763592055e180edff3fabf26e5d22ab7/embassy-executor/src/raw/mod.rs#L208-L229</a></p>
+<h2 id="Stack爆减"><a class="headerlink" href="#Stack爆减" title="Stack爆减"></a>Stack爆减</h2><p>减小这个函数的stack，超出我的能力范围了，我也在这个问题上折腾了有够长时间。我想，看能不能改下编译参数，减小stack大小。</p>
+<p>在Cargo.toml中来配置编译参数，比如：</p>
+<figure class="highlight toml"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/></pre></td><td class="code"><pre><code class="hljs toml"><span class="hljs-comment"># cargo build/run</span><br/><span class="hljs-section">[profile.dev]</span><br/><span class="hljs-attr">codegen-units</span> = <span class="hljs-number">1</span><br/><span class="hljs-attr">debug</span> = <span class="hljs-number">2</span><br/><span class="hljs-attr">debug-assertions</span> = <span class="hljs-literal">true</span> <span class="hljs-comment"># &lt;-</span><br/><span class="hljs-attr">incremental</span> = <span class="hljs-literal">false</span><br/><span class="hljs-attr">opt-level</span> = <span class="hljs-string">'z'</span>         <span class="hljs-comment"># &lt;-</span><br/><span class="hljs-attr">overflow-checks</span> = <span class="hljs-literal">true</span>  <span class="hljs-comment"># &lt;-</span><br/></code></pre></td></tr></table></figure>
+<p><code>opt-level</code>使用2或3，比z或s能减小300 Bytes左右。</p>
+<p><code>lto = "fat"</code>则有增加stack的效果。</p>
+<h3 id="codegen-units"><a class="headerlink" href="#codegen-units" title="codegen-units"></a>codegen-units</h3><p>接下来是神奇的<code>codegen-units</code>。</p>
+<blockquote>
+<p>This flag controls the maximum number of code generation units the crate is split into. It takes an integer greater than 0.</p>
+<p>When a crate is split into multiple codegen units, LLVM is able to process them in parallel. Increasing parallelism may speed up compile times, but may also produce slower code. Setting this to 1 may improve the performance of generated code, but may be slower to compile.</p>
+<p>The default value, if not specified, is 16 for non-incremental builds. For incremental builds the default is 256 which allows caching to be more granular.</p>
+</blockquote>
+<p>文档中，说默认值是16（非增量编译），1的话代码速度就最快。我在开发的时候一直使用<code>codegen-units = 1</code>。</p>
+<p>当我将它改为16的时候，神奇的事情发生了：main函数进入时的sp增高4K！！！</p>
+<p>main函数应该是由poll调用，所以大概率就是poll的stack减小了4k。</p>
+<h3 id="尝试验证"><a class="headerlink" href="#尝试验证" title="尝试验证"></a>尝试验证</h3><p>这个在nightly-2023-11-13上面无法复现，无论如何不会减小stack。</p>
+<p>因此，我想试试在最新nightly上跑下<a href="https://github.com/japaric/cargo-call-stack" rel="noopener" target="_blank">cargo-call-stack</a>，来验证是不是poll的stack减小了4k。</p>
+<p>首先，需要设置这样的环境变量：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br/></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-attr">CARGO_CALL_STACK_UNSPPORTED_NIGHTLY</span>=<span class="hljs-string">"I won't open issues about unsupported toolchains"</span><br/></code></pre></td></tr></table></figure>
+<p>想必这次其实是必然失败的…</p>
+<p>首先是遇到了这个：<a href="https://github.com/japaric/cargo-call-stack/issues/110" rel="noopener" target="_blank"><code>error: missing </code>–crate-name<code> argument</code> · Issue #110</a></p>
+<p>我也没太看懂call-stack的Rustc Wapper是怎么个事，总之是将这个参数的<code>.unwarp</code>改为了<code>.unwarp_or("test_crate_name")</code>。然后还是拉了几个crate下来，总之是编译过了。但是在运行的时候，又出现了：</p>
+<figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/></pre></td><td class="code"><pre><code class="hljs subunit"><span class="hljs-keyword">error: </span>failed to parse application's LLVM IR from `xxxx\target\thumbv6m-none-eabi\release\deps\rmk_py32f07x<span class="hljs-string">-284721</span>aaa2e6169c.ll`: BUG: failed <br/>to parse LLVM IR; please submit a cargo-call-stack bug report and attach the `.ll` file: Failure("Eof in line 2076")<br/></code></pre></td></tr></table></figure>
+<p><a href="https://github.com/japaric/cargo-call-stack/issues/109" rel="noopener" target="_blank"><code>error: Did not find ELF magic number</code> on latest nightly · Issue #109</a></p>
+<p>我出现错误的llvm IR位置是这样的内容：</p>
+<figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/></pre></td><td class="code"><pre><code class="hljs llvm"><span class="hljs-comment">; &lt;embassy_futures::select::Select4&lt;A,B,C,D&gt; as core::future::future::Future&gt;::poll</span><br/><span class="hljs-comment">; Function Attrs: minsize nounwind optsize</span><br/><span class="hljs-keyword">define</span> <span class="hljs-keyword">internal</span> <span class="hljs-keyword">fastcc</span> void @<span class="hljs-string">"_ZN102_$LT$embassy_futures..select..Select4$LT$A$C$B$C$C$C$D$GT$$u20$as$u20$core..future..future..Future$GT$4poll17habaf255f9c5144b8E"</span>(ptr <span class="hljs-keyword">noalias</span> <span class="hljs-keyword">nocapture</span> noundef <span class="hljs-keyword">readonly</span> <span class="hljs-keyword">align</span> <span class="hljs-number">4</span> dereferenceable(<span class="hljs-number">24</span>) <span class="hljs-variable">%self</span><span class="hljs-punctuation">,</span> ptr <span class="hljs-keyword">noalias</span> noundef <span class="hljs-keyword">align</span> <span class="hljs-number">4</span> dereferenceable(<span class="hljs-number">16</span>) <span class="hljs-variable">%cx</span>) <span class="hljs-keyword">unnamed_addr</span> <span class="hljs-variable">#1</span> <span class="hljs-title">!dbg</span> <span class="hljs-title">!12078</span> {<br/><span class="hljs-symbol">start:</span><br/>  <span class="hljs-variable">%_12.i.i.i.i.i.i.i.i.i.i.i.i</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">alloca</span> [<span class="hljs-number">0</span> <span class="hljs-keyword">x</span> <span class="hljs-type">i8</span>]<span class="hljs-punctuation">,</span> <span class="hljs-keyword">align</span> <span class="hljs-number">1</span><br/></code></pre></td></tr></table></figure>
+<p>[line 2074-2078]</p>
+<p>失败了。</p>
+<h2 id="为什么呢？"><a class="headerlink" href="#为什么呢？" title="为什么呢？"></a>为什么呢？</h2><p>为什么增大<code>codegen-units</code>，stack就会这么大程度地减少？不是<code>codegen-units</code>越低，代码越快，编译越慢吗？</p>
+<p>为什么poll函数会有这么大的local stack？编译器是怎么确定它的local stack大小的？</p>
+<p>为什么重构了usb驱动就会导致poll函数的stack扩大将近一倍？是否是寄存器访问模块零散的函数导致的？（使用 <a href="https://github.com/embassy-rs/chiptool" rel="noopener" target="_blank">chiptool</a> 生成，chiptool不使用<a href="https://en.wikipedia.org/wiki/Memory-mapped_I/O_and_port-mapped_I/O" rel="noopener" target="_blank">MMIO</a>，而是直接生成操作函数）</p>
+<h1 id="2025年6月9日更新"><a class="headerlink" href="#2025年6月9日更新" title="2025年6月9日更新"></a>2025年6月9日更新</h1><p>后面，我试图给py32加上storage，也就是能存键位。为此，我还给py32写了flash驱动。</p>
+<p>但是，加上storage，又爆栈了。。。。。。而且使用修改codegen-units仅能缩小一点……</p>
+<p><img alt="此人是Jason/Haobogu，RMK作者" lazyload="" src="/blog/stack-overflow-learn/image-20250609120944976.png" srcset="/blog/img/loading.gif"/></p>
+<p>此人是Jason/Haobogu，RMK作者。</p>
+<p>甚至使用新版RMK，embassy的task-arena都爆了…………</p>
+<p>embassy-task-arena我记得之前用掉的1K不到，这么爆了，栈都还没发言呢……</p>
+<p>可能和这两个PR有关：</p>
+<p><a href="https://github.com/embassy-rs/embassy/pull/4007" rel="noopener" target="_blank">Statically allocated task pools on stable by 0e4ef622 · Pull Request #4007 · embassy-rs/embassy</a></p>
+<p><a href="https://github.com/embassy-rs/embassy/pull/4020" rel="noopener" target="_blank">Statically allocate task pools on stable Rust. by Dirbaio · Pull Request #4020 · embassy-rs/embassy</a></p>
+<p>还没细细研究。</p>
+<p>此外，另一个PR也值得关注，看看未来async的pool stack会不会有改善吧。作者似乎还是华人。</p>
+<p><a href="https://github.com/rust-lang/rust/pull/135527" rel="noopener" target="_blank">Move coroutine upvars into locals for better memory economy by dingxiangfei2009 · Pull Request #135527 · rust-lang/rust</a></p>
+</img></img></div>
+<hr>
+<div>
+<div class="post-metas my-3">
+<div class="post-meta">
+<i class="iconfont icon-tags"></i>
+<a class="print-no-link" href="/blog/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/">#嵌入式</a>
+<a class="print-no-link" href="/blog/tags/PY32/">#PY32</a>
+<a class="print-no-link" href="/blog/tags/Rust/">#Rust</a>
+</div>
+</div>
+<div class="license-box my-3">
+<div class="license-title">
+<div>一次Stack Overflow的学习，踩坑与疑惑</div>
+<div>https://decaday.github.io/blog/stack-overflow-learn/</div>
+</div>
+<div class="license-meta">
+<div class="license-meta-item">
+<div>作者</div>
+<div>星期十</div>
+</div>
+<div class="license-meta-item license-meta-date">
+<div>发布于</div>
+<div>2025年1月11日</div>
+</div>
+<div class="license-meta-item license-meta-date">
+<div>更新于</div>
+<div>2025年6月30日</div>
+</div>
+<div class="license-meta-item">
+<div>许可协议</div>
+<div>
+<a class="print-no-link" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">
+<span aria-label="BY - 署名" class="hint--top hint--rounded">
+<i class="iconfont icon-cc-by"></i>
+</span>
+</a>
+<a class="print-no-link" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">
+<span aria-label="NC - 非商业性使用" class="hint--top hint--rounded">
+<i class="iconfont icon-cc-nc"></i>
+</span>
+</a>
+</div>
+</div>
+</div>
+<div class="license-icon iconfont"></div>
+</div>
+<div class="post-prevnext my-3">
+<article class="post-prev col-6">
+<a href="/blog/py32-musb/" title="PY32的musb(Mentor USB)的Rust支持">
+<i class="iconfont icon-arrowleft"></i>
+<span class="hidden-mobile">PY32的musb(Mentor USB)的Rust支持</span>
+<span class="visible-mobile">上一篇</span>
+</a>
+</article>
+<article class="post-next col-6">
+<a href="/blog/embassy-exti/" title="从EXTI实现看Embassy:异步Rust嵌入式框架">
+<span class="hidden-mobile">从EXTI实现看Embassy:异步Rust嵌入式框架</span>
+<span class="visible-mobile">下一篇</span>
+<i class="iconfont icon-arrowright"></i>
+</a>
+</article>
+</div>
+</div>
+<article id="comments" lazyload="">
+<div class="giscus" id="giscus"></div>
+<script type="text/javascript">
+      Fluid.utils.loadComments('#giscus', function() {
+        var options = {"repo":"decaday/blog","repo-id":"R_kgDOLNAOjg","category":"Announcements","category-id":"DIC_kwDOLNAOjs4CdRDg","theme-light":"light","theme-dark":"dark","mapping":"pathname","reactions-enabled":1,"emit-metadata":0,"input-position":"top","lang":"zh-CN"};
+        var attributes = {};
+        for (let option in options) {
+          if (!option.startsWith('theme-')) {
+            var key = option.startsWith('data-') ? option : 'data-' + option;
+            attributes[key] = options[option];
+          }
+        }
+        var light = 'light';
+        var dark = 'dark';
+        window.GiscusThemeLight = light;
+        window.GiscusThemeDark = dark;
+        attributes['data-theme'] = document.documentElement.getAttribute('data-user-color-scheme') === 'dark' ? dark : light;
+        for (let attribute in attributes) {
+          var value = attributes[attribute];
+          if (value === undefined || value === null || value === '') {
+            delete attributes[attribute];
+          }
+        }
+        var s = document.createElement('script');
+        s.setAttribute('src', 'https://giscus.app/client.js');
+        s.setAttribute('crossorigin', 'anonymous');
+        for (let attribute in attributes) {
+          s.setAttribute(attribute, attributes[attribute]);
+        }
+        var ss = document.getElementsByTagName('script');
+        var e = ss.length > 0 ? ss[ss.length - 1] : document.head || document.documentElement;
+        e.parentNode.insertBefore(s, e.nextSibling);
+      });
+    </script>
+<noscript>Please enable JavaScript to view the comments</noscript>
+</article>
+</hr></article>
+</div>
+</div>
+</div>
+<div class="side-col d-none d-lg-block col-lg-2">
+<aside class="sidebar" style="margin-left: -1rem">
+<div id="toc">
+<p class="toc-header">
+<i class="iconfont icon-list"></i>
+<span>目录</span>
+</p>
+<div class="toc-body" id="toc-body"></div>
+</div>
+</aside>
+</div>
+</div>
+</div>
+<a aria-label="TOP" href="#" id="scroll-top-button" role="button">
+<i aria-hidden="true" class="iconfont icon-arrowup"></i>
+</a>
+<div aria-hidden="true" aria-labelledby="ModalLabel" class="modal fade" id="modalSearch" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+<div class="modal-content">
+<div class="modal-header text-center">
+<h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+<button aria-label="Close" class="close" data-dismiss="modal" id="local-search-close" type="button">
+<span aria-hidden="true">×</span>
+</button>
+</div>
+<div class="modal-body mx-3">
+<div class="md-form mb-5">
+<input class="form-control validate" id="local-search-input" type="text"/>
+<label data-error="x" data-success="v" for="local-search-input">关键词</label>
+</div>
+<div class="list-group" id="local-search-result"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer>
+<div class="footer-inner">
+<div class="footer-content">
+<a href="https://hexo.io" rel="nofollow noopener" target="_blank"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" rel="nofollow noopener" target="_blank"><span>Fluid</span></a>
+</div>
+<div class="statistics">
+<span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+<span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+</div>
+</div>
+</footer>
+<!-- Scripts -->
+<script src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js"></script>
+<link href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet"/>
+<script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+<script src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js"></script>
+<script src="/blog/js/events.js"></script>
+<script src="/blog/js/plugins.js"></script>
+<script src="/blog/js/img-lazyload.js"></script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+<script src="https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js"></script>
+<script>Fluid.plugins.codeWidget();</script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+<script>Fluid.plugins.imageCaption();</script>
+<script src="/blog/js/local-search.js"></script>
+<script defer="" src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script src="/blog/js/boot.js"></script>
+<noscript>
+<div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+</noscript>
+</body>
+</html>

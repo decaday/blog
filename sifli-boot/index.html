@@ -1,0 +1,546 @@
+
+<!DOCTYPE html>
+
+<html data-default-color-scheme="auto" lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<link href="/blog/img/favicon.jpg" rel="apple-touch-icon" sizes="76x76"/>
+<link href="/blog/img/favicon.jpg" rel="icon"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no" name="viewport"/>
+<meta content="ie=edge" http-equiv="x-ua-compatible"/>
+<meta content="#2f4154" name="theme-color"/>
+<meta content="星期十" name="author"/>
+<meta content="" name="keywords"/>
+<meta content="SiFli思澈芯片的启动流程和rust点灯最近也是收到了思澈送的sf32lb52开发板，低功耗蓝牙，大内存大Flash，STAR-MC1(Cortex-M33)还是很有吸引力的，可以好好玩一番。 这篇文章就来分析一下思澈芯片的二级Bootloader、FlashTable，顺便写一个Rust点灯程序。 repo：https://github.com/OpenSiFli/sifli-rs SiFli" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="SiFli思澈芯片的启动流程和rust点灯" property="og:title"/>
+<meta content="https://decaday.github.io/blog/sifli-boot/index.html" property="og:url"/>
+<meta content="Decaday's Blogs" property="og:site_name"/>
+<meta content="SiFli思澈芯片的启动流程和rust点灯最近也是收到了思澈送的sf32lb52开发板，低功耗蓝牙，大内存大Flash，STAR-MC1(Cortex-M33)还是很有吸引力的，可以好好玩一番。 这篇文章就来分析一下思澈芯片的二级Bootloader、FlashTable，顺便写一个Rust点灯程序。 repo：https://github.com/OpenSiFli/sifli-rs SiFli" property="og:description"/>
+<meta content="zh_CN" property="og:locale"/>
+<meta content="https://decaday.github.io/blog/images/sifli-board.jpg" property="og:image"/>
+<meta content="2025-02-11T16:00:00.000Z" property="article:published_time"/>
+<meta content="2025-06-30T08:29:15.798Z" property="article:modified_time"/>
+<meta content="星期十" property="article:author"/>
+<meta content="嵌入式" property="article:tag"/>
+<meta content="Rust" property="article:tag"/>
+<meta content="SiFli(思澈)" property="article:tag"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="https://decaday.github.io/blog/images/sifli-board.jpg" name="twitter:image"/>
+<meta content="no-referrer-when-downgrade" name="referrer"/>
+<title>SiFli思澈芯片的启动流程和rust点灯 - Decaday's Blogs</title>
+<link href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" rel="stylesheet">
+<link href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" rel="stylesheet"/>
+<link href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet"/>
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+<link href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css" rel="stylesheet"/>
+<link href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css" rel="stylesheet"/>
+<link href="/blog/css/main.css" rel="stylesheet">
+<link href="/blog/css/highlight.css" id="highlight-css" rel="stylesheet">
+<link href="/blog/css/highlight-dark.css" id="highlight-css-dark" rel="stylesheet"/>
+<script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"decaday.github.io","root":"/blog/","version":"1.9.8","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/blog/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+<script src="/blog/js/utils.js"></script>
+<script src="/blog/js/color-schema.js"></script>
+<meta content="Hexo 7.1.1" name="generator"/></link></link></link></link></head>
+<body>
+<header>
+<div class="header-inner" style="height: 70vh;">
+<nav class="navbar fixed-top navbar-expand-lg navbar-dark scrolling-navbar" id="navbar">
+<div class="container">
+<a class="navbar-brand" href="/blog/">
+<strong>Decaday 星期十的博客</strong>
+</a>
+<button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbarSupportedContent" data-toggle="collapse" id="navbar-toggler-btn" type="button">
+<div class="animated-icon"><span></span><span></span><span></span></div>
+</button>
+<!-- Collapsible content -->
+<div class="collapse navbar-collapse" id="navbarSupportedContent">
+<ul class="navbar-nav ml-auto text-center">
+<li class="nav-item">
+<a class="nav-link" href="/blog/" target="_self">
+<i class="iconfont icon-home-fill"></i>
+<span>首页</span>
+</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="/blog/tags/" target="_self">
+<i class="iconfont icon-tags-fill"></i>
+<span>标签</span>
+</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="/blog/about/" target="_self">
+<i class="iconfont icon-user-fill"></i>
+<span>关于</span>
+</a>
+</li>
+<li class="nav-item" id="search-btn">
+<a aria-label="Search" class="nav-link" data-target="#modalSearch" data-toggle="modal" href="javascript:;" target="_self">
+<i class="iconfont icon-search"></i>
+</a>
+</li>
+<li class="nav-item" id="color-toggle-btn">
+<a aria-label="Color Toggle" class="nav-link" href="javascript:;" target="_self">
+<i class="iconfont icon-dark" id="color-toggle-icon"></i>
+</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<div class="banner" id="banner" parallax="true" style="background: url('/blog/images/sifli-board.jpg') no-repeat center center; background-size: cover;">
+<div class="full-bg-img">
+<div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+<div class="banner-text text-center fade-in-up">
+<div class="h2">
+<span id="subtitle">SiFli思澈芯片的启动流程和rust点灯</span>
+</div>
+<div class="mt-3">
+<span class="post-meta">
+<i aria-hidden="true" class="iconfont icon-date-fill"></i>
+<time datetime="2025-02-12 00:00" pubdate="">
+          2025年2月12日
+        </time>
+</span>
+</div>
+<div class="mt-1">
+<span class="post-meta mr-2">
+<i class="iconfont icon-chart"></i>
+        
+          2.8k 字
+        
+      </span>
+<span class="post-meta mr-2">
+<i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          24 分钟
+        
+      </span>
+<span id="busuanzi_container_page_pv" style="display: none">
+<i aria-hidden="true" class="iconfont icon-eye"></i>
+<span id="busuanzi_value_page_pv"></span> 次
+        </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<main>
+<div class="container-fluid nopadding-x">
+<div class="row nomargin-x">
+<div class="side-col d-none d-lg-block col-lg-2">
+</div>
+<div class="col-lg-8 nopadding-x-md">
+<div class="container nopadding-x-md" id="board-ctn">
+<div id="board">
+<article class="post-content mx-auto">
+<h1 id="seo-header">SiFli思澈芯片的启动流程和rust点灯</h1>
+<p class="note note-info" id="updated-time" style="">
+                
+                  
+                    本文最后更新于 2025年6月30日 下午
+                  
+                
+              </p>
+<div class="markdown-body">
+<h1 id="SiFli思澈芯片的启动流程和rust点灯"><a class="headerlink" href="#SiFli思澈芯片的启动流程和rust点灯" title="SiFli思澈芯片的启动流程和rust点灯"></a>SiFli思澈芯片的启动流程和rust点灯</h1><p>最近也是收到了思澈送的sf32lb52开发板，低功耗蓝牙，大内存大Flash，STAR-MC1(Cortex-M33)还是很有吸引力的，可以好好玩一番。</p>
+<p>这篇文章就来分析一下思澈芯片的二级Bootloader、FlashTable，顺便写一个Rust点灯程序。</p>
+<p>repo：<a href="https://github.com/OpenSiFli/sifli-rs" rel="noopener" target="_blank">https://github.com/OpenSiFli/sifli-rs</a></p>
+<h2 id="SiFli芯片简介"><a class="headerlink" href="#SiFli芯片简介" title="SiFli芯片简介"></a>SiFli芯片简介</h2><p>不是广告不是广告不是广告</p>
+<p>SF32LB52x 芯片采用了基于Arm Cortex-M33 STAR-MC1 处理器的大小核架构，集成高性能2D/2.5D图形引擎，双模蓝牙5.3，以及音频codec。</p>
+<p>芯片中大核性能处理器最高工作频率达192MHz，单 核性能达787CoreMark，支持动态频率功耗调节，功 耗效率最高可达4.8uA/CoreMark。</p>
+<p>思澈的芯片已经在小米、华为、华强北手表上广泛使用。最近（25年初）他们拥抱开源社区，开源了<a href="https://github.com/OpenSiFli/SiFli-SDK" rel="noopener" target="_blank">SDK</a>，发售了开发板（以后会和嘉立创合作出一个板子）。</p>
+<p>做开源社区的，还是熟悉的国梁，之前在喝粥，现在跳到思澈了（吐槽：圈子真小，一个群都是熟悉的面孔）</p>
+<h2 id="启动流程"><a class="headerlink" href="#启动流程" title="启动流程"></a>启动流程</h2><p>参考：</p>
+<ul>
+<li>SiFli-SDK <a href="https://github.com/OpenSiFli/SiFli-SDK/blob/8f42a6916c55c6b44ec45e1c0d137b15f7fa7fa3/example/boot_loader/project/butterflmicro/board" rel="noopener" target="_blank">boot_loader</a></li>
+<li>SiFli-SDK <a href="https://github.com/OpenSiFli/SiFli-SDK/issues/10" rel="noopener" target="_blank">flash table中，flash bootloader的地址问题和宏覆盖问题 · Issue #10</a></li>
+<li>SiFli Docs <a href="https://docs.sifli.com/projects/sdk/v2.3/sf32lb52x/app_development/startup_flow_sf32lb52x.html" rel="noopener" target="_blank">应用程序启动流程 - SiFli SDK编程指南 文档</a></li>
+<li>SiFli Docs <a href="https://docs.sifli.com/projects/sdk/v2.3/sf32lb52x/bootloader.html" rel="noopener" target="_blank">安全引导加载 - SiFli SDK编程指南 文档</a></li>
+</ul>
+<h3 id="Overview"><a class="headerlink" href="#Overview" title="Overview"></a>Overview</h3><p>SiFli SF32LB52x有两级Bootloader。</p>
+<p>一级Bootloader固化在了芯片的ROM中，初始化Flash和调试串口，运行二级Bootloader。</p>
+<p>二级Bootloader一般在启动Flash的开始位置+0x10000，比如0x1201 0000。它初始化PSRAM，并跳转用户程序并运行。</p>
+<p>用户程序在启动Flash的开始位置+0x20000， 比如0x1202 0000.</p>
+<p>Flash Table、二级Bootloader和用户程序一起编译和烧录。</p>
+<h3 id="地址空间"><a class="headerlink" href="#地址空间" title="地址空间"></a>地址空间</h3><p><img alt="image-20250212203226699" lazyload="" src="/blog/sifli-boot/image-20250212203226699.png" srcset="/blog/img/loading.gif"/></p>
+<h4 id="内置SRAM"><a class="headerlink" href="#内置SRAM" title="内置SRAM"></a>内置SRAM</h4><p>HPSYS 总线上共有512KB SRAM，其中包括：</p>
+<ul>
+<li>0x2000_0000-0x2001_FFFF，128KBzero-wait-cycle SRAM（与D-TCM共享），所有AHBmaster均可访问， 最高频率为192MHz。 </li>
+<li>0x2002_0000-0x2007_FFFF，384KBzero-wait-cycle SRAM，所有AHBmaster均可访问，最高频率为192MHz</li>
+</ul>
+<h4 id="外挂Flash或PSRAM"><a class="headerlink" href="#外挂Flash或PSRAM" title="外挂Flash或PSRAM"></a>外挂Flash或PSRAM</h4><p>SiFli SF32LB52x使用MPI1和MPI2来挂载Flash或PSRAM。既可以合封，也能挂载到外部。</p>
+<p>HPSYS支持合封四线和八线PSRAM，外挂NOR/NANDFLASH。</p>
+<p>MPI1可挂PSRAM，地址0x6000_0000–0x61FF_FFFF，接口最高频率为DDR 144MHz，数据位宽为8-bit。</p>
+<p>MPI1 可挂合封FLASH，地址0x6000_0000 - 0x61FF_FFFF (0x1000_0000 - 0x11FF_FFFF)  推荐使用频率为96MHz</p>
+<p>MPI2 可挂外置FLASH，地址0x6200_0000 - 0x9FFF_FFFF (0x1200_0000 - 0x1FFF_FFFF)  推荐使用频率为60MHz</p>
+<h4 id="SF32LB52-MOD-1-N16R8"><a class="headerlink" href="#SF32LB52-MOD-1-N16R8" title="SF32LB52-MOD-1-N16R8"></a>SF32LB52-MOD-1-N16R8</h4><p>以我手头的SF32LB52-DevKit-LCD V1.2（板载SF32LB52-MOD-1-N16R8）为例：</p>
+<p>MPI1挂了 8MB OPI-PSRAM，地址0x6000_0000，MPI2挂了16MB QSPI-NOR Flash，实际地址0x1200_0000。</p>
+<h3 id="FlashTable"><a class="headerlink" href="#FlashTable" title="FlashTable"></a>FlashTable</h3><p>FlashTable一般在Flash的其实地址（内部或者外部Flash，下文称为启动Flash），比如 (0x1200_0000 - 0x12001_FFFF，地址空间64K) ，用来指示二级Bootloader，HCPU，LCPU的代码位置和运行方式。</p>
+<p>目前默认FlashTable的生成方式是：</p>
+<ol>
+<li><a href="https://github.com/OpenSiFli/SiFli-SDK/blob/8f42a6916c55c6b44ec45e1c0d137b15f7fa7fa3/tools/build/resource.py#L684" rel="noopener" target="_blank">Scons构建脚本</a>根据 <a href="https://github.com/OpenSiFli/SiFli-SDK/blob/v2.3.1/customer/boards/em-lb525/ptab.json" rel="noopener" target="_blank">ptab.json</a> 分区表的<code>ftab</code>条目生成ftab.c</li>
+<li><a href="https://github.com/OpenSiFli/SiFli-SDK/blob/8f42a6916c55c6b44ec45e1c0d137b15f7fa7fa3/tools/build/resource.py#L684" rel="noopener" target="_blank">Scons构建脚本</a>根据 <a href="https://github.com/OpenSiFli/SiFli-SDK/blob/v2.3.1/customer/boards/em-lb525/ptab.json" rel="noopener" target="_blank">ptab.json</a> 分区表的<code>tags</code>条目生成ptab.h，这是一个undef的文件，覆盖定义<a href="https://github.com/OpenSiFli/SiFli-SDK/blob/v2.3.1/drivers/cmsis/sf32lb52x/mem_map.h" rel="noopener" target="_blank">mem_map.h</a> 中的宏。（其中有一些宏依赖关系，所以不仅仅是ptab.h里的宏改变了。</li>
+<li>然后编译ftab.c，不链接其它代码，直接编译为ftab.bin。</li>
+</ol>
+<p>个人认为这个覆盖宏的流程，以及宏命名方式有点糟糕（小声）</p>
+<p>我在过年的时候也尝试复刻了这个流程，来给Rust固件来用：<a href="https://github.com/OpenSiFli/sifli-rs/tree/dd512e5b53af3bb39515547f8950b497a219aedf/sifli-flash-table" rel="noopener" target="_blank">sifli-flash-table</a>。之后我想把烧录用的那一堆文件整理下，做个runner或者cli出来，但还没想好怎么做。</p>
+<p>这是我写flash table时和工程师交流的issue，可供参考：<a href="https://github.com/OpenSiFli/SiFli-SDK/issues/10" rel="noopener" target="_blank">Issue #10 · OpenSiFli/SiFli-SDK</a></p>
+<h3 id="一级Bootloader"><a class="headerlink" href="#一级Bootloader" title="一级Bootloader"></a>一级Bootloader</h3><p>一级Bootloader固化在了芯片的ROM中，其中断向量表地址为0。上电后会首先运行一级Bootloader，根据芯片封装类型，确定Flash分区表的位置，根据Flash分区表指示的二级Bootloader地址（必须在启动Flash上，地址为启动Flash开始的地址），拷贝二级Bootloader代码到RAM中，并跳转运行。</p>
+<p>一级Bootloader会初始化SiFli那个既当Uart又当SWD的串口，发送<code>SFBL</code>信息，检查是否设置了BOOT选项，以进入下载模式（这样我们就不怕自己的程序把芯片玩成砖了）</p>
+<p>一级Bootloader阶段大核以上电默认的时钟频率运行，初始化启动Flash的IO配置。</p>
+<p>源码:<a href="https://github.com/OpenSiFli/SiFli-SDK/tree/821cd14e18ef15c8fe59308aaf728c3fe8fb36a7/example/boot_loader" rel="noopener" target="_blank">SiFli-SDK/example/boot_loader</a>， <code>BOOTROM</code>宏开启。</p>
+<p>跳转方式为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">void</span> <span class="hljs-title function_">run_img</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> dest)</span><br/>{<br/>    __asm(<span class="hljs-string">"LDR SP, [%0]"</span> :: <span class="hljs-string">"r"</span>(dest));<br/>    __asm(<span class="hljs-string">"LDR PC, [%0, #4]"</span> :: <span class="hljs-string">"r"</span>(dest));<br/>}<br/></code></pre></td></tr></table></figure>
+<p><a href="https://github.com/OpenSiFli/SiFli-SDK/blob/98eed35d8c547a30f7ad3439af478780f2c973b0/example/boot_loader/project/butterflmicro/board/main.c#L69-L73" rel="noopener" target="_blank">https://github.com/OpenSiFli/SiFli-SDK/blob/98eed35d8c547a30f7ad3439af478780f2c973b0/example/boot_loader/project/butterflmicro/board/main.c#L69-L73</a></p>
+<p>它将SP(Stack Pointer)栈指针，也就是栈的最高地址，设为目的固件的第一个地址(stack_top)。</p>
+<p>将PC（Program Counter）程序计数器，也就是下一条命令的地址，设为目的固件的第二个地址（ResetHandler）。这符合标准的cortex-m向量表格式。</p>
+<h3 id="二级Bootloader"><a class="headerlink" href="#二级Bootloader" title="二级Bootloader"></a>二级Bootloader</h3><p>二级Bootloader同样是有向量表和启动汇编的完整cortex-m程序。在SystemInit中会重定义向量表（设置SCB-&gt;VTOR寄存器）。</p>
+<p>二级Bootloader根据芯片封装类型以及Flash分区表，加载应用程序并跳转执行。根据芯片封装类型，应用程序分为以下几种启动方式：</p>
+<ul>
+<li><p>XIP（直接以NOR Flash地址执行代码，代码的存储地址与执行地址相同）</p>
+<p>使用MPI内置或外挂NOR FLASH</p>
+</li>
+<li><p>非XIP（从Flash拷贝代码到RAM中执行，即代码的存储地址与执行地址不同）</p>
+<p>内置PSRAM（MPI1），外置MP1 NAND FLASH或SDIO SD FLASH。</p>
+</li>
+</ul>
+<p>不论是哪种启动方式，应用程序与二级Bootloader均存放在同一个启动Flash上。</p>
+<p>二级Bootloader会调整时钟设置，详见<a href="https://docs.sifli.com/projects/sdk/v2.3/sf32lb52x/app_development/startup_flow_sf32lb52x.html#id2" rel="noopener" target="_blank">文档</a>。</p>
+<p>源码:<a href="https://github.com/OpenSiFli/SiFli-SDK/tree/821cd14e18ef15c8fe59308aaf728c3fe8fb36a7/example/boot_loader" rel="noopener" target="_blank">SiFli-SDK/example/boot_loader</a>， <code>BOOTROM</code>宏关闭。</p>
+<p>二级Bootloader的跳转函数和上述一级Bootloader相同。</p>
+<h3 id="用户固件"><a class="headerlink" href="#用户固件" title="用户固件"></a>用户固件</h3><p>SiFli的用户固件同样还是有向量表和启动汇编的完整cortex-m程序。</p>
+<p>事实上，两个Bootloader和用户固件用的是同一个startup.s和linker script。</p>
+<p>根据文档，二级Bootloader不加载PMU的校准参数，仅修改所使用的存储相关的IO设置。Cache未使能，MPU未使能。在用户固件中还需要将这三个东西初始化。</p>
+<h2 id="Rust点灯"><a class="headerlink" href="#Rust点灯" title="Rust点灯"></a>Rust点灯</h2><p>对于Cortex-M33 STAR-MC1(thumbv8m.main)有成熟的LLVM后端和Rust前端，那当然要上Rust呀。</p>
+<p>Rust，启动！</p>
+<p>对于Rust HAL的结构，这里不再赘述，请参考：</p>
+<p><a href="https://andelf.github.io/2024/08/23/embedded-rust-peripheral-register-access-svdtools-chiptool-and-metapac-approach/" rel="noopener" target="_blank">Rust 嵌入式开发中的外设寄存器访问：从 svd2rust 到 chiptool 和 metapac - 以 hpm-data 为例 | 猫·仁波切</a></p>
+<p><a href="https://github.com/embassy-rs/embassy" rel="noopener" target="_blank">embassy-rs/embassy: Modern embedded framework, using Rust and async.</a></p>
+<p>我之后也会基于py32或sifli写一篇博客。</p>
+<p>sifli-hal基本是复制了<a href="https://github.com/embassy-rs/embassy/tree/main/embassy-rp" rel="noopener" target="_blank">embassy/embassy-rp</a>的项目结构，我自己加了一些codegen，比如中断表和外设singleton（单例）生成。</p>
+<h3 id="GPIO驱动"><a class="headerlink" href="#GPIO驱动" title="GPIO驱动"></a>GPIO驱动</h3><p>GPIO的代码并不复杂：<a href="https://github.com/OpenSiFli/sifli-rs/blob/main/sifli-hal/src/gpio.rs" rel="noopener" target="_blank">sifli-rs/sifli-hal/src/gpio.rs</a></p>
+<p>思澈也对每一个用bit（一个IO用一个bit那种）的寄存器提供了三个入口，比如：</p>
+<ul>
+<li><p>DOER：数据输出开启寄存器（Data Output Set Register），RW，1打开，0关闭。</p>
+</li>
+<li><p>DOESR： 数据输出开启置位寄存器（Data Output Enable Set Register），Write Only，对某位写1来开启。</p>
+</li>
+<li><p>DOECR： 数据输出开启清除寄存器（Data Output Enable Clear Register）Write Only，对某位写1来关闭。</p>
+</li>
+</ul>
+<p>这就省去我们按位与、取反等等的麻烦。</p>
+<p>要注意的是，不能复位PINMUX外设，因为有些引脚已经用作MPI引脚，复位它就崩了。</p>
+<h3 id="寄典之调试"><a class="headerlink" href="#寄典之调试" title="寄典之调试"></a>寄典之调试</h3><p>但是我却被卡了两天，运行Rust固件就HardFault。而且使用cortex-debug产生HardFault就直接断了，SiFliUartServer的灯也灭了（查看文档是说Debug模式关闭，此时也无法烧录固件，无法再次连接调试，除非复位）</p>
+<p>在初次尝试JLink Commander的情况也同上。</p>
+<p>在SDK中将SWD引脚PINMUX设为SWD功能，使用DAPlink也无法连接。</p>
+<p>在<strong>N次</strong>尝试后，我发现还是有概率读到SCB寄存器的值的。显示UsageFault INVSTATE。</p>
+<p><img alt="image-20250212222217762" lazyload="" src="/blog/sifli-boot/image-20250212222217762.png" srcset="/blog/img/loading.gif"/></p>
+<p>cortex-debug并不提供SCB寄存器信息，sifli svd也没有，我只能从stm32那里借了一个svd过来。</p>
+<h3 id="UsageFault-INVSTATE"><a class="headerlink" href="#UsageFault-INVSTATE" title="UsageFault INVSTATE"></a>UsageFault INVSTATE</h3><p><img alt="image-20250212222240563" lazyload="" src="/blog/sifli-boot/image-20250212222240563.png" srcset="/blog/img/loading.gif"/></p>
+<p>In the Cortex-M33 processor, any values of ICI bits that were not legally written, because of an interruption to an exception-continuable instruction, generate an INVSTATE UsageFault exception on attempt to re-execute the interrupted instruction. </p>
+<p>简单来说，PC寄存器的值必须是奇数，也就是最后一个bit（LSB）需要是1。LSB置1表示Thumb指令集，0表示ARM指令集。由于cortex-m不支持ARM指令集，所以就会报错了。正常的代码是不用管这个的，但是中断表中的向量必须都是奇数。</p>
+<p>我之前有一些尝试，手动将固件的ResetHandler设为main函数地址或空函数地址（通过objdump得到），验证是否是启动代码导致的问题，不过都失败了，原因之一就是我没有处理LSB位。</p>
+<p>之后，我又尝试了JLink Commander，发现这玩意其实挺稳的，一般不容易导致断开。也是这玩意带我找出了问题所在。</p>
+<h3 id="寄典之MSPLIM"><a class="headerlink" href="#寄典之MSPLIM" title="寄典之MSPLIM"></a>寄典之MSPLIM</h3><p>我使用Jlink Commander设置断点在bootloader跳转的位置和启动汇编中，然后对照使用objdump反编译出来的asm来逐步调试，发现其实运行完了<a href="https://github.com/rust-embedded/cortex-m/tree/master/cortex-m-rt" rel="noopener" target="_blank">ccortex-m-rt</a>中的汇编。然而，当跳转进main函数，压栈时，HardFault发生了：</p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/></pre></td><td class="code"><pre><code class="hljs mipsasm"><span class="hljs-keyword">J-Link&gt;s</span><br/><span class="hljs-keyword"></span><span class="hljs-number">12020208</span>:   <span class="hljs-number">80</span> <span class="hljs-keyword">B5 </span>             PUSH      {R7,LR}<br/>T-<span class="hljs-keyword">bit </span>of XPSR is <span class="hljs-number">0</span> <span class="hljs-keyword">but </span><span class="hljs-keyword">should </span><span class="hljs-keyword">be </span><span class="hljs-number">1</span>. Changed to <span class="hljs-number">1</span>.<br/></code></pre></td></tr></table></figure>
+<p>还是LSB的问题。于是我又一顿研究……一无所获。</p>
+<p>……</p>
+<p>之后，在我对照启动文件的时候，以外发现了一行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/></pre></td><td class="code"><pre><code class="hljs asm">ldr   r0, = __StackLimit<br/>msr   msplim,r0<br/></code></pre></td></tr></table></figure>
+<p><a href="https://github.com/OpenSiFli/SiFli-SDK/blob/v2.3.1/drivers/cmsis/sf32lb52x/Templates/gcc/startup_bf0_hcpu.S" rel="noopener" target="_blank">SiFli-SDK/drivers/cmsis/sf32lb52x/Templates/gcc/startup_bf0_hcpu.S</a></p>
+<p>死马当活马医，加上，果然跑起来了！</p>
+<img alt="image-20250212224136239" lazyload="" src="image-20250212224136239.png" srcset="/blog/img/loading.gif" style="zoom:50%;">
+<h3 id="MSPLIM"><a class="headerlink" href="#MSPLIM" title="MSPLIM"></a>MSPLIM</h3><p>MSPLIM: The stack limit registers limit the extent to which the MSP and PSP registers can descend respectively.</p>
+<p>这个东西是好东西，Armv8-M（Cortex-M33，M23）才有的，用于设置栈底，当堆栈溢出时会产生HardFault（UsageFault STKOF），防止踩到.bss和.data段。有了这个东西，<a href="https://github.com/knurling-rs/flip-link" rel="noopener" target="_blank">flip-link</a> 都不用了。</p>
+<p>也就是说，Bootloader已经设置了MSPLIM，而我没去重新设置它，导致的问题。</p>
+<p><strong>不过，为什么产生的是INVSTATE而不是STKOF，就不得而知了……</strong></p>
+<p>我给<a href="https://github.com/OpenSiFli/sifli-rs" rel="noopener" target="_blank">sifli-hal</a>加上这些代码，用掉cortex-m-rt的<code>__pre_init</code>符号，来设置msplim就OK了：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/><span class="line">12</span><br/></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-meta">#[cfg(feature = <span class="hljs-string">"set-msplim"</span>)]</span><br/>global_asm!(<br/>    <span class="hljs-string">".section .text._pre_init"</span>,<br/>    <span class="hljs-string">".global __pre_init"</span>,<br/>    <span class="hljs-string">".type __pre_init, %function"</span>,<br/>    <span class="hljs-string">".thumb_func"</span>,<br/>    <span class="hljs-string">"__pre_init:"</span>,<br/>    <span class="hljs-string">"    ldr r0, =_stack_end"</span>,<br/>    <span class="hljs-string">"    msr MSPLIM, r0"</span>,<br/>    <span class="hljs-string">"    bx lr"</span>,<br/>    <span class="hljs-string">".size __pre_init, . - __pre_init"</span><br/>);<br/></code></pre></td></tr></table></figure>
+<p>同时，我也给cortex-m-rt拉了PR，但是他们会不会合，就说不定了：</p>
+<p><a href="https://github.com/rust-embedded/cortex-m/pull/580" rel="noopener" target="_blank">cortex-m-rt: Add optional MSPLIM initialization, fix vector table size on armv8m by decaday · Pull Request #580 · rust-embedded/cortex-m</a></p>
+<h2 id="最后"><a class="headerlink" href="#最后" title="最后"></a>最后</h2><p>找到这个问题用了不短的时间，这还让我几乎学会了命令行gdb和arm汇编（盯着汇编看了好久），emmmm</p>
+<p>不过总之也是跑通了，Cortex-M33就是好玩，那个太监Cortex-M0连中断原因都查不了。</p>
+<p>对于<a href="https://github.com/OpenSiFli/sifli-rs" rel="noopener" target="_blank">sifli-rs</a>，可能会有更多的大佬参与进来（目前SiFli的SDK和工具链还不支持Linux/Mac）。我自己的时间和精力来写完一整个hal估计是不太够（Welcome！）</p>
+<p>我自己这边，打算之后像我之前搞的 <a href="https://github.com/decaday/py32-bind-hal" rel="noopener" target="_blank">py32-bind-hal</a> 和 <a href="https://github.com/decaday/py32csdk-hal-sys" rel="noopener" target="_blank">py32csdk-hal-sys</a> 一样搞一套binding出来，毕竟sifli的外设大多没得抄，<a href="https://github.com/py32-rs/py32-hal" rel="noopener" target="_blank">py32-hal</a>直接copy stm32就行了。而且蓝牙等一些东西不得不用binding。</p>
+<p>对于GPIO、Usart这些外设可能会优先写驱动，USB是个musb，能直接用我之前写的<a href="https://github.com/decaday/musb" rel="noopener" target="_blank">musb crate</a>，而对于I2C、SPI这种无聊的通讯外设，那可能就优先使用Bindings来顶着。</p>
+<p>然后，我个人很想玩玩SiFli这个2.5D GPU <code>ePicasso</code>，据说是自研的。SiFli给了这么大的资源，肯定要移植到<a href="https://slint.dev/" rel="noopener" target="_blank">Slint</a>上玩玩。</p>
+</img></div>
+<hr/>
+<div>
+<div class="post-metas my-3">
+<div class="post-meta">
+<i class="iconfont icon-tags"></i>
+<a class="print-no-link" href="/blog/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/">#嵌入式</a>
+<a class="print-no-link" href="/blog/tags/Rust/">#Rust</a>
+<a class="print-no-link" href="/blog/tags/SiFli-%E6%80%9D%E6%BE%88/">#SiFli(思澈)</a>
+</div>
+</div>
+<div class="license-box my-3">
+<div class="license-title">
+<div>SiFli思澈芯片的启动流程和rust点灯</div>
+<div>https://decaday.github.io/blog/sifli-boot/</div>
+</div>
+<div class="license-meta">
+<div class="license-meta-item">
+<div>作者</div>
+<div>星期十</div>
+</div>
+<div class="license-meta-item license-meta-date">
+<div>发布于</div>
+<div>2025年2月12日</div>
+</div>
+<div class="license-meta-item license-meta-date">
+<div>更新于</div>
+<div>2025年6月30日</div>
+</div>
+<div class="license-meta-item">
+<div>许可协议</div>
+<div>
+<a class="print-no-link" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">
+<span aria-label="BY - 署名" class="hint--top hint--rounded">
+<i class="iconfont icon-cc-by"></i>
+</span>
+</a>
+<a class="print-no-link" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">
+<span aria-label="NC - 非商业性使用" class="hint--top hint--rounded">
+<i class="iconfont icon-cc-nc"></i>
+</span>
+</a>
+</div>
+</div>
+</div>
+<div class="license-icon iconfont"></div>
+</div>
+<div class="post-prevnext my-3">
+<article class="post-prev col-6">
+<a href="/blog/py32-swd-leak/" title="什么？SWD电平不匹配？那让调试器给py32漏点电！">
+<i class="iconfont icon-arrowleft"></i>
+<span class="hidden-mobile">什么？SWD电平不匹配？那让调试器给py32漏点电！</span>
+<span class="visible-mobile">上一篇</span>
+</a>
+</article>
+<article class="post-next col-6">
+<a href="/blog/py32-musb/" title="PY32的musb(Mentor USB)的Rust支持">
+<span class="hidden-mobile">PY32的musb(Mentor USB)的Rust支持</span>
+<span class="visible-mobile">下一篇</span>
+<i class="iconfont icon-arrowright"></i>
+</a>
+</article>
+</div>
+</div>
+<article id="comments" lazyload="">
+<div class="giscus" id="giscus"></div>
+<script type="text/javascript">
+      Fluid.utils.loadComments('#giscus', function() {
+        var options = {"repo":"decaday/blog","repo-id":"R_kgDOLNAOjg","category":"Announcements","category-id":"DIC_kwDOLNAOjs4CdRDg","theme-light":"light","theme-dark":"dark","mapping":"pathname","reactions-enabled":1,"emit-metadata":0,"input-position":"top","lang":"zh-CN"};
+        var attributes = {};
+        for (let option in options) {
+          if (!option.startsWith('theme-')) {
+            var key = option.startsWith('data-') ? option : 'data-' + option;
+            attributes[key] = options[option];
+          }
+        }
+        var light = 'light';
+        var dark = 'dark';
+        window.GiscusThemeLight = light;
+        window.GiscusThemeDark = dark;
+        attributes['data-theme'] = document.documentElement.getAttribute('data-user-color-scheme') === 'dark' ? dark : light;
+        for (let attribute in attributes) {
+          var value = attributes[attribute];
+          if (value === undefined || value === null || value === '') {
+            delete attributes[attribute];
+          }
+        }
+        var s = document.createElement('script');
+        s.setAttribute('src', 'https://giscus.app/client.js');
+        s.setAttribute('crossorigin', 'anonymous');
+        for (let attribute in attributes) {
+          s.setAttribute(attribute, attributes[attribute]);
+        }
+        var ss = document.getElementsByTagName('script');
+        var e = ss.length > 0 ? ss[ss.length - 1] : document.head || document.documentElement;
+        e.parentNode.insertBefore(s, e.nextSibling);
+      });
+    </script>
+<noscript>Please enable JavaScript to view the comments</noscript>
+</article>
+</article>
+</div>
+</div>
+</div>
+<div class="side-col d-none d-lg-block col-lg-2">
+<aside class="sidebar" style="margin-left: -1rem">
+<div id="toc">
+<p class="toc-header">
+<i class="iconfont icon-list"></i>
+<span>目录</span>
+</p>
+<div class="toc-body" id="toc-body"></div>
+</div>
+</aside>
+</div>
+</div>
+</div>
+<a aria-label="TOP" href="#" id="scroll-top-button" role="button">
+<i aria-hidden="true" class="iconfont icon-arrowup"></i>
+</a>
+<div aria-hidden="true" aria-labelledby="ModalLabel" class="modal fade" id="modalSearch" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+<div class="modal-content">
+<div class="modal-header text-center">
+<h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+<button aria-label="Close" class="close" data-dismiss="modal" id="local-search-close" type="button">
+<span aria-hidden="true">×</span>
+</button>
+</div>
+<div class="modal-body mx-3">
+<div class="md-form mb-5">
+<input class="form-control validate" id="local-search-input" type="text"/>
+<label data-error="x" data-success="v" for="local-search-input">关键词</label>
+</div>
+<div class="list-group" id="local-search-result"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer>
+<div class="footer-inner">
+<div class="footer-content">
+<a href="https://hexo.io" rel="nofollow noopener" target="_blank"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" rel="nofollow noopener" target="_blank"><span>Fluid</span></a>
+</div>
+<div class="statistics">
+<span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+<span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+</div>
+</div>
+</footer>
+<!-- Scripts -->
+<script src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js"></script>
+<link href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet"/>
+<script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+<script src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js"></script>
+<script src="/blog/js/events.js"></script>
+<script src="/blog/js/plugins.js"></script>
+<script src="/blog/js/img-lazyload.js"></script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+<script src="https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js"></script>
+<script>Fluid.plugins.codeWidget();</script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+<script>Fluid.plugins.imageCaption();</script>
+<script src="/blog/js/local-search.js"></script>
+<script defer="" src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script src="/blog/js/boot.js"></script>
+<noscript>
+<div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+</noscript>
+</body>
+</html>

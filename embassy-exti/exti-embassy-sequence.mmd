@@ -1,0 +1,22 @@
+sequenceDiagram
+  participant UC as 用户代码
+  participant ER as Embassy 运行时/驱动
+  participant HW as 硬件中断
+  UC ->> ER: 0. let button = ExtiInput::new()
+  Note over ER: 1.初始化EXTI寄存器
+  UC ->>+ ER: 2. button.wait_for_high().await
+  Note over ER: 3. poll() 被调用
+  Note over ER: 4. 发现中断未发生 (IMR=1)
+  Note over ER: 5. 注册 Waker 到全局数组
+  ER -->>- UC: 6. 返回 Poll::Pending (任务挂起)
+  Note over UC, ER: (......CPU执行其他任务......)
+
+
+  HW ->>+ ER: <br>7. EXTI 中断发生
+  Note over ER: 8. on_irq() 中断函数执行
+  Note over ER: 9. 屏蔽中断 (IMR=0)
+  Note over ER: 10. 从全局数组找到对应Waker并调用wake()
+  ER ->>+ ER: 11. 运行时被唤醒, 再次 poll()
+  Note over ER: 12. 发现中断已发生 (IMR=0)
+  ER -->>- UC: 13. 返回 Poll::Ready
+  Note right of UC: 14. .await 完成, 继续执行后续代码

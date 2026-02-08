@@ -1,0 +1,735 @@
+
+<!DOCTYPE html>
+
+<html data-default-color-scheme="auto" lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<link href="/blog/img/favicon.jpg" rel="apple-touch-icon" sizes="76x76"/>
+<link href="/blog/img/favicon.jpg" rel="icon"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no" name="viewport"/>
+<meta content="ie=edge" http-equiv="x-ua-compatible"/>
+<meta content="#2f4154" name="theme-color"/>
+<meta content="星期十" name="author"/>
+<meta content="" name="keywords"/>
+<meta content="ESP-ADF架构探索(I. 初探ADF)乐鑫音频开发框架 (ESP-ADF) 是乐鑫官方为其 ESP32、ESP32-S3 SoC 设计的音频开发框架，支持多种音频格式和输入输出方式，以音频元素（Element）和音频管道（Pipeline）来组织和管理音频流，以audio_hal、periph等管理音频硬件。  前言最近用Rust想写一个嵌入式音频框架embedded-audio，但架构设计上" name="description"/>
+<meta content="article" property="og:type"/>
+<meta content="ESP-ADF架构探索(I. 初探IDF)" property="og:title"/>
+<meta content="https://decaday.github.io/blog/exploring-esp-adf-i/index.html" property="og:url"/>
+<meta content="Decaday's Blogs" property="og:site_name"/>
+<meta content="ESP-ADF架构探索(I. 初探ADF)乐鑫音频开发框架 (ESP-ADF) 是乐鑫官方为其 ESP32、ESP32-S3 SoC 设计的音频开发框架，支持多种音频格式和输入输出方式，以音频元素（Element）和音频管道（Pipeline）来组织和管理音频流，以audio_hal、periph等管理音频硬件。  前言最近用Rust想写一个嵌入式音频框架embedded-audio，但架构设计上" property="og:description"/>
+<meta content="zh_CN" property="og:locale"/>
+<meta content="https://decaday.github.io/blog/exploring-esp-adf-i/audio-project-typical-example.jpg" property="og:image"/>
+<meta content="https://decaday.github.io/blog/exploring-esp-adf-i/image-20250609122849792.png" property="og:image"/>
+<meta content="https://decaday.github.io/blog/exploring-esp-adf-i/adf_block_diagram.png" property="og:image"/>
+<meta content="https://decaday.github.io/blog/exploring-esp-adf-i/blockdiag-1c8d650e9ca87dc711f83b297cfd9cb3a0b64be8.png" property="og:image"/>
+<meta content="https://decaday.github.io/blog/exploring-esp-adf-i/blockdiag-4e7bc35aa710b4b93a472e61721a3c75e3156808.png" property="og:image"/>
+<meta content="2025-06-08T16:00:00.000Z" property="article:published_time"/>
+<meta content="2025-09-01T09:19:03.411Z" property="article:modified_time"/>
+<meta content="星期十" property="article:author"/>
+<meta content="嵌入式" property="article:tag"/>
+<meta content="Rust" property="article:tag"/>
+<meta content="音频" property="article:tag"/>
+<meta content="ESP32" property="article:tag"/>
+<meta content="C" property="article:tag"/>
+<meta content="ESP-ADF" property="article:tag"/>
+<meta content="embedded-audio" property="article:tag"/>
+<meta content="ESP-IDF" property="article:tag"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="https://decaday.github.io/blog/exploring-esp-adf-i/audio-project-typical-example.jpg" name="twitter:image"/>
+<meta content="no-referrer-when-downgrade" name="referrer"/>
+<title>ESP-ADF架构探索(I. 初探IDF) - Decaday's Blogs</title>
+<link href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" rel="stylesheet">
+<link href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" rel="stylesheet"/>
+<link href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet"/>
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+<link href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css" rel="stylesheet"/>
+<link href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css" rel="stylesheet"/>
+<link href="/blog/css/main.css" rel="stylesheet">
+<link href="/blog/css/highlight.css" id="highlight-css" rel="stylesheet">
+<link href="/blog/css/highlight-dark.css" id="highlight-css-dark" rel="stylesheet"/>
+<script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"decaday.github.io","root":"/blog/","version":"1.9.8","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null},"woyaola":null,"cnzz":null},"search_path":"/blog/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+<script src="/blog/js/utils.js"></script>
+<script src="/blog/js/color-schema.js"></script>
+<meta content="Hexo 7.1.1" name="generator"/></link></link></link></link></head>
+<body>
+<header>
+<div class="header-inner" style="height: 70vh;">
+<nav class="navbar fixed-top navbar-expand-lg navbar-dark scrolling-navbar" id="navbar">
+<div class="container">
+<a class="navbar-brand" href="/blog/">
+<strong>Decaday 星期十的博客</strong>
+</a>
+<button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbarSupportedContent" data-toggle="collapse" id="navbar-toggler-btn" type="button">
+<div class="animated-icon"><span></span><span></span><span></span></div>
+</button>
+<!-- Collapsible content -->
+<div class="collapse navbar-collapse" id="navbarSupportedContent">
+<ul class="navbar-nav ml-auto text-center">
+<li class="nav-item">
+<a class="nav-link" href="/blog/" target="_self">
+<i class="iconfont icon-home-fill"></i>
+<span>首页</span>
+</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="/blog/tags/" target="_self">
+<i class="iconfont icon-tags-fill"></i>
+<span>标签</span>
+</a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="/blog/about/" target="_self">
+<i class="iconfont icon-user-fill"></i>
+<span>关于</span>
+</a>
+</li>
+<li class="nav-item" id="search-btn">
+<a aria-label="Search" class="nav-link" data-target="#modalSearch" data-toggle="modal" href="javascript:;" target="_self">
+<i class="iconfont icon-search"></i>
+</a>
+</li>
+<li class="nav-item" id="color-toggle-btn">
+<a aria-label="Color Toggle" class="nav-link" href="javascript:;" target="_self">
+<i class="iconfont icon-dark" id="color-toggle-icon"></i>
+</a>
+</li>
+</ul>
+</div>
+</div>
+</nav>
+<div class="banner" id="banner" parallax="true" style="background: url('/blog/images/esp-adf.png') no-repeat center center; background-size: cover;">
+<div class="full-bg-img">
+<div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+<div class="banner-text text-center fade-in-up">
+<div class="h2">
+<span id="subtitle">ESP-ADF架构探索(I. 初探IDF)</span>
+</div>
+<div class="mt-3">
+<span class="post-meta">
+<i aria-hidden="true" class="iconfont icon-date-fill"></i>
+<time datetime="2025-06-09 00:00" pubdate="">
+          2025年6月9日
+        </time>
+</span>
+</div>
+<div class="mt-1">
+<span class="post-meta mr-2">
+<i class="iconfont icon-chart"></i>
+        
+          6.6k 字
+        
+      </span>
+<span class="post-meta mr-2">
+<i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          56 分钟
+        
+      </span>
+<span id="busuanzi_container_page_pv" style="display: none">
+<i aria-hidden="true" class="iconfont icon-eye"></i>
+<span id="busuanzi_value_page_pv"></span> 次
+        </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<main>
+<div class="container-fluid nopadding-x">
+<div class="row nomargin-x">
+<div class="side-col d-none d-lg-block col-lg-2">
+</div>
+<div class="col-lg-8 nopadding-x-md">
+<div class="container nopadding-x-md" id="board-ctn">
+<div id="board">
+<article class="post-content mx-auto">
+<h1 id="seo-header">ESP-ADF架构探索(I. 初探IDF)</h1>
+<p class="note note-info" id="updated-time" style="">
+                
+                  
+                    本文最后更新于 2025年9月1日 下午
+                  
+                
+              </p>
+<div class="markdown-body">
+<h1 id="ESP-ADF架构探索-I-初探ADF"><a class="headerlink" href="#ESP-ADF架构探索-I-初探ADF" title="ESP-ADF架构探索(I. 初探ADF)"></a>ESP-ADF架构探索(I. 初探ADF)</h1><p>乐鑫音频开发框架 (ESP-ADF) 是乐鑫官方为其 ESP32、ESP32-S3 SoC 设计的音频开发框架，支持多种音频格式和输入输出方式，以音频元素（Element）和音频管道（Pipeline）来组织和管理音频流，以audio_hal、periph等管理音频硬件。</p>
+<p><img alt="典型音频项目示例" lazyload="" src="/blog/exploring-esp-adf-i/audio-project-typical-example.jpg" srcset="/blog/img/loading.gif"/></p>
+<h1 id="前言"><a class="headerlink" href="#前言" title="前言"></a>前言</h1><p>最近用Rust想写一个嵌入式音频框架<a href="https://github.com/decaday/embedded-audio" rel="noopener" target="_blank">embedded-audio</a>，但架构设计上很是困扰，因此撰文，研究<a href="https://github.com/espressif/esp-adf" rel="noopener" target="_blank">ESP-ADF</a> （ESP32嵌入式音频框架）。</p>
+<p>本文阅读基础：</p>
+<ul>
+<li>ESP-IDF使用经验（不需ADF），了解Kconfig和IDF项目架构</li>
+<li>C语言能力</li>
+<li>一定英文能力</li>
+</ul>
+<p>本文 <strong>(I. 初探ADF)</strong> 提供：</p>
+<ul>
+<li>架构概览</li>
+<li>五个经典例程讲解</li>
+<li>ADF概念详细讲解</li>
+</ul>
+<p>如果你已经比较清楚ADF架构，可以直接看第II篇。如果你是ADF初学者，建议只看第I篇。后面会深入探讨和研究架构，对于<strong>应用层开发是不必要</strong>的。</p>
+<p><a href="../exploring-esp-adf-i">(I. 初探ADF)</a> </p>
+<p><a href="../exploring-esp-adf-ii">(II. 深入Element)</a></p>
+<p><a href="../exploring-esp-adf-iii">(III. 深入Pipeline)</a></p>
+<p><strong>前排提醒：</strong></p>
+<ol>
+<li>本文出示的代码均为经删改的伪代码，仅用于逻辑演示。</li>
+<li>本文中一些机械性的叙述由LLM辅助编写，但是经过N次人工校对修改。</li>
+<li>本篇（第 <strong>I</strong> 篇）后面的篇目，主要研究ESP-ADF的内部实现和架构，不重点研究应用层。</li>
+<li>文章发布时间为2025年6-7月，请注意是否过时。</li>
+</ol>
+<h3 id="你知道吗？"><a class="headerlink" href="#你知道吗？" title="你知道吗？"></a>你知道吗？</h3><p>ESP-ADF现在不是叫 Espressif <strong>Audio</strong> Development Framework，而是Espressif <strong>Advanced</strong> Development Framework。不知道什么时候改的名。</p>
+<p><img alt="Espressif Advanced Development Framework" lazyload="" src="/blog/exploring-esp-adf-i/image-20250609122849792.png" srcset="/blog/img/loading.gif"/></p>
+<p>ESP-ADF不仅是他们在用，Beken也买了ADF放在他们SDK里面，叫<a href="https://github.com/decaday/TuyaOpen-T5AI/tree/master/t5_os/components/bk_audio" rel="noopener" target="_blank">bk-audio</a>（非官方repo引用的官方SDK）。</p>
+<h1 id="整体概览"><a class="headerlink" href="#整体概览" title="整体概览"></a>整体概览</h1><p><img alt="ADF Block Diagram" lazyload="" src="/blog/exploring-esp-adf-i/adf_block_diagram.png" srcset="/blog/img/loading.gif"/></p>
+<p>乐鑫音频开发框架 (ESP-ADF) 是乐鑫官方为其 ESP32、ESP32-S3 SoC 设计的高级开发框架 。</p>
+<p>ESP-ADF 支持广泛的音频格式，包括 MP3、AAC、FLAC、WAV、OGG、OPUS、AMR 等，并且能够从多种音源获取数据，例如 HTTP、HLS (HTTP Live Streaming)、SPIFFS、SD 卡、A2DP 音频源/接收器等 。其目标应用领域包括智能音箱、互联网收音机、语音控制设备、VoIP 解决方案以及视频通话、录制和直播等 。该框架提供了一系列 API 组件，涵盖音频流 (Audio Streams)、编解码器 (Codecs) 和服务 (Services)，这些组件被组织在音频管道 (Audio Pipeline) 结构中 。</p>
+<p><img alt="Elements" lazyload="" src="/blog/exploring-esp-adf-i/blockdiag-1c8d650e9ca87dc711f83b297cfd9cb3a0b64be8.png" srcset="/blog/img/loading.gif"/></p>
+<p>音频数据通常使用输入流获取，通过编解码器处理，在某些情况下还通过音频处理函数处理，最后通过另一个流输出。提供了一个事件接口来促进应用程序事件的通信。与特定硬件的接口通过外设完成。</p>
+<p><img alt="示例管道组织结构" lazyload="" src="/blog/exploring-esp-adf-i/blockdiag-4e7bc35aa710b4b93a472e61721a3c75e3156808.png" srcset="/blog/img/loading.gif"/></p>
+<h2 id="ADF仓库结构"><a class="headerlink" href="#ADF仓库结构" title="ADF仓库结构"></a>ADF仓库结构</h2><p><a href="https://github.com/espressif/esp-adf" rel="noopener" target="_blank">espressif/esp-adf: Espressif Advanced Development Framework</a></p>
+<p>我让AI整理了下，详见：<a href="../docs/esp-adf-components-examples">结构、组件和例程表</a></p>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/></pre></td><td class="code"><pre><code class="hljs jboss-cli">esp-adf/<br/>├── components      <span class="hljs-comment"># 核心组件和第三方库</span><br/>├── docs            <span class="hljs-comment"># 文档</span><br/>├── examples        <span class="hljs-comment"># 示例代码</span><br/>├── tools           <span class="hljs-comment"># 实用工具</span><br/>├── CMakeLists.txt  <span class="hljs-comment"># 顶层构建脚本</span><br/>├── esp-idf         <span class="hljs-comment"># idf 作为submodoule</span><br/>├── README.md       <span class="hljs-comment"># 项目根 README</span><br/>└── <span class="hljs-string">...</span>             <span class="hljs-comment"># 其他配置文件</span><br/></code></pre></td></tr></table></figure>
+<h2 id="Examples"><a class="headerlink" href="#Examples" title="Examples"></a>Examples</h2><p>详细表格请见：<a href="../docs/esp-adf-components-examples">结构、组件和例程表</a></p>
+<table>
+<thead>
+<tr>
+<th>目录</th>
+<th>主要功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>get-started</code></td>
+<td>提供最基础的音频播放、控制和连接示例，适合初学者快速上手。</td>
+</tr>
+<tr>
+<td><code>player</code></td>
+<td>专注于各种音源（HTTP, HLS, SD卡, Flash, 蓝牙等）的播放功能。</td>
+</tr>
+<tr>
+<td><code>recorder</code></td>
+<td>展示如何从麦克风录制音频，并编码存储为不同格式。</td>
+</tr>
+<tr>
+<td><code>speech_recognition</code></td>
+<td>包含语音唤醒 (Wake Word Engine) 和语音活动检测 (VAD) 的示例。</td>
+</tr>
+<tr>
+<td><code>protocols</code></td>
+<td>演示了基于特定网络协议的音视频应用，如 RTMP, RTSP, VoIP。</td>
+</tr>
+<tr>
+<td><code>system</code></td>
+<td>提供系统级功能的示例，如低功耗管理、CoreDump 上传、电池管理等。</td>
+</tr>
+<tr>
+<td><code>display</code></td>
+<td>展示如何结合显示屏或 LED 灯带，为音频应用提供可视化交互。</td>
+</tr>
+<tr>
+<td><code>cloud_services</code></td>
+<td>演示如何对接到云服务平台，实现语音合成 (TTS) 和翻译等功能。</td>
+</tr>
+<tr>
+<td><code>audio_processing</code></td>
+<td>包含了各种音频后处理算法的示例，如均衡器、变声、重采样等。</td>
+</tr>
+<tr>
+<td><code>advanced_examples</code></td>
+<td>提供更复杂的综合性应用示例，如多房间同步、DLNA、灵活管道构建等。</td>
+</tr>
+<tr>
+<td><code>ai_agent</code></td>
+<td>展示如何与 AI 代理平台（如 Coze）进行集成，实现智能对话机器人。</td>
+</tr>
+<tr>
+<td><code>cli</code></td>
+<td>提供一个基于命令行的交互式示例，用于测试和控制 ADF 功能。</td>
+</tr>
+<tr>
+<td><code>checks</code></td>
+<td>用于快速验证开发板上外设（如按键、LED）功能是否正常。</td>
+</tr>
+</tbody></table>
+<h1 id="从play-mp3-control开始-看一些例程"><a class="headerlink" href="#从play-mp3-control开始-看一些例程" title="从play_mp3_control开始,看一些例程"></a>从<code>play_mp3_control</code>开始,看一些例程</h1><p>我们先简单看几个例子，看看ADF是怎么用的。</p>
+<p>这一步简单了解大概运行逻辑，了解下概念即可。应用层的开发并非本文重点。</p>
+<h2 id="play-mp3-control"><a class="headerlink" href="#play-mp3-control" title="play_mp3_control"></a>play_mp3_control</h2><p><a href="https://github.com/espressif/esp-adf/tree/master/examples/get-started/play_mp3_control" rel="noopener" target="_blank">源码地址</a></p>
+<p>这个示例项目展示了创建一个可以控制的 MP3 播放器。该播放器能够播放嵌入在固件中的 MP3 文件，并展示了播放、暂停、恢复、停止、音量调节以及切换歌曲等功能。</p>
+<p>数据流如下： <strong>读取函数 <code>mp3_music_read_cb</code> -&gt; MP3解码器 -&gt; I2S流输出 -&gt; Codec芯片</strong></p>
+<h4 id="音频文件"><a class="headerlink" href="#音频文件" title="音频文件"></a><strong>音频文件</strong></h4><p>首先，代码通过 <code>asm</code> 语句来引用被链接脚本嵌入到二进制固件中的 MP3 文件。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/></pre></td><td class="code"><pre><code class="hljs C"><span class="hljs-comment">// low rate mp3 audio</span><br/><span class="hljs-keyword">extern</span> <span class="hljs-type">const</span> <span class="hljs-type">uint8_t</span> lr_mp3_start[] <span class="hljs-keyword">asm</span>(<span class="hljs-string">"_binary_music_16b_2c_8000hz_mp3_start"</span>);<br/><span class="hljs-keyword">extern</span> <span class="hljs-type">const</span> <span class="hljs-type">uint8_t</span> lr_mp3_end[]   <span class="hljs-keyword">asm</span>(<span class="hljs-string">"_binary_music_16b_2c_8000hz_mp3_end"</span>);<br/></code></pre></td></tr></table></figure>
+<p><code>audio_element</code> 需要一个回调函数来获取音频数据流。这里的 <code>mp3_music_read_cb</code> 函数负责从 flash 中读取由 <code>file_marker</code> 指定的 MP3 数据块。它会从当前位置 （<code>file_marker.pos</code> ）开始，复制element所请求的长度的数据到缓冲区，并更新位置。当所有数据都读取完毕后，它返回 <code>AEL_IO_DONE</code> 来通知 pipeline 数据流结束。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/><span class="line">12</span><br/></pre></td><td class="code"><pre><code class="hljs C"><span class="hljs-type">int</span> <span class="hljs-title function_">mp3_music_read_cb</span><span class="hljs-params">(<span class="hljs-type">audio_element_handle_t</span> el, <span class="hljs-type">char</span> *buf, <span class="hljs-type">int</span> len, TickType_t wait_time, <span class="hljs-type">void</span> *ctx)</span><br/>{<br/>    <span class="hljs-type">int</span> read_size = file_marker.end - file_marker.start - file_marker.pos;<br/>    <span class="hljs-keyword">if</span> (read_size == <span class="hljs-number">0</span>) {<br/>        <span class="hljs-keyword">return</span> AEL_IO_DONE;<br/>    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (len &lt; read_size) {<br/>        read_size = len;<br/>    }<br/>    <span class="hljs-built_in">memcpy</span>(buf, file_marker.start + file_marker.pos, read_size);<br/>    file_marker.pos += read_size;<br/>    <span class="hljs-keyword">return</span> read_size;<br/>}<br/></code></pre></td></tr></table></figure>
+<p>（这个在rust里就很好办了，直接<code>include_bytes!</code>就行。）</p>
+<h4 id="主程序-app-main"><a class="headerlink" href="#主程序-app-main" title="主程序 app_main"></a><strong>主程序 <code>app_main</code></strong></h4><p><strong>1. 初始化Codec</strong></p>
+<p>首先，它会初始化音频编解码芯片 (Codec)，如DA7217，ES8388、ES8311（乐鑫的音频板子常带ES的Codec），这些CodeC主要是通过I2S与主机传递数据，以I2C作为配置接口。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/></pre></td><td class="code"><pre><code class="hljs C"><span class="hljs-comment">// app_main</span><br/><span class="hljs-type">audio_element_handle_t</span> i2s_stream_writer, mp3_decoder;<br/><span class="hljs-comment">// ...</span><br/>ESP_LOGI(TAG, <span class="hljs-string">"[ 1 ] Start audio codec chip"</span>);<br/><span class="hljs-type">audio_board_handle_t</span> board_handle = audio_board_init();<br/>audio_hal_ctrl_codec(board_handle-&gt;audio_hal, AUDIO_HAL_CODEC_MODE_DECODE, AUDIO_HAL_CTRL_START);<br/></code></pre></td></tr></table></figure>
+<p><strong>2. 创建和配置音频 Pipeline</strong></p>
+<p>音频管线 (<code>audio_pipeline</code>) 负责管理和连接各个Element。</p>
+<p>首先创建了一个 MP3 decoder element，并使用 <code>audio_element_set_read_cb</code> 将上面定义的数据读取函数 <code>mp3_music_read_cb</code> 注册给它。这样，解码器就能获取原始的 MP3 数据。</p>
+<p>接着，创建一个 I2S element 作为数据流的终点，它负责将解码后的数据写入到 Codec 芯片。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/></pre></td><td class="code"><pre><code class="hljs C"><span class="hljs-type">audio_pipeline_handle_t</span> pipeline;<br/><span class="hljs-type">audio_pipeline_cfg_t</span> pipeline_cfg = DEFAULT_AUDIO_PIPELINE_CONFIG();<br/>pipeline = audio_pipeline_init(&amp;pipeline_cfg);<br/><br/><span class="hljs-comment">// [2.1] Create mp3 decoder to decode mp3 file and set custom read callback</span><br/><span class="hljs-type">audio_element_handle_t</span> i2s_stream_writer, mp3_decoder;<br/><span class="hljs-type">mp3_decoder_cfg_t</span> mp3_cfg = DEFAULT_MP3_DECODER_CONFIG();<br/>mp3_decoder = mp3_decoder_init(&amp;mp3_cfg);<br/>audio_element_set_read_cb(mp3_decoder, mp3_music_read_cb, <span class="hljs-literal">NULL</span>);<br/></code></pre></td></tr></table></figure>
+<p>创建完 <code>elements</code> 后，需要将它们注册到 <code>pipeline</code> 中，并按照 <code>mp3_decoder</code> -&gt; <code>i2s_stream_writer</code> 的顺序连接起来，形成一个完整的数据处理链路。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/></pre></td><td class="code"><pre><code class="hljs C"><span class="hljs-comment">// [2.4] Link it together [mp3_music_read_cb]--&gt;mp3_decoder--&gt;i2s_stream--&gt;[codec_chip]</span><br/><span class="hljs-type">const</span> <span class="hljs-type">char</span> *link_tag[<span class="hljs-number">2</span>] = {<span class="hljs-string">"mp3"</span>, <span class="hljs-string">"i2s"</span>};<br/>audio_pipeline_link(pipeline, &amp;link_tag[<span class="hljs-number">0</span>], <span class="hljs-number">2</span>);<br/></code></pre></td></tr></table></figure>
+<p><strong>3. 事件监听与主循环</strong></p>
+<p>为了响应按键输入和 <code>pipeline</code> 的状态变化，代码设置了一个事件监听器 <code>audio_event_iface</code>。它会同时监听来自外设（如触摸按键）和 <code>pipeline</code> 中所有 <code>element</code> 的事件。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/></pre></td><td class="code"><pre><code class="hljs C">ESP_LOGI(TAG, <span class="hljs-string">"[ 4 ] Set up  event listener"</span>);<br/><span class="hljs-type">audio_event_iface_cfg_t</span> evt_cfg = AUDIO_EVENT_IFACE_DEFAULT_CFG();<br/><span class="hljs-type">audio_event_iface_handle_t</span> evt = audio_event_iface_init(&amp;evt_cfg);<br/><br/>ESP_LOGI(TAG, <span class="hljs-string">"[4.1] Listening event from all elements of pipeline"</span>);<br/>audio_pipeline_set_listener(pipeline, evt);<br/><br/>ESP_LOGI(TAG, <span class="hljs-string">"[4.2] Listening event from peripherals"</span>);<br/>audio_event_iface_set_listener(esp_periph_set_get_event_iface(<span class="hljs-built_in">set</span>), evt);<br/></code></pre></td></tr></table></figure>
+<p>主循环 <code>while(1)</code> 通过 <code>audio_event_iface_listen</code> 阻塞等待事件消息。</p>
+<ul>
+<li><p><strong>音乐信息事件</strong>：当 MP3 解码器开始处理数据时，它会发出 <code>AEL_MSG_CMD_REPORT_MUSIC_INFO</code> 事件，其中包含了音频的采样率、位宽和声道数。代码在收到此事件后，调用 <code>i2s_stream_set_clk</code> 来配置 I2S 时钟，以确保后续的音频数据能被正确地硬件播放。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/></pre></td><td class="code"><pre><code class="hljs C"><span class="hljs-keyword">if</span> (msg.source_type == AUDIO_ELEMENT_TYPE_ELEMENT &amp;&amp; msg.source == (<span class="hljs-type">void</span> *) mp3_decoder<br/>    &amp;&amp; msg.cmd == AEL_MSG_CMD_REPORT_MUSIC_INFO) {<br/>    <span class="hljs-type">audio_element_info_t</span> music_info = {<span class="hljs-number">0</span>};<br/>    audio_element_getinfo(mp3_decoder, &amp;music_info);<br/>    ESP_LOGI(TAG, <span class="hljs-string">"[ * ] Receive music info from mp3 decoder, sample_rates=%d, bits=%d, ch=%d"</span>,<br/>             music_info.sample_rates, music_info.bits, music_info.channels);<br/>    i2s_stream_set_clk(i2s_stream_writer, music_info.sample_rates, music_info.bits, music_info.channels);<br/>    <span class="hljs-keyword">continue</span>;<br/>}<br/></code></pre></td></tr></table></figure>
+</li>
+<li><p><strong>按键事件</strong>：当接收到按键事件时，代码根据按键ID执行不同操作。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/><span class="line">11</span><br/><span class="line">12</span><br/><span class="line">13</span><br/><span class="line">14</span><br/><span class="line">15</span><br/><span class="line">16</span><br/><span class="line">17</span><br/><span class="line">18</span><br/></pre></td><td class="code"><pre><code class="hljs C"><span class="hljs-keyword">if</span> ((msg.source_type == PERIPH_ID_TOUCH || msg.source_type == PERIPH_ID_BUTTON || msg.source_type == PERIPH_ID_ADC_BTN)<br/>    &amp;&amp; (msg.cmd == PERIPH_TOUCH_TAP || msg.cmd == PERIPH_BUTTON_PRESSED || msg.cmd == PERIPH_ADC_BUTTON_PRESSED)) {<br/>    <span class="hljs-keyword">if</span> ((<span class="hljs-type">int</span>) msg.data == get_input_play_id()) {<br/>        <span class="hljs-comment">// ...</span><br/>    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> ((<span class="hljs-type">int</span>) msg.data == get_input_set_id()) {<br/>        <span class="hljs-comment">// ...</span><br/>        <span class="hljs-keyword">break</span>;<br/>    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> ((<span class="hljs-type">int</span>) msg.data == get_input_mode_id()) {<br/>        ESP_LOGI(TAG, <span class="hljs-string">"[ * ] [mode] tap event"</span>);<br/>        audio_pipeline_stop(pipeline);<br/>        audio_pipeline_wait_for_stop(pipeline);<br/>        audio_pipeline_terminate(pipeline);<br/>        audio_pipeline_reset_ringbuffer(pipeline);<br/>        audio_pipeline_reset_elements(pipeline);<br/>        set_next_file_marker();<br/>        audio_pipeline_run(pipeline);<br/>    } <span class="hljs-comment">// ...</span><br/>}<br/></code></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>4. 资源释放</strong></p>
+<p>跳出主循环后，程序会停止、销毁 <code>pipeline</code>，注销 <code>elements</code>，释放所有alloc的资源。</p>
+<h4 id="总结"><a class="headerlink" href="#总结" title="总结"></a>总结</h4><p>先注册一些element，然后把它们加入到pipeline里，再用audio_pipeline_link连接起来（这样pipeline会在他们之间建一个ringbuffer）。</p>
+<p>然后注册和绑定监听事件。随后pipeline.run()，将管线开起来，等decoder跑起来了，监听来自 <code>mp3_decoder</code> 的 <code>AEL_MSG_CMD_REPORT_MUSIC_INFO</code> 事件，以便获取音频元信息（采样率、位深、声道）并正确配置 <code>i2s_stream</code> 的时钟。</p>
+<h2 id="pipeline-http-mp3"><a class="headerlink" href="#pipeline-http-mp3" title="pipeline_http_mp3"></a>pipeline_http_mp3</h2><p><a href="https://github.com/espressif/esp-adf/tree/master/examples/player/pipeline_http_mp3" rel="noopener" target="_blank">源码地址</a></p>
+<p>这个例子的source，使用了一个专门用于处理网络数据流的 <code>audio_element</code>：<code>http_stream</code>。</p>
+<p><code>[http_server] ---&gt; http_stream ---&gt; mp3_decoder ---&gt; i2s_stream ---&gt; [codec_chip]</code></p>
+<h4 id="1-网络初始化"><a class="headerlink" href="#1-网络初始化" title="1. 网络初始化"></a>1. 网络初始化</h4><p>播放网络音频流的首要前提是连接到互联网。因此，在 <code>app_main</code> 中，程序首先初始化 Wi-Fi 外设 (<code>periph_wifi</code>) 并等待连接成功。SSID 和密码通过 <code>menuconfig</code> 进行配置。</p>
+<h4 id="2-构建Pipeline"><a class="headerlink" href="#2-构建Pipeline" title="2. 构建Pipeline"></a>2. 构建Pipeline</h4><p><code>audio_pipeline</code> 的构建过程在概念上与前例相似，但其构成元素有所不同。</p>
+<ul>
+<li><p><strong>创建 Elements</strong>: 除了共有的 <code>mp3_decoder</code> 和 <code>i2s_stream_writer</code>，此示例创建了一个 <code>http_stream_reader</code> 的 <code>audio_element</code>，它负责从 HTTP 服务器获取数据流。</p>
+</li>
+<li><p><strong>链接 Pipeline</strong>: 数据流的链接顺序相应地变为三级：<code>http</code> -&gt; <code>mp3</code> -&gt; <code>i2s</code>。数据首先由 <code>http_stream_reader</code> 从网络获取，然后传递给 <code>mp3_decoder</code> 解码，最后由 <code>i2s_stream_writer</code> 输出到 <code>codec_chip</code>。</p>
+</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/></pre></td><td class="code"><pre><code class="hljs C"><span class="hljs-type">const</span> <span class="hljs-type">char</span> *link_tag[<span class="hljs-number">3</span>] = {<span class="hljs-string">"http"</span>, <span class="hljs-string">"mp3"</span>, <span class="hljs-string">"i2s"</span>};<br/>audio_pipeline_link(pipeline, &amp;link_tag[<span class="hljs-number">0</span>], <span class="hljs-number">3</span>);<br/></code></pre></td></tr></table></figure>
+<ul>
+<li><strong>配置http_stream_reader:</strong> 程序通过 <code>audio_element_set_uri</code> 函数，将要播放的 MP3 文件的 URL 地址设置给 <code>http_stream_reader</code>。<code>http_stream_reader</code> 内部会自动处理 HTTP 请求、接收数据等网络操作。</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/></pre></td><td class="code"><pre><code class="hljs C">ESP_LOGI(TAG, <span class="hljs-string">"[2.6] Set up  uri (http as http_stream, mp3 as mp3 decoder, and default output is i2s)"</span>);<br/>audio_element_set_uri(http_stream_reader, <span class="hljs-string">"https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.mp3"</span>);<br/></code></pre></td></tr></table></figure>
+<h4 id="3-事件处理"><a class="headerlink" href="#3-事件处理" title="3. 事件处理"></a>3. 事件处理</h4><p>这个例子的事件循环逻辑比前一个简单。它没按键，仅监听两类事件：</p>
+<ol>
+<li>和前例一样，监听来自 <code>mp3_decoder</code> 的 <code>AEL_MSG_CMD_REPORT_MUSIC_INFO</code> 事件，以便获取音频元信息（采样率、位深、声道）并正确配置 <code>i2s_stream</code> 的时钟。</li>
+<li>监听来自 <code>pipeline</code> 最后一个 <code>element</code> (<code>i2s_stream_writer</code>) 的状态报告。当接收到 <code>AEL_STATUS_STATE_STOPPED</code> 或 <code>AEL_STATUS_STATE_FINISHED</code> 状态时，意味着音频流播放完毕或已停止，此时程序会跳出循环，结束播放。</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/></pre></td><td class="code"><pre><code class="hljs C"><span class="hljs-comment">/* Stop when the last pipeline element (i2s_stream_writer in this case) receives stop event */</span><br/><span class="hljs-keyword">if</span> (msg.source_type == AUDIO_ELEMENT_TYPE_ELEMENT &amp;&amp; msg.source == (<span class="hljs-type">void</span> *) i2s_stream_writer<br/>    &amp;&amp; msg.cmd == AEL_MSG_CMD_REPORT_STATUS<br/>    &amp;&amp; (((<span class="hljs-type">int</span>)msg.data == AEL_STATUS_STATE_STOPPED) || ((<span class="hljs-type">int</span>)msg.data == AEL_STATUS_STATE_FINISHED))) {<br/>    ESP_LOGW(TAG, <span class="hljs-string">"[ * ] Stop event received"</span>);<br/>    <span class="hljs-keyword">break</span>;<br/>}<br/></code></pre></td></tr></table></figure>
+<h4 id="总结-1"><a class="headerlink" href="#总结-1" title="总结"></a>总结</h4><p>这个例子在ESP-IDF高度封装的情况下，显得极为简单。值得注意的是，这个例子使用的是 <code>http_stream_reader</code> ，而网络是不确定的，这才能体现出RingBuffer的必要性。未来我们将更加深入的研究<code>http_stream</code> 这个element的具体实现。</p>
+<h2 id="element-wav-amr-sdcard"><a class="headerlink" href="#element-wav-amr-sdcard" title="element_wav_amr_sdcard"></a>element_wav_amr_sdcard</h2><p><a href="https://github.com/espressif/esp-adf/tree/master/examples/recorder/element_wav_amr_sdcard" rel="noopener" target="_blank">源码地址</a></p>
+<p>从麦克风（通过 <code>codec_chip</code> 和 <code>i2s_stream</code>）采集音频数据，然后将这份数据 同时分发给两个独立的编码和写入流程，一个用于生成 WAV 文件，另一个用于生成 AMR 文件，最终都保存在 SD 卡中。</p>
+<figure class="highlight xl"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/></pre></td><td class="code"><pre><code class="hljs xl">                                  |---&gt; <span class="hljs-function"><span class="hljs-title">rb01</span> ---&gt;</span> <span class="hljs-function"><span class="hljs-title">wav_encoder</span> ---&gt;</span> <span class="hljs-function"><span class="hljs-title">rb02</span> ---&gt;</span> <span class="hljs-function"><span class="hljs-title">fatfs</span> ---&gt;</span> [wav_file]<br/>[<span class="hljs-function"><span class="hljs-title">mic</span>] ---&gt;</span> <span class="hljs-function"><span class="hljs-title">codec_chip</span> ---&gt;</span> i2s -- |<br/>                                  |---&gt; <span class="hljs-function"><span class="hljs-title">rb10</span> ---&gt;</span> <span class="hljs-function"><span class="hljs-title">amr_encoder</span> ---&gt;</span> <span class="hljs-function"><span class="hljs-title">rb12</span> ---&gt;</span> <span class="hljs-function"><span class="hljs-title">fatfs</span> ---&gt;</span> [amr_file]<br/></code></pre></td></tr></table></figure>
+<p><code>i2s</code> : <code>i2s_stream_reader</code> <code>rb</code> : <code>ringbuf</code> <code>fatfs</code> : <code>fatfs_stream_writer</code></p>
+<p>与之前使用 <code>pipeline</code> 来统管理所有 <code>element</code> 的方式不同，这个示例手动管理 <code>audio_element</code>来控制数据流的连接和生命周期。</p>
+<h4 id="1-初始化硬件"><a class="headerlink" href="#1-初始化硬件" title="1. 初始化硬件"></a><strong>1. 初始化硬件</strong></h4><p>录音首先需要配置 <code>codec chip</code> 工作在编码模式 (<code>AUDIO_HAL_CODEC_MODE_ENCODE</code>)，并初始化 SD 卡。</p>
+<h4 id="2-创建并手动连接-Elements"><a class="headerlink" href="#2-创建并手动连接-Elements" title="2. 创建并手动连接 Elements"></a><strong>2. 创建并手动连接 Elements</strong></h4><p>程序会创建几个的 <code>audio_element</code>：1个 <code>i2s_stream_reader</code>、2个编码器 (<code>wav_encoder</code>, <code>amr_encoder</code>) 和2个文件写入器 <code>fatfs_stream_writer</code> (fatfs可以设置同时最多打开文件的个数，在ESP-IDF中是通过<code>menuconfig</code>设置。我记得默认是5)。</p>
+<ul>
+<li><p>构建WAV处理链：</p>
+<p>首先，代码创建了两个 ringbuf。然后使用 audio_element_set_output_ringbuf 和 audio_element_set_input_ringbuf 函数，将 i2s_stream_reader -&gt; ringbuf01 -&gt; wav_encoder -&gt; ringbuf02 -&gt; wav_fatfs_stream_writer 连接起来。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/></pre></td><td class="code"><pre><code class="hljs C">ESP_LOGI(TAG, <span class="hljs-string">"[3.3] Create a ringbuffer and insert it between i2s_stream_reader and wav_encoder"</span>);<br/>ringbuf01 = rb_create(RING_BUFFER_SIZE, <span class="hljs-number">1</span>);<br/>audio_element_set_output_ringbuf(i2s_stream_reader, ringbuf01);<br/>audio_element_set_input_ringbuf(wav_encoder, ringbuf01);<br/><span class="hljs-comment">// ...</span><br/></code></pre></td></tr></table></figure>
+</li>
+<li><p>数据分流：</p>
+<p>为了实现从 i2s_stream_reader 到 AMR 编码器的第二路数据流，代码使用了 audio_element_set_multi_output_ringbuf 函数。这个函数允许一个 element 拥有多个输出 ringbuf，从而实现了数据的一对多分发。这是实现数据流分叉的关键。<del>（C语言直接用指针真爽，Rust生命周期所有权引用真的头大）</del></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/></pre></td><td class="code"><pre><code class="hljs C">ESP_LOGI(TAG, <span class="hljs-string">"[4.2] Create a ringbuffer and insert it between i2s_stream_reader and wav_encoder"</span>);<br/>ringbuf11 = rb_create(RING_BUFFER_SIZE, <span class="hljs-number">1</span>);<br/>audio_element_set_multi_output_ringbuf(i2s_stream_reader,ringbuf11,<span class="hljs-number">0</span>);<br/>audio_element_set_input_ringbuf(amr_encoder,ringbuf11);<br/></code></pre></td></tr></table></figure>
+<p>后续 AMR 链的连接方式与 WAV 链相同。</p>
+</li>
+<li><p>设置输出文件路径：</p>
+<p>通过 audio_element_set_uri 为两个 fatfs_stream_writer 分别指定在 SD 卡上保存的文件名。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/></pre></td><td class="code"><pre><code class="hljs C">audio_element_set_uri(wav_fatfs_stream_writer, <span class="hljs-string">"/sdcard/rec_out.wav"</span>);<br/><span class="hljs-comment">// ...</span><br/>audio_element_set_uri(amr_fatfs_stream_writer, <span class="hljs-string">"/sdcard/rec_out.amr"</span>);<br/></code></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="3-启动与控制"><a class="headerlink" href="#3-启动与控制" title="3. 启动与控制"></a><strong>3. 启动与控制</strong></h4><p>由于没有统一的 <code>pipeline</code> 管理器，程序需要调用 <code>audio_element_run</code> 和 <code>audio_element_resume</code> 来独立启动每一个 <code>element</code>。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/></pre></td><td class="code"><pre><code class="hljs C">ESP_LOGI(TAG, <span class="hljs-string">"[8.0] Start audio elements"</span>);<br/>audio_element_run(i2s_stream_reader);<br/>audio_element_run(wav_encoder);<br/>audio_element_run(wav_fatfs_stream_writer);<br/><span class="hljs-comment">// ...</span><br/></code></pre></td></tr></table></figure>
+<p>主循环通过一个简单的延时来控制录制时长，达到预设的 <code>RECORD_TIME_SECONDS</code> 后就跳出循环并停止所有 <code>element</code>。</p>
+<h4 id="总结-2"><a class="headerlink" href="#总结-2" title="总结"></a><strong>总结</strong></h4><p>这个例子构建了一个从单一数据源 (<code>i2s_stream</code>) 到两个不同处理链 (<code>wav_encoder</code> 和 <code>amr_encoder</code>) 的 分叉数据流。</p>
+<p>而且它不依赖 <code>audio_pipeline</code> ，而是通过 <code>audio_element_set_input/output_ringbuf</code> 和 <code>audio_element_run</code> 等函数手动管理各个 <code>element</code> 的连接与运行。</p>
+<h2 id="http-play-and-save-to-file"><a class="headerlink" href="#http-play-and-save-to-file" title="http_play_and_save_to_file"></a>http_play_and_save_to_file</h2><p><a href="https://github.com/espressif/esp-adf/tree/master/examples/advanced_examples/http_play_and_save_to_file" rel="noopener" target="_blank">源码地址</a></p>
+<p>这个示例展示了如何使用 <code>audio_pipeline</code> 管理器来构建和控制一个分叉数据流。从单一的数据源 <code>http_stream</code> 获取数据后，<code>pipeline</code> 将其分发到两个不同的处理路径：一个用于解码和播放，另一个用于直接写入文件。</p>
+<figure class="highlight xl"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/></pre></td><td class="code"><pre><code class="hljs xl"> <span class="hljs-function"><span class="hljs-title">http_stream_reader</span> ---&gt;</span> <span class="hljs-function"><span class="hljs-title">mp3_decoder</span> ---&gt;</span> <span class="hljs-function"><span class="hljs-title">i2s_stream</span> ---&gt;</span> codec chip<br/>                |<br/>                v<br/>            <span class="hljs-function"><span class="hljs-title">raw_stream</span> ---&gt;</span> <span class="hljs-function"><span class="hljs-title">fatfs_stream</span> ---&gt;</span> SD card<br/></code></pre></td></tr></table></figure>
+<p>与上一个录音示例中手动管理所有 <code>element</code> 不同，此示例使用了两个<code>audio_pipeline</code>，不过仍然是手动设置某个元素的多路输出来实现数据流的分叉。</p>
+<h4 id="1-创建两个Pipeline"><a class="headerlink" href="#1-创建两个Pipeline" title="1. 创建两个Pipeline"></a>1. 创建两个Pipeline</h4><p>程序创建了两个pipeline句柄：<code>pipeline</code>用于播放，<code>pipeline_save</code>用于保存。</p>
+<ul>
+<li><p><strong>播放Pipeline (<code>pipeline</code>)</strong>: 负责从HTTP获取数据、解码并播放。其包含<code>http_stream_reader</code>、<code>mp3_decoder</code>、<code>i2s_stream_writer</code>三个元素。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/></pre></td><td class="code"><pre><code class="hljs C">ESP_LOGI(TAG, <span class="hljs-string">"[2.0] Create audio pipeline for playback"</span>);<br/><span class="hljs-type">audio_pipeline_cfg_t</span> pipeline_cfg = DEFAULT_AUDIO_PIPELINE_CONFIG();<br/>pipeline = audio_pipeline_init(&amp;pipeline_cfg); <span class="hljs-comment">// Playback pipeline</span><br/><br/><span class="hljs-comment">// ... register http_stream_reader, mp3_decoder, i2s_stream_writer ...</span><br/><br/>ESP_LOGI(TAG, <span class="hljs-string">"[2.5] Link elements together http_stream--&gt;mp3_decoder--&gt;i2s_stream--&gt;[codec_chip]"</span>);<br/><span class="hljs-type">const</span> <span class="hljs-type">char</span> *link_tag[<span class="hljs-number">3</span>] = {<span class="hljs-string">"http"</span>, <span class="hljs-string">"mp3"</span>, <span class="hljs-string">"i2s"</span>};<br/>audio_pipeline_link(pipeline, &amp;link_tag[<span class="hljs-number">0</span>], <span class="hljs-number">3</span>);<br/></code></pre></td></tr></table></figure>
+</li>
+<li><p><strong>保存Pipeline (<code>pipeline_save</code>)</strong>: 负责将原始数据流写入文件。它包含一个<code>raw_stream</code>（作为数据入口的占位元素）和一个<code>fatfs_stream_writer</code>（写入SD卡）。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/></pre></td><td class="code"><pre><code class="hljs C">ESP_LOGI(TAG, <span class="hljs-string">"[3.2] Create pipeline to save audio file"</span>);<br/><span class="hljs-type">audio_pipeline_cfg_t</span> pipeline_save_cfg = DEFAULT_AUDIO_PIPELINE_CONFIG();<br/><span class="hljs-type">audio_pipeline_handle_t</span> pipeline_save = audio_pipeline_init(&amp;pipeline_save_cfg); <span class="hljs-comment">// Save pipeline</span><br/><br/><span class="hljs-comment">// ... register el_raw_read, el_fatfs_wr_stream ...</span><br/><br/>ESP_LOGI(TAG, <span class="hljs-string">"[3.5] Link elements together raw_stream--&gt;fatfs_stream"</span>);<br/><span class="hljs-type">const</span> <span class="hljs-type">char</span> *link_save[<span class="hljs-number">2</span>] = {<span class="hljs-string">"raw"</span>, <span class="hljs-string">"file"</span>};<br/>audio_pipeline_link(pipeline_save, &amp;link_save[<span class="hljs-number">0</span>], <span class="hljs-number">2</span>);<br/></code></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="2-数据分叉"><a class="headerlink" href="#2-数据分叉" title="2. 数据分叉"></a><strong>2. 数据分叉</strong></h4><p>两个Pipeline创建并各自链接后，程序通过设置Element的multi ringbuf，将播放Pipeline中的 <code>http_stream</code> 与保存Pipeline连接起来。</p>
+<p><code>raw_stream</code>是一个占位元素，并不实际发挥作用。其作用只是当<code>pipeline_save</code>连接时，使pipeline在 <code>raw_stream</code> 和 <code>fatfs_stream</code> 中间创建一个RingBuffer，然后我们再将这个RingBuffer设置为 <code>http_stream</code> 的第二个输出RingBuffer。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/></pre></td><td class="code"><pre><code class="hljs C">ESP_LOGI(TAG, <span class="hljs-string">"[3.6] Connect input ringbuffer of pipeline_save to http stream multi output"</span>);<br/><span class="hljs-comment">// Get the output ringbuffer of the save pipeline's raw element.</span><br/><span class="hljs-type">ringbuf_handle_t</span> rb = audio_element_get_output_ringbuf(el_raw_read);<br/><span class="hljs-comment">// Set this ringbuffer as an additional output for the http_stream_reader.</span><br/>audio_element_set_multi_output_ringbuf(http_stream_reader, rb, <span class="hljs-number">0</span>);<br/></code></pre></td></tr></table></figure>
+<h4 id="4-存储"><a class="headerlink" href="#4-存储" title="4. 存储"></a><strong>4. 存储</strong></h4><p>这个例子可以存储在SD卡上，也可以存储在Flash上。这需要提前配置<code>partitions.csv</code>，挂载FatFs（Flash文件系统强推<a href="https://github.com/littlefs-project/littlefs" rel="noopener" target="_blank">littlefs</a>！<a href="https://github.com/joltwallet/esp_littlefs" rel="noopener" target="_blank">LittleFS For ESP-IDF</a> 。不推荐spiffs。）</p>
+<h4 id="总结-3"><a class="headerlink" href="#总结-3" title="总结"></a><strong>总结</strong></h4><p>这个例子中，我们通过设置某个特定元素的多个输出RingBuffer，在Pipeline不知情的情况下，完成了数据的分流操作。事实上，Pipeline也没有为分流进行特殊的设计，这在我们下一篇文章中将会讲到。</p>
+<p>这个例子使用了一个用于在Pipeline中占位的 <code>raw_stream</code> 可能是出于演示需要，事实上，第二条Pipeline可以完全不设置，手动创建一个RingBuffer，将其设置为 <code>http_stream</code> 的 <code>multi output ringbuffer</code>，再将fatfs连上即可。</p>
+<h2 id="pipeline-a2dp-sink-and-hfp"><a class="headerlink" href="#pipeline-a2dp-sink-and-hfp" title="pipeline_a2dp_sink_and_hfp"></a>pipeline_a2dp_sink_and_hfp</h2><p><a href="https://github.com/espressif/esp-adf/tree/master/examples/get-started/pipeline_a2dp_sink_and_hfp" rel="noopener" target="_blank">源码地址</a> <em>（不是，你管这玩意叫get-started？？）</em></p>
+<p>此示例是实现了一个典型的蓝牙音箱或耳机的功能。它遵从以下几个核心的蓝牙Profile：</p>
+<ul>
+<li><strong>A2DP Sink (Advanced Audio Distribution Profile - Sink Role)</strong>: 高质量立体声音乐播放。手机或电脑作为 A2DP Source (音源)，将音频流发送给作为 A2DP Sink 的 ESP32 设备进行播放。</li>
+<li><strong>HFP HF (Hands-Free Profile - Hands-Free Role)</strong>: 通话功能。它支持双向的、较低延迟的单声道语音传输，并定义了丰富的通话控制指令，如接听、挂断、拒接、语音拨号等。</li>
+</ul>
+<p>为了在不同功能（听音乐 vs. 打电话）间切换，它预先定义了两个独立的 <code>pipeline</code> 句柄，分别用于 A2DP 和 HFP 场景，并结合HFP回调函数来直接操作数据流，从而实现音乐播放和免提通话的切换。</p>
+<h4 id="1-初始化蓝牙服务与HFP回调"><a class="headerlink" href="#1-初始化蓝牙服务与HFP回调" title="1. 初始化蓝牙服务与HFP回调"></a><strong>1. 初始化蓝牙服务与HFP回调</strong></h4><p>在 <code>app_main</code> 中，程序首先启动蓝牙服务，并立即为 HFP Client 注册一个回调函数 <code>bt_hf_client_cb</code>。这个回调函数是后续所有通话功能处理的入口。随后初始化codec。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/><span class="line">10</span><br/></pre></td><td class="code"><pre><code class="hljs C">esp_log_level_set(TAG, ESP_LOG_DEBUG);<br/><br/>ESP_LOGI(TAG, <span class="hljs-string">"[ 1 ] Create Bluetooth service"</span>);<br/><span class="hljs-type">bluetooth_service_cfg_t</span> bt_cfg = {<br/>    .device_name = <span class="hljs-string">"ESP-ADF-AUDIO"</span>,<br/>    .mode = BLUETOOTH_A2DP_SINK,<br/>};<br/>bluetooth_service_start(&amp;bt_cfg);<br/>esp_hf_client_register_callback(bt_hf_client_cb);<br/>esp_hf_client_init();<br/></code></pre></td></tr></table></figure>
+<h4 id="2-创建两个并行的Pipeline"><a class="headerlink" href="#2-创建两个并行的Pipeline" title="2. 创建两个并行的Pipeline"></a><strong>2. 创建两个并行的Pipeline</strong></h4><p>程序创建了两个独立的Pipeline句柄，<code>pipeline_d</code>用于播放，<code>pipeline_e</code>用于录音。这两个Pipeline在程序启动后便会一直运行。</p>
+<ul>
+<li><p><strong>播放Pipeline (<code>pipeline_d</code>)</strong>: 其数据流为 <code>bt_stream_reader</code> -&gt; <code>i2s_stream_writer</code> (filter可选)。它负责将从蓝牙服务收到的任何音频数据（无论是A2DP音乐还是HFP通话语音）送往编解码芯片进行播放。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/></pre></td><td class="code"><pre><code class="hljs C">audio_pipeline_register(pipeline_d, bt_stream_reader, <span class="hljs-string">"bt"</span>);<br/>audio_pipeline_register(pipeline_d, i2s_stream_writer, <span class="hljs-string">"i2s_w"</span>);<br/><span class="hljs-comment">// ...</span><br/><span class="hljs-type">const</span> <span class="hljs-type">char</span> *link_d[<span class="hljs-number">2</span>] = {<span class="hljs-string">"bt"</span>, <span class="hljs-string">"i2s_w"</span>};<br/>audio_pipeline_link(pipeline_d, &amp;link_d[<span class="hljs-number">0</span>], <span class="hljs-number">2</span>);<br/></code></pre></td></tr></table></figure>
+</li>
+<li><p><strong>录音Pipeline (<code>pipeline_e</code>)</strong>: 其数据流为 <code>i2s_stream_reader</code> -&gt; <code>raw_read</code>。它负责从编解码芯片的ADC采集麦克风的声音，并暂时存入管道的RingBuffer中，等待下游 <code>raw_stream</code>  元素 (<code>raw_read</code>) 读取。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/></pre></td><td class="code"><pre><code class="hljs C">audio_pipeline_register(pipeline_e, i2s_stream_reader, <span class="hljs-string">"i2s_r"</span>);<br/>audio_pipeline_register(pipeline_e, raw_read, <span class="hljs-string">"raw"</span>);<br/><span class="hljs-comment">// ...</span><br/><span class="hljs-type">const</span> <span class="hljs-type">char</span> *link_e[<span class="hljs-number">2</span>] = {<span class="hljs-string">"i2s_r"</span>, <span class="hljs-string">"raw"</span>};<br/>audio_pipeline_link(pipeline_e, &amp;link_e[<span class="hljs-number">0</span>], <span class="hljs-number">2</span>);<br/></code></pre></td></tr></table></figure>
+<p> RingBuffer满后，将Block住<code>i2s_stream_reader</code>，<code>audio_element_init</code>默认将元素超时时间设为最大值，所以在读取前会一直卡住。<code>raw_stream</code> 没有自己主动的任务，在下游元素的回调中才会被动读取。</p>
+</li>
+</ul>
+<h4 id="3-HF回调函数"><a class="headerlink" href="#3-HF回调函数" title="3. HF回调函数"></a>3. HF回调函数</h4><p>当HFP事件发生时（如电话接通），由<code>bt_hf_client_cb</code>函数进行分发和响应。通话期间的音频数据流完全由特定的回调函数接管，它们直接与运行中的Pipeline元素交互。</p>
+<ul>
+<li><p>当HFP音频连接建立时，会触发<code>ESP_HF_CLIENT_AUDIO_STATE_EVT</code>事件。此时，<code>bt_app_hf_client_audio_open</code>函数被调用，它会重新配置<code>bt_stream_reader</code>的音频参数（如采样率、声道数）以匹配HFP的语音规格（如16kHz，单声道）。通话结束后，<code>bt_app_hf_client_audio_close</code>会将其恢复为A2DP的规格（如44.1kHz，双声道）。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/><span class="line">8</span><br/><span class="line">9</span><br/></pre></td><td class="code"><pre><code class="hljs C"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title function_">bt_app_hf_client_audio_open</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br/>{<br/>    <span class="hljs-comment">// ...</span><br/>    <span class="hljs-type">audio_element_info_t</span> bt_info = {<span class="hljs-number">0</span>};<br/>    audio_element_getinfo(bt_stream_reader, &amp;bt_info);<br/>    bt_info.sample_rates = HFP_RESAMPLE_RATE; <span class="hljs-comment">// e.g., 16000</span><br/>    bt_info.channels = <span class="hljs-number">1</span>;<br/>    audio_element_setinfo(bt_stream_reader, &amp;bt_info);<br/>}<br/></code></pre></td></tr></table></figure>
+</li>
+<li><p>一旦HFP音频连接建立，蓝牙协议栈会注册两个数据处理回调。</p>
+<p>:当从手机端收到通话语音时，<code>bt_app_hf_client_incoming_cb</code>被触发。它直接调用<code>audio_element_output</code>将语音数据注入正在运行的<code>bt_stream_reader</code>元素的输出中，数据随后被<code>i2s_stream_writer</code>播放出来。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/></pre></td><td class="code"><pre><code class="hljs C"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title function_">bt_app_hf_client_incoming_cb</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">uint8_t</span> *buf, <span class="hljs-type">uint32_t</span> sz)</span><br/>{<br/>    <span class="hljs-comment">// ...</span><br/>    audio_element_output(bt_stream_reader, (<span class="hljs-type">char</span> *)buf, sz); <span class="hljs-comment">// Inject incoming voice to player</span><br/>    esp_hf_client_outgoing_data_ready();<br/>}<br/></code></pre></td></tr></table></figure>
+</li>
+<li><p>当需要向手机端发送麦克风语音时，<code>bt_app_hf_client_outgoing_cb</code>被触发。它直接调用<code>raw_stream_read</code> ，从 <code>pipeline_e</code> 的<code>raw_read</code>元素中主动取出音频数据，并拷贝到蓝牙协议栈的缓冲区中进行发送。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br/><span class="line">2</span><br/><span class="line">3</span><br/><span class="line">4</span><br/><span class="line">5</span><br/><span class="line">6</span><br/><span class="line">7</span><br/></pre></td><td class="code"><pre><code class="hljs C"><span class="hljs-type">static</span> <span class="hljs-type">uint32_t</span> <span class="hljs-title function_">bt_app_hf_client_outgoing_cb</span><span class="hljs-params">(<span class="hljs-type">uint8_t</span> *p_buf, <span class="hljs-type">uint32_t</span> sz)</span><br/>{<br/>    <span class="hljs-comment">// ...</span><br/>    out_len_bytes = raw_stream_read(raw_read, enc_buffer, sz); <span class="hljs-comment">// Read mic data from recorder</span><br/>    <span class="hljs-built_in">memcpy</span>(p_buf, enc_buffer, out_len_bytes);<br/>    <span class="hljs-comment">// ...</span><br/>}<br/></code></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="总结-4"><a class="headerlink" href="#总结-4" title="总结"></a><strong>总结</strong></h4><p>这个例子使用两个独立的、持续运行的Pipeline实例来分别适配音频的输出和输入。当需要在不同模式（音乐/通话）间切换时，通过注册到底层协议栈的回调函数，直接与Pipeline中的Element进行直接的数据交互和参数配置。</p>
+<p>但是这个例子在电话接通时没有清空缓冲区的动作（至少我没找到），播放时可能会先有杂音，这好像也是很多HF设备的通病。</p>
+<h1 id="ESP-ADF-的核心架构概念"><a class="headerlink" href="#ESP-ADF-的核心架构概念" title="ESP-ADF 的核心架构概念"></a>ESP-ADF 的核心架构概念</h1><h2 id="音频管道-Audio-Pipeline"><a class="headerlink" href="#音频管道-Audio-Pipeline" title="音频管道 (Audio Pipeline)"></a>音频管道 (Audio Pipeline)</h2><p>音频管道 (Audio Pipeline) 是 ESP-ADF 中管理音频数据流的核心概念。它代表了一组动态链接的音频元素 (Audio Elements) 的组合，其中每个元素执行特定的任务（例如，从源读取、解码、滤波、写入目标）。</p>
+<p>管道的生命周期包括初始化 (<code>audio_pipeline_init</code>)、注册元素 (<code>audio_pipeline_register</code>，元素需有唯一名称)、链接元素 (<code>audio_pipeline_link</code>，按顺序连接已注册的元素)、运行 (<code>audio_pipeline_run</code>)、暂停 (<code>audio_pipeline_pause</code>)、恢复 (<code>audio_pipeline_resume</code>)、停止 (<code>audio_pipeline_stop</code>)、终止/反初始化 (<code>audio_pipeline_terminate</code> / <code>audio_pipeline_deinit</code>) 15。这种结构化的生命周期为控制音频处理任务提供了清晰且易于管理的方式。</p>
+<p>比如：</p>
+<ul>
+<li>录音并重采样：<code>mic ---&gt; codec_chip ---&gt; i2s_stream ---&gt; resample_filter ---&gt; wav_encoder ---&gt; fatfs_stream ---&gt; sdcard</code> </li>
+<li>从 SD 卡播放 MP3 并控制：<code>[sdcard] ---&gt; fatfs_stream ---&gt; mp3_decoder ---&gt; resample ---&gt; i2s_stream ---&gt; [codec_chip]</code> </li>
+<li>从 SPIFFS 播放 MP3：<code>[flash] ---&gt; spiffs_stream ---&gt; mp3_decoder ---&gt; i2s_stream ---&gt; [codec_chip]</code> </li>
+<li>HTTP MP3 播放：<code>HTTP reader stream -&gt; MP3 decoder -&gt; I2S writer stream</code></li>
+</ul>
+<p>音频管道不仅仅是元素的列表，它还主动管理这些元素的执行上下文（任务）以及它们之间的数据流（通过环形缓冲区）。</p>
+<p><code>audio_pipeline_handle_t</code> 负责控制音频数据流并将音频元素与环形缓冲区连接起来，并按顺序启动音频元素，音频元素作为 FreeRTOS 任务运行。</p>
+<p>管道在链接元素时 (<code>audio_pipeline_link</code>) ，会建立连接这些任务的环形缓冲区。</p>
+<p>此外，管道还将元素任务的消息转发给应用程序 ，充当中央通信枢纽。然而，管道的性能取决于底层 FreeRTOS 任务调度和任务间通信机制（环形缓冲区和事件队列）的效率。</p>
+<h2 id="音频元素-Element"><a class="headerlink" href="#音频元素-Element" title="音频元素 (Element)"></a>音频元素 (Element)</h2><p>音频元素是 ESP-ADF 中的基本构建模块 。每个解码器、编码器、滤波器、输入流或输出流实际上都是一个音频元素。它们代表了音频数据生命周期中的各个阶段：数据采集、处理和数据输出。应用程序是通过连接这些元素来构建的。</p>
+<p>每个音频元素都可以为其生命周期的不同阶段设置回调函数：<code>open</code>、<code>seek</code>、<code>process</code>、<code>close</code>、<code>destroy</code>、<code>read</code> 和 <code>write</code>（在 <code>audio_element_cfg_t</code> 中定义）19。这种回调机制允许在每个元素内部实现自定义行为，并定义其核心处理逻辑。例如，MP3 解码器使用 <code>open</code>、<code>process</code>、<code>close</code> 和 <code>destroy</code> 回调函数 19。<code>read</code> 和 <code>write</code> 回调对于充当数据源或数据汇的元素，或用于直接数据操作至关重要 19。音频元素作为 FreeRTOS 任务运行 19，可以启动、停止、暂停和恢复。这种基于任务的执行方式允许元素并发和独立地操作，在输入环形缓冲区数据可用时进行处理。</p>
+<h4 id="分类（非正式）"><a class="headerlink" href="#分类（非正式）" title="分类（非正式）"></a>分类（非正式）</h4><ul>
+<li><strong>Source (输入流):</strong> 产生音频数据。示例包括：<code>i2s_stream</code> (用于麦克风输入 16)、<code>fatfs_stream</code> (用于 SD 卡 17)、<code>spiffs_stream</code> (用于 SPIFFS 18)、<code>http_stream</code> (用于网络 14)、<code>raw_stream</code> (用于自定义数据输入 21)。</li>
+<li><strong>Processor (滤波器、解码器、编码器):</strong> 转换音频数据。示例包括：<code>mp3_decoder</code> 、<code>wav_encoder</code> 、<code>resample_filter</code> 、<code>aac_decoder</code>、<code>opus_decoder</code> 、<code>equalizer</code> (均衡器)、<code>sonic</code> (变速变调)、<code>alc</code> (自动电平控制) 、<code>algorithm_stream</code> (用于 AEC、AGC、NS)。</li>
+<li><strong>Sink (输出流):</strong> 消费音频数据。示例包括：<code>i2s_stream</code> (用于扬声器/耳机输出 )、<code>fatfs_stream</code> (比如用于 SD 卡录音或播放)、<code>raw_stream</code> (用于自定义数据输出 21)。</li>
+</ul>
+<p>音频元素的设计促进了可重用性和可组合性。标准化的接口（<code>audio_element_handle_t</code>、通用的配置模式、环形缓冲区连接）允许将不同的元素混合搭配，包括分支，混音，以创建复杂的音频应用。</p>
+<h2 id="环形缓冲区-RingBuffer"><a class="headerlink" href="#环形缓冲区-RingBuffer" title="环形缓冲区 (RingBuffer)"></a>环形缓冲区 (RingBuffer)</h2><p>环形缓冲区 (<code>ringbuf_handle_t</code>) 用于连接音频元素并在它们之间传输音频数据。每个从环形缓冲区读取数据的元素任务将在数据可用之前阻塞。类似地，向已满的环形缓冲区写入数据也将阻塞写入任务，除非指定了超时 25。</p>
+<p>关键的环形缓冲区操作包括 <code>rb_create</code>、<code>rb_destroy</code>、<code>rb_read</code>、<code>rb_write</code>、<code>rb_bytes_available</code> 和 <code>rb_abort</code> 25。这些函数提供了管理环形缓冲区生命周期和数据流所必需的机制。<code>rb_abort</code> 对于在管道关闭或错误条件下解除任务阻塞至关重要。</p>
+<p>在大多数 ESP-ADF 示例中，都使用了<code>audio_pipeline_link()</code>，这会自动创建RingBuffer。它们也可以手动创建并插入元素之间，如 <code>element_wav_amr_sdcard</code> 示例。</p>
+<p>ESP-ADF 中的环形缓冲区不仅用作数据容器，还充当并发音频元素任务之间的基本同步原语。其阻塞行为是用于进程间/任务间通信和同步的生产者-消费者队列的特征。这些环形缓冲区的大小对于管道性能和对瞬时延迟（例如网络延迟）非常重要。过小的缓冲区可能导致欠载（播放器卡顿）或过载（写入器卡顿），而过大的缓冲区则会消耗宝贵的 RAM。<code>audio_pipeline_link</code> 的默认行为可能使用默认缓冲区大小，这可能需要针对特定应用进行调整。</p>
+<h2 id="事件处理系统-Event"><a class="headerlink" href="#事件处理系统-Event" title="事件处理系统 (Event)"></a>事件处理系统 (Event)</h2><p>ESP-ADF 提供了一个事件接口 API (<code>audio_event_iface_t</code>)，用于音频元素与应用程序之间或元素之间的通信。它基于 FreeRTOS 队列。该系统允许元素异步报告状态更改（例如，播放完成、错误、数据发现）或其他重要事件。应用程序可以监听这些事件并做出相应反应。</p>
+<p>事件系统将音频处理任务（元素）与主应用程序逻辑解耦。元素专注于数据处理，而应用程序通过事件处理更高级别的控制和响应状态更新。</p>
+<h2 id="层级结构"><a class="headerlink" href="#层级结构" title="层级结构"></a>层级结构</h2><table>
+<thead>
+<tr>
+<th><strong>层级</strong></th>
+<th><strong>关键组件/模块</strong></th>
+<th><strong>主要功能</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>应用层</td>
+<td>用户特定代码、UI 逻辑、自定义功能</td>
+<td>实现最终产品功能</td>
+</tr>
+<tr>
+<td>服务层</td>
+<td><code>ESP_Dispatcher</code>, <code>periph_service</code>, <code>wifi_service</code>, <code>audio_service</code>, <code>esp_audio</code></td>
+<td>提供高级、可重用的应用构建模块 (例如模块化、外设管理、网络、音频控制)</td>
+</tr>
+<tr>
+<td>框架层</td>
+<td><code>audio_pipeline</code>, <code>audio_element</code>, <code>ringbuf</code>, <code>audio_event_iface</code></td>
+<td>核心音频处理引擎、数据流管理、元素编排、事件系统</td>
+</tr>
+<tr>
+<td>抽象层</td>
+<td><code>audio_hal</code>, 流实现 (HTTP, FATFS 等)</td>
+<td>连接框架与硬件 (编解码器) 并抽象复杂 I/O (网络、文件系统)</td>
+</tr>
+<tr>
+<td>驱动层 / ESP-IDF</td>
+<td>FreeRTOS, 外设驱动 (I2S, SPI, I2C), 网络协议栈 (Wi-Fi, TCP/IP), HAL (IDF)</td>
+<td>底层硬件控制、操作系统、基本连接、系统工具</td>
+</tr>
+</tbody></table>
+<h1 id="最后"><a class="headerlink" href="#最后" title="最后"></a>最后</h1><p>我们未来重点关注框架层，按需研究一些抽象层和服务层的内容。下一篇文章中，将对整体架构和概念进行进一步深入研究。</p>
+<p>传送门：<a href="../exploring-esp-adf-ii">(II. 深入Element)</a></p>
+</div>
+<hr/>
+<div>
+<div class="post-metas my-3">
+<div class="post-meta">
+<i class="iconfont icon-tags"></i>
+<a class="print-no-link" href="/blog/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/">#嵌入式</a>
+<a class="print-no-link" href="/blog/tags/Rust/">#Rust</a>
+<a class="print-no-link" href="/blog/tags/%E9%9F%B3%E9%A2%91/">#音频</a>
+<a class="print-no-link" href="/blog/tags/ESP32/">#ESP32</a>
+<a class="print-no-link" href="/blog/tags/C/">#C</a>
+<a class="print-no-link" href="/blog/tags/ESP-ADF/">#ESP-ADF</a>
+<a class="print-no-link" href="/blog/tags/embedded-audio/">#embedded-audio</a>
+<a class="print-no-link" href="/blog/tags/ESP-IDF/">#ESP-IDF</a>
+</div>
+</div>
+<div class="license-box my-3">
+<div class="license-title">
+<div>ESP-ADF架构探索(I. 初探IDF)</div>
+<div>https://decaday.github.io/blog/exploring-esp-adf-i/</div>
+</div>
+<div class="license-meta">
+<div class="license-meta-item">
+<div>作者</div>
+<div>星期十</div>
+</div>
+<div class="license-meta-item license-meta-date">
+<div>发布于</div>
+<div>2025年6月9日</div>
+</div>
+<div class="license-meta-item license-meta-date">
+<div>更新于</div>
+<div>2025年9月1日</div>
+</div>
+<div class="license-meta-item">
+<div>许可协议</div>
+<div>
+<a class="print-no-link" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">
+<span aria-label="BY - 署名" class="hint--top hint--rounded">
+<i class="iconfont icon-cc-by"></i>
+</span>
+</a>
+<a class="print-no-link" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">
+<span aria-label="NC - 非商业性使用" class="hint--top hint--rounded">
+<i class="iconfont icon-cc-nc"></i>
+</span>
+</a>
+</div>
+</div>
+</div>
+<div class="license-icon iconfont"></div>
+</div>
+<div class="post-prevnext my-3">
+<article class="post-prev col-6">
+<a href="/blog/exploring-esp-adf-ii/" title="ESP-ADF架构探索(II. 深入Element)">
+<i class="iconfont icon-arrowleft"></i>
+<span class="hidden-mobile">ESP-ADF架构探索(II. 深入Element)</span>
+<span class="visible-mobile">上一篇</span>
+</a>
+</article>
+<article class="post-next col-6">
+<a href="/blog/py32-swd-leak/" title="什么？SWD电平不匹配？那让调试器给py32漏点电！">
+<span class="hidden-mobile">什么？SWD电平不匹配？那让调试器给py32漏点电！</span>
+<span class="visible-mobile">下一篇</span>
+<i class="iconfont icon-arrowright"></i>
+</a>
+</article>
+</div>
+</div>
+<article id="comments" lazyload="">
+<div class="giscus" id="giscus"></div>
+<script type="text/javascript">
+      Fluid.utils.loadComments('#giscus', function() {
+        var options = {"repo":"decaday/blog","repo-id":"R_kgDOLNAOjg","category":"Announcements","category-id":"DIC_kwDOLNAOjs4CdRDg","theme-light":"light","theme-dark":"dark","mapping":"pathname","reactions-enabled":1,"emit-metadata":0,"input-position":"top","lang":"zh-CN"};
+        var attributes = {};
+        for (let option in options) {
+          if (!option.startsWith('theme-')) {
+            var key = option.startsWith('data-') ? option : 'data-' + option;
+            attributes[key] = options[option];
+          }
+        }
+        var light = 'light';
+        var dark = 'dark';
+        window.GiscusThemeLight = light;
+        window.GiscusThemeDark = dark;
+        attributes['data-theme'] = document.documentElement.getAttribute('data-user-color-scheme') === 'dark' ? dark : light;
+        for (let attribute in attributes) {
+          var value = attributes[attribute];
+          if (value === undefined || value === null || value === '') {
+            delete attributes[attribute];
+          }
+        }
+        var s = document.createElement('script');
+        s.setAttribute('src', 'https://giscus.app/client.js');
+        s.setAttribute('crossorigin', 'anonymous');
+        for (let attribute in attributes) {
+          s.setAttribute(attribute, attributes[attribute]);
+        }
+        var ss = document.getElementsByTagName('script');
+        var e = ss.length > 0 ? ss[ss.length - 1] : document.head || document.documentElement;
+        e.parentNode.insertBefore(s, e.nextSibling);
+      });
+    </script>
+<noscript>Please enable JavaScript to view the comments</noscript>
+</article>
+</article>
+</div>
+</div>
+</div>
+<div class="side-col d-none d-lg-block col-lg-2">
+<aside class="sidebar" style="margin-left: -1rem">
+<div id="toc">
+<p class="toc-header">
+<i class="iconfont icon-list"></i>
+<span>目录</span>
+</p>
+<div class="toc-body" id="toc-body"></div>
+</div>
+</aside>
+</div>
+</div>
+</div>
+<a aria-label="TOP" href="#" id="scroll-top-button" role="button">
+<i aria-hidden="true" class="iconfont icon-arrowup"></i>
+</a>
+<div aria-hidden="true" aria-labelledby="ModalLabel" class="modal fade" id="modalSearch" role="dialog" tabindex="-1">
+<div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+<div class="modal-content">
+<div class="modal-header text-center">
+<h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+<button aria-label="Close" class="close" data-dismiss="modal" id="local-search-close" type="button">
+<span aria-hidden="true">×</span>
+</button>
+</div>
+<div class="modal-body mx-3">
+<div class="md-form mb-5">
+<input class="form-control validate" id="local-search-input" type="text"/>
+<label data-error="x" data-success="v" for="local-search-input">关键词</label>
+</div>
+<div class="list-group" id="local-search-result"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer>
+<div class="footer-inner">
+<div class="footer-content">
+<a href="https://hexo.io" rel="nofollow noopener" target="_blank"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" rel="nofollow noopener" target="_blank"><span>Fluid</span></a>
+</div>
+<div class="statistics">
+<span id="busuanzi_container_site_pv" style="display: none">
+        总访问量 
+        <span id="busuanzi_value_site_pv"></span>
+         次
+      </span>
+<span id="busuanzi_container_site_uv" style="display: none">
+        总访客数 
+        <span id="busuanzi_value_site_uv"></span>
+         人
+      </span>
+</div>
+</div>
+</footer>
+<!-- Scripts -->
+<script src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js"></script>
+<link href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" rel="stylesheet"/>
+<script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+<script src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js"></script>
+<script src="/blog/js/events.js"></script>
+<script src="/blog/js/plugins.js"></script>
+<script src="/blog/js/img-lazyload.js"></script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+<script src="https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js"></script>
+<script>Fluid.plugins.codeWidget();</script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+<script>Fluid.plugins.imageCaption();</script>
+<script src="/blog/js/local-search.js"></script>
+<script defer="" src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script src="/blog/js/boot.js"></script>
+<noscript>
+<div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+</noscript>
+</body>
+</html>
